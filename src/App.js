@@ -1,12 +1,15 @@
 import React from 'react';
 
+// Components
+import { DesktopContainer } from './containers'
+
 import './App.less'
 
 function App() {
   return (
-    <div className="App">
-      <header>Welcome to Mkulima</header>
-    </div>
+    <DesktopContainer>
+      <header>Welcome</header>
+    </DesktopContainer>
   );
 }
 
