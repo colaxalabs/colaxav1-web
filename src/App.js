@@ -1,16 +1,23 @@
 import React from 'react';
+import { Switch, Route } from 'react-router-dom'
+
+// Containers
+import { DesktopContainer } from './containers'
 
 // Components
-import { DesktopContainer } from './containers'
+import { Homepage } from './components/pages'
 
 import './App.less'
 
 function App() {
   return (
     <DesktopContainer>
-      <header>Welcome</header>
+      <Switch>
+        <Route exact path='/' component={Homepage} />
+      </Switch>
     </DesktopContainer>
   );
 }
 
 export default App;
+

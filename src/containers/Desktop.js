@@ -1,8 +1,13 @@
 import React from 'react'
 import { Menu, Layout } from 'antd'
 import {
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
+  WalletOutlined,
+  CalendarOutlined,
+  HourglassOutlined,
+  QuestionOutlined,
+  AlertOutlined,
+  RocketOutlined,
+  Loading3QuartersOutlined,
 } from '@ant-design/icons'
 
 import { Media } from './Media'
@@ -26,44 +31,47 @@ class DesktopContainer extends React.Component {
     return (
       <>
         <Media greaterThan='mobile'>
-          <Layout>
-            <Sider trigger={null} collapsible collapsed={this.state.isCollapsed}>
-              <Menu theme='dark' mode='inline'>
-                <Menu.Item>
-                  Dormant
-                </Menu.Item>
-                <Menu.Item>
-                  Preparation
-                </Menu.Item>
-                <Menu.Item>
-                  Planting
-                </Menu.Item>
-                <Menu.Item>
-                  Crop Growth
-                </Menu.Item>
-                <Menu.Item>
-                  Booking
-                </Menu.Item>
-              </Menu>
-            </Sider>
-            <Layout className='site-layout'>
-              <Header className='site-layout-background'>
-                {React.createElement(this.state.isCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined, { onClick: this.toggle })}
-              </Header>
-              <Content
-                className='site-layout-background'
-                style={{
-                  margin: '24px 16px',
-                  padding: 24,
-                  minHeight: 280,
-                }}
-              >
-                {children}
-              </Content>
-            </Layout>
-          </Layout>
-        </Media>
-      </>
+            <Layout>
+              <Sider breakpoint='sm' collapsedWidth='80' onCollapse={this.toggle} collapsible collapsed={this.state.isCollapsed}>
+                <div className="header">MKL</div>
+                <Menu theme="dark" mode="inline">
+                  <Menu.Item icon={<QuestionOutlined />}>
+                    Dormant
+                  </Menu.Item>
+                  <Menu.Item icon={<Loading3QuartersOutlined />}>
+                    Preparation
+                  </Menu.Item>
+                  <Menu.Item icon={<RocketOutlined />}>
+                    Planting
+                  </Menu.Item>
+                  <Menu.Item icon={<HourglassOutlined />}>
+                    Crop Growth
+                  </Menu.Item>
+                  <Menu.Item icon={<AlertOutlined />}>
+                    Harvesting
+                  </Menu.Item>
+                  <Menu.Item icon={<CalendarOutlined />}>
+                    Booking
+                  </Menu.Item>
+                  <Menu.Item style={{ marginTop: '25px' }} icon={<WalletOutlined />}>
+                    Wallet
+                  </Menu.Item>
+                </Menu>
+              </Sider>
+              <Layout className="site-layout">
+                <Header className='site-layout-background' style={{ padding: 0 }} />
+                <Content
+                  className="site-layout-background"
+                  style={{
+                    margin: '24px 16px 0',
+                  }}
+                  >
+                    {children}
+                  </Content>
+                </Layout>
+              </Layout>
+            </Media>
+          </>
     )
   }
 }
