@@ -8,6 +8,8 @@ import store from './store'
 import history from './history'
 import * as serviceWorker from './serviceWorker';
 
+import './index.css'
+
 ReactDOM.render(
   <React.StrictMode>
     <Router history={history}>

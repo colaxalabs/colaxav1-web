@@ -31,9 +31,9 @@ class DesktopContainer extends React.Component {
     return (
       <>
         <Media greaterThan='mobile'>
-            <Layout>
+          <Layout style={{ minHeight: '100vh' }}>
               <Sider breakpoint='sm' collapsedWidth='80' onCollapse={this.toggle} collapsible collapsed={this.state.isCollapsed}>
-                <div className="header">MKL</div>
+                <div className="header">Mkulima</div>
                 <Menu theme="dark" mode="inline">
                   <Menu.Item icon={<QuestionOutlined />}>
                     Dormant
@@ -61,7 +61,6 @@ class DesktopContainer extends React.Component {
               <Layout className="site-layout">
                 <Header className='site-layout-background' style={{ padding: 0 }} />
                 <Content
-                  className="site-layout-background"
                   style={{
                     margin: '24px 16px 0',
                   }}
