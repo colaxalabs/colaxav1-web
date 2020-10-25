@@ -1,13 +1,25 @@
 import React from 'react'
 import {
+  Statistic,
   Tag,
   Row,
   Col,
   Typography,
   Card,
+  Tooltip,
 } from 'antd'
+import { InfoCircleOutlined } from '@ant-design/icons'
 
-const { Text, Title } = Typography
+const { Text } = Typography
+
+const valueStyle = { fontFamily: 'Noto Sans SC' }
+
+const infoStyle = {
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center'
+}
 
 const farms = [
   {
@@ -35,27 +47,43 @@ function Homepage() {
     <>
       <Row justify='center' align='middle'>
         <Col xs={24} xl={6} className='column_con'>
-          <div className='head_line_con'>
-            <Title className='head_line' level={5}>Tokenized lands</Title>
-            <Text className='stats'>132</Text>
+          <div style={infoStyle} className='head_line_con'>
+            <Statistic title='Lands' value={132} valueStyle={valueStyle} />
+            <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
+              <Tooltip placement='top' title={<span>Number of tokenized farmlands</span>}>
+              <InfoCircleOutlined />
+            </Tooltip>
+            </div>
           </div>
         </Col>
         <Col xs={24} xl={6} className='column_con'>
-          <div className='head_line_con'>
-            <Title className='head_line' level={5}>Completed seasons</Title>
-            <Text className='stats'>11</Text>
+          <div style={infoStyle} className='head_line_con'>
+            <Statistic title='Seasons' value={13} valueStyle={valueStyle} />
+            <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
+              <Tooltip placement='top' title={<span>Number of completed seasons</span>}>
+              <InfoCircleOutlined />
+            </Tooltip>
+            </div>
           </div>
         </Col>
         <Col xs={24} xl={6} className='column_con'>
-          <div className='head_line_con'>
-            <Title className='head_line' level={5}>Completed bookings</Title>
-            <Text className='stats'>9</Text>
+          <div style={infoStyle} className='head_line_con'>
+            <Statistic title='Bookings' value={32} valueStyle={valueStyle} />
+            <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
+              <Tooltip placement='top' title={<span>Number of completed seasons</span>}>
+              <InfoCircleOutlined />
+            </Tooltip>
+            </div>
           </div>
         </Col>
         <Col xs={24} xl={6} className='column_con'>
-          <div className='head_line_con'>
-            <Title className='head_line' level={5}>Completed traces</Title>
-            <Text className='stats'>3</Text>
+          <div style={infoStyle} className='head_line_con'>
+            <Statistic title='Traces' value={2} valueStyle={valueStyle} />
+            <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
+              <Tooltip placement='top' title={<span>Number of successful traces</span>}>
+              <InfoCircleOutlined />
+            </Tooltip>
+            </div>
           </div>
         </Col>
       </Row>
@@ -67,12 +95,12 @@ function Homepage() {
               style={{ width: 320 }}
               cover={<img alt='img' src={`${farm.img}`} />}
               actions={[
-                <Typography.Text
+                <Text
                   underline
                   strong
                 >
                   <a>View</a>
-                </Typography.Text>
+                </Text>
               ]}
             >
               <Card.Meta title={'#' + farm.tokenId} description={<Tag color='#7546C9'>{farm.season}</Tag>} />
