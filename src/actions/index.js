@@ -4,6 +4,10 @@ import {
 
 // Actions
 import { walletFound } from './wallet'
+import {
+  loadDashboard,
+  isDashLoading,
+} from './dashboard'
 
 const networkFound = net => ({
   type: LOAD_NETWORK,
@@ -13,5 +17,7 @@ const networkFound = net => ({
 export {
   networkFound,
   walletFound,
+  loadDashboard,
+  isDashLoading,
 }
 

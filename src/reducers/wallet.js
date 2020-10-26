@@ -1,6 +1,7 @@
 import {
   CONNECT_WALLET,
   WALLET_FOUND,
+  WALLET_DISCONNECT,
 } from '../types'
 
 export function wallet(state = { loaded: false, isMetamask: false }, action = {}) {
@@ -14,6 +15,10 @@ export function wallet(state = { loaded: false, isMetamask: false }, action = {}
       return {
         ...state,
         isMetamask: action.wallet.isMetamask,
+      }
+    case WALLET_DISCONNECT:
+      return {
+        loaded: false,
       }
     default:
       return state
