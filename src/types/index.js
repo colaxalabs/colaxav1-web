@@ -1,2 +1,5 @@
 export const CONNECT_WALLET = 'CONNECT_WALLET'
+export const LOAD_NETWORK = 'LOAD_NETWORK'
+export const NETWORK_CHANGE = 'NETWORK_CHANGE'
+export const WALLET_FOUND = 'WALLET_FOUND'
 
