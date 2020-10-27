@@ -2,7 +2,7 @@ import Contract from 'web3-eth-contract'
 
 export function initContract(contract, contractAddress) {
   // Set provider for all instances
-  Contract.setProvider(window.web3.currentProvider)
+  Contract.setProvider('ws://localhost:8545')
   const newContract = new Contract(contract.abi, contractAddress)
   return newContract
 }
