@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types'
+import Web3 from 'web3'
 import React, { useEffect } from 'react'
 import {
   Statistic,
@@ -28,6 +29,7 @@ import store from '../../store'
 import {
   loadDashboard,
   isDashLoading,
+  loadCurrency,
 } from '../../actions'
 
 const { Text } = Typography
@@ -48,7 +50,7 @@ const loadingInfo = {
   height: '60px'
 }
 
-function Homepage({ dash, isLoading }) {
+function Homepage({ dash, isLoading, usdRate }) {
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts.dev.FRMRegistry[0])
@@ -57,12 +59,18 @@ function Homepage({ dash, isLoading }) {
     async function loadDashboardData() {
       const dashboard = {}
       const loadingState = {}
+      const conversionRate = {}
       loadingState.dashLoading = true
       store.dispatch(isDashLoading({ ...loadingState }))
+      const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
+      const { result } = await etherPrice.json()
+      conversionRate.ethusd = result.ethusd
+      store.dispatch(loadCurrency({ ...conversionRate }))
       dashboard.lands = await registryContract.methods.totalSupply().call()
-      dashboard.seasons = await seasonContract.methods.completeSeasons().call()
       dashboard.bookings = await seasonContract.methods.totalBooking().call()
       dashboard.traces = await seasonContract.methods.allTraces().call()
+      const tx = await seasonContract.methods.platformTransactions().call()
+      dashboard.txs = Web3.utils.fromWei(tx, 'ether')
       dashboard.farms = []
       // Load the first 3 farms
       if (Number(dashboard.lands) === 0) {
@@ -86,11 +94,26 @@ function Homepage({ dash, isLoading }) {
         }
       }
       store.dispatch(loadDashboard({ ...dashboard }))
+      
       loadingState.dashLoading = false
       store.dispatch(isDashLoading({ ...loadingState }))
     }
 
+    async function fetchEtherConversionRate() {
+      const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
+      const { result } = await etherPrice.json()
+      const conversionRate = {}
+      conversionRate.ethusd = result.ethusd
+      store.dispatch(loadCurrency({ ...conversionRate }))
+    }
+
+    const interval = setInterval(() => {
+      fetchEtherConversionRate()
+    }, 2500)
+
     loadDashboardData()
+
+    return () => clearInterval(interval)
 
   }, [])
 
@@ -120,25 +143,9 @@ function Homepage({ dash, isLoading }) {
             </div>
           ) : (
             <div style={infoStyle} className='head_line_con'>
-              <Statistic title='Seasons' value={Number(dash.seasons)} valueStyle={valueStyle} />
-              <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
-                <Tooltip placement='top' title={<span>Number of complete seasons</span>}>
-                  <InfoCircleOutlined />
-                </Tooltip>
-              </div>
-            </div>
-          )}
-        </Col>
-        <Col xs={24} xl={6} className='column_con'>
-          {isLoading ? (
-            <div style={loadingInfo} className='head_line_con'>
-              <LoadingOutlined style={{ marginTop: '20px' }}/>
-            </div>
-          ) : (
-            <div style={infoStyle} className='head_line_con'>
               <Statistic title='Bookings' value={Number(dash.bookings)} valueStyle={valueStyle} />
               <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
-                <Tooltip placement='top' title={<span>Number of complete bookings</span>}>
+                <Tooltip placement='top' title={<span>Number of completed bookings</span>}>
                   <InfoCircleOutlined />
                 </Tooltip>
               </div>
@@ -154,7 +161,23 @@ function Homepage({ dash, isLoading }) {
             <div style={infoStyle} className='head_line_con'>
               <Statistic title='Traces' value={Number(dash.traces)} valueStyle={valueStyle} />
               <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
-                <Tooltip placement='top' title={<span>Number of traces performed</span>}>
+                <Tooltip placement='top' title={<span>Number of performed traces</span>}>
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </div>
+            </div>
+          )}
+        </Col>
+        <Col xs={24} xl={6} className='column_con'>
+          {isLoading ? (
+            <div style={loadingInfo} className='head_line_con'>
+              <LoadingOutlined style={{ marginTop: '20px' }}/>
+            </div>
+          ) : (
+            <div style={infoStyle} className='head_line_con'>
+              <Statistic title='Transactions' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(dash.txs) * Number(usdRate))}`} valueStyle={valueStyle} />
+              <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
+                <Tooltip placement='top' title={<span>Total amount transacted</span>}>
                   <InfoCircleOutlined />
                 </Tooltip>
               </div>
@@ -197,11 +220,14 @@ function Homepage({ dash, isLoading }) {
 
 Homepage.propTypes = {
   dash: PropTypes.object,
+  isLoading: PropTypes.bool,
+  usdRate: PropTypes.number,
 }
 
 function mapStateToProps(state) {
   return {
     isLoading: state.loading.dashboardLoading,
+    usdRate: Number(state.currency.ethusd),
     dash: state.dashboard,
   }
 }

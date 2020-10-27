@@ -8,6 +8,7 @@ import {
   loadDashboard,
   isDashLoading,
 } from './dashboard'
+import { loadCurrency } from './currency'
 
 const networkFound = net => ({
   type: LOAD_NETWORK,
@@ -19,5 +20,6 @@ export {
   walletFound,
   loadDashboard,
   isDashLoading,
+  loadCurrency,
 }
 
