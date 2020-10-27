@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import {
   Statistic,
   Tag,
@@ -15,6 +15,7 @@ import { InfoCircleOutlined, LoadingOutlined } from '@ant-design/icons'
 // Contracts
 import Registry from '../../abis/FRMRegistry.json'
 import Season from '../../abis/Season.json'
+import Contracts from '../../contracts.json'
 
 // Utils
 import { initContract } from '../../utils'
@@ -70,8 +71,8 @@ const farms = [
 function Homepage({ dash, isLoading }) {
 
   useEffect(() => {
-    const registryContract = initContract(Registry, '0x5a43A0684E85Dd2bD06B96E8EF85a6E686a15C36')
-    const seasonContract = initContract(Season, '0x038B880cc4E1A47D9005892e2DF920625aB3C8BB')
+    const registryContract = initContract(Registry, Contracts.dev.FRMRegistry[0])
+    const seasonContract = initContract(Season, Contracts.dev.Season[0])
 
     async function loadDashboardData() {
       const dashboard = {}
