@@ -8,6 +8,7 @@ import {
   Typography,
   Card,
   Tooltip,
+  Empty,
 } from 'antd'
 import { connect } from 'react-redux'
 import { InfoCircleOutlined, LoadingOutlined } from '@ant-design/icons'
@@ -47,27 +48,6 @@ const loadingInfo = {
   height: '60px'
 }
 
-const farms = [
-  {
-    id: 1,
-    img: 'https://gateway.pinata.cloud/ipfs/QmPaqwkwUUn9x2wJ574sg14zzrmF8dAbP6C2rgiLHuGa1h',
-    tokenId: 3253322,
-    season: 'Dormant',
-  },
-  {
-    id: 2,
-    img: 'https://gateway.pinata.cloud/ipfs/QmUfideC1r5JhMVwgd8vjC7DtVnXw3QGfCSQA7fUVHK789',
-    tokenId: 4900211,
-    season: 'Harvesting',
-  },
-  {
-    id: 3,
-    img: 'https://gateway.pinata.cloud/ipfs/QmVvJg2VCJ4SnDaR3cSr5f5diXrR7Sc7jLgxtJU8bE6yiY',
-    tokenId: 10000122,
-    season: 'Planting',
-  },
-]
-
 function Homepage({ dash, isLoading }) {
 
   useEffect(() => {
@@ -83,6 +63,28 @@ function Homepage({ dash, isLoading }) {
       dashboard.seasons = await seasonContract.methods.completeSeasons().call()
       dashboard.bookings = await seasonContract.methods.totalBooking().call()
       dashboard.traces = await seasonContract.methods.allTraces().call()
+      dashboard.farms = []
+      // Load the first 3 farms
+      if (Number(dashboard.lands) === 0) {
+        dashboard.farms = []
+      } else if (Number(dashboard.lands) > 3) {
+        // Randomize querying the 1st 3 farms
+        for (let i = 1; i <= 3; i++) {
+          try {
+            dashboard.farms[i] = await registryContract.methods.queryUserTokenizedFarm(Math.floor(Math.random() * Number(dashboard.lands) + 1))
+          } catch(err) {
+            console.log(err)
+          }
+        }
+      } else {
+        for (let i = 1; i <= Number(dashboard.lands); i++) {
+          try {
+            dashboard.farms[i] = await registryContract.methods.queryUserTokenizedFarm(i).call()
+          } catch(err) {
+            console.log(err)
+          }
+        }
+      }
       store.dispatch(loadDashboard({ ...dashboard }))
       loadingState.dashLoading = false
       store.dispatch(isDashLoading({ ...loadingState }))
@@ -161,7 +163,15 @@ function Homepage({ dash, isLoading }) {
         </Col>
       </Row>
       <Row justify='center' align='center'>
-        {farms.map(farm => (
+        {isLoading ? (
+          <Col xs={24} xl={24} className='column_con' style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingOutlined style={{ marginTop: '50px' }}/>
+          </Col>
+        ) : dash.farms.length === 0 ? (
+          <Col xs={24} xl={24} className='column_con'>
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span>No farm records</span>} />
+          </Col>
+        ) : dash.farms.map(farm => (
           <Col key={farm.id} xs={24} xl={8} className='column_con'>
             <Card
               hoverable
