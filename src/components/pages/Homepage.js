@@ -2,17 +2,23 @@ import PropTypes from 'prop-types'
 import Web3 from 'web3'
 import React, { useEffect } from 'react'
 import {
-  Statistic,
-  Tag,
   Row,
   Col,
-  Typography,
-  Card,
-  Tooltip,
-  Empty,
 } from 'antd'
 import { connect } from 'react-redux'
-import { InfoCircleOutlined, LoadingOutlined } from '@ant-design/icons'
+import {
+  LoadingOutlined,
+} from '@ant-design/icons'
+
+// Components
+import {
+  Farm,
+  Nofarm,
+} from '../farm'
+import {
+  Stats,
+} from '../dashboard'
+import Loading from '../loading'
 
 // Contracts
 import Registry from '../../abis/FRMRegistry.json'
@@ -23,7 +29,7 @@ import Contracts from '../../contracts.json'
 import { initContract } from '../../utils'
 
 // Redux store
-import store from '../../store'
+import { store } from '../../store'
 
 // Redux actions
 import {
@@ -31,24 +37,6 @@ import {
   isDashLoading,
   loadCurrency,
 } from '../../actions'
-
-const { Text } = Typography
-
-const valueStyle = { fontFamily: 'Noto Sans SC' }
-
-const infoStyle = {
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center'
-}
-
-const loadingInfo = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: '60px'
-}
 
 function Homepage({ dash, isLoading, usdRate }) {
 
@@ -122,95 +110,59 @@ function Homepage({ dash, isLoading, usdRate }) {
       <Row justify='center' align='middle'>
         <Col xs={24} xl={6} className='column_con'>
           {isLoading ? (
-            <div style={loadingInfo} className='head_line_con'>
-              <LoadingOutlined style={{ marginTop: '20px' }}/>
-            </div>
+            <Loading />  
           ) : (
-            <div style={infoStyle} className='head_line_con'>
-              <Statistic title='Lands' value={Number(dash.lands)} valueStyle={valueStyle} />
-              <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
-                <Tooltip placement='top' title={<span>Number of tokenized farmlands</span>}>
-                  <InfoCircleOutlined />
-                </Tooltip>
-              </div>
-            </div>
+            <Stats
+              title='Lands'
+              description='Number of registered farms lands'
+              dispValue={dash.lands}
+            />
           )} 
         </Col>
         <Col xs={24} xl={6} className='column_con'>
           {isLoading ? (
-            <div style={loadingInfo} className='head_line_con'>
-              <LoadingOutlined style={{ marginTop: '20px' }}/>
-            </div>
+            <Loading />
           ) : (
-            <div style={infoStyle} className='head_line_con'>
-              <Statistic title='Bookings' value={Number(dash.bookings)} valueStyle={valueStyle} />
-              <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
-                <Tooltip placement='top' title={<span>Number of completed bookings</span>}>
-                  <InfoCircleOutlined />
-                </Tooltip>
-              </div>
-            </div>
+            <Stats
+              title='Bookings'
+              description='Number of completed bookings'
+              dispValue={dash.bookings}
+            />
           )}
         </Col>
         <Col xs={24} xl={6} className='column_con'>
           {isLoading ? (
-            <div style={loadingInfo} className='head_line_con'>
-              <LoadingOutlined style={{ marginTop: '20px' }}/>
-            </div>
+            <Loading />
           ) : (
-            <div style={infoStyle} className='head_line_con'>
-              <Statistic title='Traces' value={Number(dash.traces)} valueStyle={valueStyle} />
-              <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
-                <Tooltip placement='top' title={<span>Number of performed traces</span>}>
-                  <InfoCircleOutlined />
-                </Tooltip>
-              </div>
-            </div>
+            <Stats
+              title='Traces'
+              description='Number of performed bookings'
+              dispValue={dash.traces}
+            />
           )}
         </Col>
         <Col xs={24} xl={6} className='column_con'>
           {isLoading ? (
-            <div style={loadingInfo} className='head_line_con'>
-              <LoadingOutlined style={{ marginTop: '20px' }}/>
-            </div>
+            <Loading />
           ) : (
-            <div style={infoStyle} className='head_line_con'>
-              <Statistic title='Transactions' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(dash.txs) * Number(usdRate))}`} valueStyle={valueStyle} />
-              <div style={{ alignSelf: 'flex-start', marginLeft: '15px' }}>
-                <Tooltip placement='top' title={<span>Total amount transacted</span>}>
-                  <InfoCircleOutlined />
-                </Tooltip>
-              </div>
-            </div>
+            <Stats
+              title='Transactions'
+              description='Total amount transacted'
+              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(dash.txs) * Number(usdRate))}`}
+            />
           )}
         </Col>
       </Row>
       <Row justify='center' align='center'>
         {isLoading ? (
           <Col xs={24} xl={24} className='column_con' style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-            <LoadingOutlined style={{ marginTop: '50px' }}/>
+            <LoadingOutlined style={{ marginTop: '150px' }}/>
           </Col>
         ) : dash.farms.length === 0 ? (
-          <Col xs={24} xl={24} className='column_con'>
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span>No farm records</span>} />
-          </Col>
+          <Nofarm />
         ) : dash.farms.map(farm => (
           <Col key={farm.id} xs={24} xl={8} className='column_con'>
-            <Card
-              hoverable
-              style={{ width: 320 }}
-              cover={<img alt='img' src={`${farm.img}`} />}
-              actions={[
-                <Text
-                  underline
-                  strong
-                >
-                  <a>View</a>
-                </Text>
-              ]}
-            >
-              <Card.Meta title={'#' + farm.tokenId} description={<Tag color='#7546C9'>{farm.season}</Tag>} />
-            </Card>
+            <Farm farm={farm} />
           </Col>
         ))}
       </Row>

@@ -7,7 +7,7 @@ import {
 } from '../actions'
 
 // Redux store
-import store from '../store'
+import { store } from '../store'
 
 const isMetamaskInstalled = typeof window.ethereum !== 'undefined'
 

@@ -6,18 +6,22 @@ import Web3 from 'web3'
 import { DesktopContainer } from './containers'
 
 // Components
-import { Homepage } from './components/pages'
+import {
+  Homepage,
+  Userpage,
+} from './components/pages'
 
 // Redux actions
 import {
   networkFound,
+  disconnectWallet,
 } from './actions'
 
 // Utils
 import { loadWeb3 } from './utils'
 
 // Redux store
-import store from './store'
+import { store } from './store'
 
 import './App.less'
 
@@ -35,12 +39,17 @@ function App() {
       networkInfo.currentNetwork = Web3.utils.isHex(_chainId) ? Web3.utils.hexToNumber(_chainId) : _chainId
       store.dispatch(networkFound({ ...networkInfo }))
     })
+    window.ethereum.on('disconnect', (error) => {
+      store.dispatch(disconnectWallet())
+      window.alert(`Error ${error.message}`)
+    })
   }
 
   return (
     <DesktopContainer>
       <Switch>
         <Route exact path='/' component={Homepage} />
+        <Route exact path='/wallet/' component={Userpage} />
       </Switch>
     </DesktopContainer>
   );

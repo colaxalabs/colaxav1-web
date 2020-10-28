@@ -3,10 +3,16 @@ import {
 } from '../types'
 
 // Actions
-import { walletFound } from './wallet'
+import {
+  walletFound,
+  walletConnected,
+  connectWallet,
+  disconnectWallet,
+} from './wallet'
 import {
   loadDashboard,
   isDashLoading,
+  isUserDashLoading,
 } from './dashboard'
 import { loadCurrency } from './currency'
 
@@ -21,5 +27,9 @@ export {
   loadDashboard,
   isDashLoading,
   loadCurrency,
+  walletConnected,
+  connectWallet,
+  disconnectWallet,
+  isUserDashLoading,
 }
 

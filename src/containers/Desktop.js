@@ -54,7 +54,9 @@ class DesktopContainer extends React.Component {
                     Booking
                   </Menu.Item>
                   <Menu.Item style={{ marginTop: '25px' }} icon={<WalletOutlined />}>
-                    Wallet
+                    <a href='/wallet/'>
+                      Wallet
+                    </a>
                   </Menu.Item>
                 </Menu>
               </Sider>
