@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^7.1.2",
     "antd": "^4.7.2",
     "craco-less": "^1.17.0",
+    "ethereum-blockies-base64": "^1.0.2",
     "flatted": "^3.1.0",
     "history": "^5.0.0",
     "prop-types": "^15.7.2",
