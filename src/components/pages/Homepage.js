@@ -48,12 +48,15 @@ function Homepage({ dash, isLoading, usdRate }) {
       const dashboard = {}
       const loadingState = {}
       const conversionRate = {}
+      // Start loading app component
       loadingState.dashLoading = true
       store.dispatch(isDashLoading({ ...loadingState }))
+      // Fetch Eth price
       const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
       const { result } = await etherPrice.json()
       conversionRate.ethusd = result.ethusd
       store.dispatch(loadCurrency({ ...conversionRate }))
+      // Query app dashboard info from the blockchain
       dashboard.lands = await registryContract.methods.totalSupply().call()
       dashboard.bookings = await seasonContract.methods.totalBooking().call()
       dashboard.traces = await seasonContract.methods.allTraces().call()
@@ -83,6 +86,7 @@ function Homepage({ dash, isLoading, usdRate }) {
       }
       store.dispatch(loadDashboard({ ...dashboard }))
       
+      // Stop loading app component
       loadingState.dashLoading = false
       store.dispatch(isDashLoading({ ...loadingState }))
     }
@@ -161,7 +165,7 @@ function Homepage({ dash, isLoading, usdRate }) {
         ) : dash.farms.length === 0 ? (
           <Nofarm />
         ) : dash.farms.map(farm => (
-          <Col key={farm.id} xs={24} xl={8} className='column_con'>
+          <Col key={farm.tokenId} xs={24} xl={8} className='column_con'>
             <Farm farm={farm} />
           </Col>
         ))}

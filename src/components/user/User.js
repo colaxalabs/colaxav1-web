@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types'
+import Web3 from 'web3'
 import React, { useEffect } from 'react'
 import {
   Avatar,
@@ -34,11 +35,20 @@ import { Farm, Nofarm } from '../farm'
 // Redux action
 import {
   loadCurrency,
+  loadUser,
   isUserDashLoading,
 } from '../../actions'
 
 // Redux store
 import { store } from '../../store'
+
+// Contracts
+import Registry from '../../abis/FRMRegistry.json'
+import Season from '../../abis/Season.json'
+import Contracts from '../../contracts.json'
+
+// Utils
+import { initContract } from '../../utils'
 
 const { TabPane } = Tabs
 const { Text, Title, Link } = Typography
@@ -174,19 +184,44 @@ const props = {
   },
 }
 
-function User({ isLoading, usdRate }) {
+function User({ wallet, userData, isLoading, usdRate }) {
 
   useEffect(() => {
 
+    const registryContract = initContract(Registry, Contracts.dev.FRMRegistry[0])
+    const seasonContract = initContract(Season, Contracts.dev.Season[0])
+
     async function loadUserDashboard() {
+      const user = {}
       const conversionRate = {}
       const loadingState = {}
+      // Start loading app component
       loadingState.userDashLoading = true
       store.dispatch(isUserDashLoading({ ...loadingState }))
+      // Fetch Eth price
       const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
       const { result } = await etherPrice.json()
       conversionRate.ethusd = result.ethusd
       store.dispatch(loadCurrency({ ...conversionRate }))
+      // Query user info from the blockchain
+      user.lands = await registryContract.methods.balanceOf(wallet[0]).call()
+      user.totalBookings = await seasonContract.methods.totalBookingDeliveredForBooker(wallet[0]).call()
+      const tx = await seasonContract.methods.addressTransactions(wallet[0]).call()
+      user.txs = Web3.utils.fromWei(tx, 'ether')
+      user.userFarms = []
+      if (Number(user.lands) === 0) {
+        user.userFarms = []
+      } else {
+        for (let i = 1; i <= Number(user.lands); i++) {
+          try {
+            user.userFarms[i] = await registryContract.methods.queryUserTokenizedFarm(i).call()
+          } catch(err) {
+            console.log(err)
+          }
+        }
+      }
+      store.dispatch(loadUser({ ...user }))
+      // Stop loading app component
       loadingState.userDashLoading = false
       store.dispatch(isUserDashLoading({ ...loadingState }))
     } 
@@ -207,7 +242,7 @@ function User({ isLoading, usdRate }) {
 
     return () => clearInterval(interval)
 
-  }, [])
+  }, [wallet])
 
   return (
     <div>
@@ -219,7 +254,7 @@ function User({ isLoading, usdRate }) {
             <Stats
               title='Lands'
               description='Number of registered farm lands'
-              dispValue={2}
+              dispValue={userData.lands}
             />
           )}
         </Col>
@@ -230,7 +265,7 @@ function User({ isLoading, usdRate }) {
             <Stats
               title='Bookings'
               description='Number of completed bookings'
-              dispValue={3}
+              dispValue={userData.totalBookings}
             />
           )}
         </Col>
@@ -241,7 +276,7 @@ function User({ isLoading, usdRate }) {
             <Stats
               title='Transaction'
               description='Total amount transacted'
-              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(1 * Number(usdRate))}`}
+              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(userData.txs) * Number(usdRate))}`}
             />
           )}
         </Col>
@@ -256,12 +291,12 @@ function User({ isLoading, usdRate }) {
             <Tabs>
               <TabPane tab='Farms' key='1'>
                 <Row>
-                  {farms.length === 0 ? (
+                  {userData.userFarms.length === 0 ? (
                     <Nofarm />
                   ) : (
-                    farms.map(farm => (
-                      <Col key={farm.id} xs={24} xl={8} className='column_con'>
-                        <Farm farm={farm} />
+                    userData.userFarms.map(userFarm => (
+                      <Col key={userFarm.tokenId} xs={24} xl={8} className='column_con'>
+                        <Farm farm={userFarm} />
                       </Col>
                     ))
                   )}
@@ -361,12 +396,16 @@ function User({ isLoading, usdRate }) {
 User.propTypes = {
   isLoading: PropTypes.bool,
   usdRate: PropTypes.number,
+  wallet: PropTypes.array,
+  userData: PropTypes.object,
 }
 
 function mapStateToProps(state) {
   return {
     isLoading: state.loading.userDashLoading,
     usdRate: Number(state.currency.ethusd),
+    wallet: state.wallet.address,
+    userData: state.user,
   }
 }
 

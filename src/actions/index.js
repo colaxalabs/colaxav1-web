@@ -15,6 +15,7 @@ import {
   isUserDashLoading,
 } from './dashboard'
 import { loadCurrency } from './currency'
+import { loadUser } from './user'
 
 const networkFound = net => ({
   type: LOAD_NETWORK,
@@ -31,5 +32,6 @@ export {
   connectWallet,
   disconnectWallet,
   isUserDashLoading,
+  loadUser,
 }
 

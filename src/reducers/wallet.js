@@ -4,7 +4,13 @@ import {
   WALLET_DISCONNECT,
 } from '../types'
 
-export function wallet(state = { loaded: false, isMetamask: false }, action = {}) {
+const INITIAL_STATE = {
+  loaded: false,
+  isMetamask: false,
+  address: [],
+}
+
+export function wallet(state = INITIAL_STATE, action = {}) {
   switch(action.type) {
     case CONNECT_WALLET:
       return {
