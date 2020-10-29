@@ -30,7 +30,7 @@ import {
   Stats,
 } from '../dashboard'
 import Loading from '../loading'
-import { Farm, Nofarm } from '../farm'
+import { Farm, Nofarm, Nobooking } from '../farm'
 
 // Redux action
 import {
@@ -53,69 +53,6 @@ import { initContract } from '../../utils'
 const { TabPane } = Tabs
 const { Text, Title, Link } = Typography
 const { Option } = Select
-
-const farms = [
-  {
-    id: 1,
-    img: 'https://gateway.pinata.cloud/ipfs/QmVvJg2VCJ4SnDaR3cSr5f5diXrR7Sc7jLgxtJU8bE6yiY',
-    season: 'Dormant',
-    tokenId: 3898392911,
-  },
-  {
-    id: 2,
-    img: 'https://gateway.pinata.cloud/ipfs/QmWwS4mjCyoXmQPhE1osyeCcxGz2z9a9JsuvaTRr3Yn6z2',
-    season: 'Dormant',
-    tokenId: 9403020311,
-  },
-  {
-    id: 3,
-    img: 'https://gateway.pinata.cloud/ipfs/QmPaqwkwUUn9x2wJ574sg14zzrmF8dAbP6C2rgiLHuGa1h',
-    season: 'Planting',
-    tokenId: 1110203203,
-  },
-  {
-    id: 4,
-    img: 'https://gateway.pinata.cloud/ipfs/QmUfideC1r5JhMVwgd8vjC7DtVnXw3QGfCSQA7fUVHK789',
-    season: 'Preparation',
-    tokenId: 9202223452,
-  },
-  {
-    id: 5,
-    img: 'https://gateway.pinata.cloud/ipfs/QmQWt49RWk3df8Qywt7C37SMwPxbQW3uBfcxLDKmSNT3Ho',
-    season: 'Booking',
-    tokenId: 3339811117,
-  }
-]
-
-const dataSource = [
-  {
-    key: '1',
-    tokenId: 9392,
-    booker: '0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8',
-    volume: 32,
-    deposit: 203000000,
-    delivered: false,
-    season: 1,
-  },
-  {
-    key: '2',
-    tokenId: 10003,
-    booker: '0x62F9E4026B04175f5eD4CEaDaebc40B7F0499497',
-    volume: 2,
-    deposit: 100002333,
-    delivered: true,
-    season: 11,
-  },
-  {
-    key: '3',
-    tokenId: 33434,
-    booker: '0x808b4dA0Be6c9512E948521452227EFc619BeA52',
-    volume: 91,
-    deposit: 3992999911,
-    delivered: false,
-    season: 3,
-  },
-]
 
 const columns = [
   {
@@ -176,14 +113,6 @@ const cons = [
   'Receive farm harvest booking without middlemen',
 ]
 
-const props = {
-  onChange({file, fileList}) {
-    if (file.status !== 'uploading') {
-      console.log(file, fileList)
-    }
-  },
-}
-
 function User({ wallet, userData, isLoading, usdRate }) {
 
   useEffect(() => {
@@ -215,6 +144,19 @@ function User({ wallet, userData, isLoading, usdRate }) {
         for (let i = 1; i <= Number(user.lands); i++) {
           try {
             user.userFarms[i] = await registryContract.methods.queryUserTokenizedFarm(i).call()
+          } catch(err) {
+            console.log(err)
+          }
+        }
+      }
+      user.userBookings = []
+      if (Number(user.totalBookings) === 0) {
+        user.userBookings = []
+      } else {
+        for (let i = 1; i <= Number(user.totalBookings); i++) {
+          try {
+            let seasonBooked = await seasonContract.methods.getSeasonBooked(i).call()
+            user.userBookings[i] = await seasonContract.methods.getBookerBooking(seasonBooked, wallet[0]).call()
           } catch(err) {
             console.log(err)
           }
@@ -304,9 +246,13 @@ function User({ wallet, userData, isLoading, usdRate }) {
               </TabPane>
               <TabPane tab='Bookings' key='2'>
                 <Row justify='center' align='center'>
-                  <Col xs={24} xl={24} className='column_con'>
-                    <Table dataSource={dataSource} columns={columns} />
-                  </Col>
+                  {userData.userBookings.length === 0 ? (
+                    <Nobooking />
+                  ) : (
+                    <Col xs={24} xl={24} className='column_con'>
+                      <Table dataSource={userData.userBookings} columns={columns} />
+                    </Col>
+                  )} 
                 </Row>
               </TabPane>
               <TabPane tab='Register' key='3'>
@@ -370,7 +316,7 @@ function User({ wallet, userData, isLoading, usdRate }) {
                         label='Upload farm image'
                         name='upload'
                       >
-                        <Upload { ...props } >
+                        <Upload>
                           <Button icon={<UploadOutlined style={{ color: '#7546C9' }} />}>Upload farm image</Button>
                         </Upload>
                       </Form.Item>
