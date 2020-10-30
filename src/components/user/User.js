@@ -30,7 +30,7 @@ import {
   Stats,
 } from '../dashboard'
 import Loading from '../loading'
-import { Farm, Nofarm, Nobooking } from '../farm'
+import { Farm, Nofarm } from '../farm'
 
 // Redux action
 import {
@@ -103,7 +103,11 @@ const columns = [
   {
     title: 'Action',
     key: 'action',
-    render: (text, record) => <Button type='primary' size='small' onClick={() => console.log(record)}>Confirm Receivership</Button>
+    render: (text, record) => (
+      <>
+        {record.volume !== 0 && <Button type='primary' size='small' onClick={() => console.log(record.volume)}>Confirm Receivership</Button>}
+      </>
+    )
   }
 ]
 
@@ -246,13 +250,9 @@ function User({ wallet, userData, isLoading, usdRate }) {
               </TabPane>
               <TabPane tab='Bookings' key='2'>
                 <Row justify='center' align='center'>
-                  {userData.userBookings.length === 0 ? (
-                    <Nobooking />
-                  ) : (
-                    <Col xs={24} xl={24} className='column_con'>
-                      <Table dataSource={userData.userBookings} columns={columns} />
-                    </Col>
-                  )} 
+                  <Col xs={24} xl={24} className='column_con'>
+                    <Table dataSource={userData.userBookings} columns={columns} />
+                  </Col>
                 </Row>
               </TabPane>
               <TabPane tab='Register' key='3'>

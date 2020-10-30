@@ -9,6 +9,7 @@ import { DesktopContainer } from './containers'
 import {
   Homepage,
   Userpage,
+  Farmpage,
 } from './components/pages'
 
 // Redux actions
@@ -50,6 +51,7 @@ function App() {
       <Switch>
         <Route exact path='/' component={Homepage} />
         <Route exact path='/wallet/' component={Userpage} />
+        <Route path='/farm/:id' component={Farmpage} />
       </Switch>
     </DesktopContainer>
   );

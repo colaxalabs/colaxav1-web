@@ -13,6 +13,7 @@ import {
   loadDashboard,
   isDashLoading,
   isUserDashLoading,
+  isFarmDashLoading,
 } from './dashboard'
 import { loadCurrency } from './currency'
 import { loadUser } from './user'
@@ -33,5 +34,6 @@ export {
   disconnectWallet,
   isUserDashLoading,
   loadUser,
+  isFarmDashLoading,
 }
 
