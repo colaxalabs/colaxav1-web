@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types'
+import Web3 from 'web3'
 import React, { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
   Row,
@@ -12,6 +14,7 @@ import {
   Avatar,
   Typography,
   Space,
+  Empty,
 } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
@@ -19,51 +22,92 @@ import makeBlockie from 'ethereum-blockies-base64'
 // Components
 import { Stats } from '../dashboard'
 import Loading from '../loading'
+
 // Redux actions
 import {
   isFarmDashLoading,
   loadCurrency,
+  loadFarm,
 } from '../../actions'
 
 // Redux store
 import { store } from '../../store'
 
+// Contracts
+import Registry from '../../abis/FRMRegistry.json'
+import Season from '../../abis/Season.json'
+import Contracts from '../../contracts.json'
+
 // Utils
+import { initContract } from '../../utils'
 import { seasonColumns, bookingColumns } from '../../utils'
 
 const { Text } = Typography
 const { TabPane } = Tabs
 
-const farm = {
-  farmName: 'Arunga Vineyard',
-    tokenId: 2293934,
-    img: 'https://gateway.pinata.cloud/ipfs/QmPaqwkwUUn9x2wJ574sg14zzrmF8dAbP6C2rgiLHuGa1h',
-    season: 'Planting',
-    owner: '0x7723EFcbBC8b874E07744006cA1d4cf9F54f96BD',
-    completeSeasons: 3,
-  size: '243.33ha',
-  location: 'Lurambi, Kakamega, Kakamega County',
-  soil: 'Loam soil',
-}
-
-const seasons = []
-
-const bookings = []
-
-function Farmpage({ usdRate, isLoading }) {
+function Farmpage({ farm, usdRate, isLoading }) {
+  const { id } = useParams()
 
   useEffect(() => {
+    const registryContract = initContract(Registry, Contracts.dev.FRMRegistry[0])
+    const seasonContract = initContract(Season, Contracts.dev.Season[0])
+
     async function loadFarmDashboard() {
       const loadingState = {}
       const conversionRate = {}
+      const farm = {}
       // Start loading app component
       loadingState.farmDashLoading = true
       store.dispatch(isFarmDashLoading({ ...loadingState }))
-      // Fetch Eth price
+      const tokenExists = await registryContract.methods.exists(id).call()
+      if (tokenExists) {
+        // Query farm info from the blockchain
+        const _farm = await registryContract.methods.getFarm(id).call() 
+        farm.tokenId = id
+        farm.name = _farm.name
+        farm.size = _farm.size
+        farm.lon = _farm.longitude
+        farm.lat = _farm.latitude
+        farm.img = _farm.imageHash
+        farm.soil = _farm.soil
+        farm.season = _farm.season
+        farm.owner = _farm.owner
+        farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(farm.tokenId).call()
+        const tx = await seasonContract.methods.farmTransactions(farm.tokenId).call()
+        farm.txs = Web3.utils.fromWei(tx, 'ether')
+        farm.seasons = []
+        if (farm.completedSeasons === 0) {
+          farm.seasons = []
+        } else {
+          for (let i = 1; i <= farm.completedSeasons + 1; i++) {
+            farm.seasons[i] = await seasonContract.methods.querySeasonData(farm.tokenId, i).call()
+          }
+        }
+        farm.farmBookings = []
+        if (farm.totalBookings === 0) {
+          farm.farmBookings = []
+        } else {
+          for (let i = 1; i <= farm.totalBookings; i++) {
+            farm.farmBookings[i] = await seasonContract.methods.getFarmBooking(farm.tokenId, i).call()
+          }
+        }
+        // Fetch Eth price
+        const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
+        const { result } = await etherPrice.json()
+        conversionRate.ethusd = result.ethusd
+        store.dispatch(loadCurrency({ ...conversionRate }))
+        // Stop loading app component
+        loadingState.farmDashLoading = false
+        store.dispatch(isFarmDashLoading({ ...loadingState }))
+      }
+      farm.notFound = true
+      store.dispatch(loadFarm({ ...farm }))
+      // Fetch Eth price anyway
       const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
       const { result } = await etherPrice.json()
       conversionRate.ethusd = result.ethusd
       store.dispatch(loadCurrency({ ...conversionRate }))
+      // Stop loading app component
       loadingState.farmDashLoading = false
       store.dispatch(isFarmDashLoading({ ...loadingState }))
     }
@@ -84,11 +128,15 @@ function Farmpage({ usdRate, isLoading }) {
 
     return () => clearInterval(interval)
 
-  }, [])
+  }, [id])
 
   return (
     <>
-      <Row justify='center' align='center'>
+      {farm.notFound ? (
+        <Empty description='Not Found' style={{ marginTop: '150px' }} />
+      ) : (
+        <>
+        <Row justify='center' align='center'>
         <Col xs={24} xl={8} className='column_con'>
           {isLoading ? (
             <Loading />
@@ -96,7 +144,7 @@ function Farmpage({ usdRate, isLoading }) {
             <Stats
               title='Seasons'
               description='Number of completed seasons'
-              dispValue={11}
+              dispValue={farm.completedSeasons}
             />
           )} 
         </Col>
@@ -107,7 +155,7 @@ function Farmpage({ usdRate, isLoading }) {
             <Stats
               title='Bookings'
               description='Number of completed bookings'
-              dispValue={21}
+              dispValue={farm.totalBookings}
             />
           )} 
         </Col>
@@ -118,7 +166,7 @@ function Farmpage({ usdRate, isLoading }) {
             <Stats
               title='Transaction'
               description='Total amount transacted'
-              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(2 * Number(usdRate))}`}
+              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(farm.txs) * Number(usdRate))}`}
             />
           )} 
         </Col>
@@ -146,17 +194,17 @@ function Farmpage({ usdRate, isLoading }) {
             <Loading />
           ) : (
             <>
-              <Descriptions title={farm.farmName} layout='vertical' bordered>
+              <Descriptions title={farm.name} layout='vertical' bordered>
                 <Descriptions.Item label='Farm Size'>{farm.size}</Descriptions.Item>
                 <Descriptions.Item label='Location'>{farm.location}</Descriptions.Item>
                 <Descriptions.Item label='Soil'>{farm.soil}</Descriptions.Item>
                 <Descriptions.Item label='Owner'>
                   <Space>
-                    <Avatar size='small' src={makeBlockie(farm.owner)} />
+                    <Avatar size='small' src={farm.owner ? makeBlockie(farm.owner) : ''} />
                     <Text ellipsis copyable>{farm.owner}</Text>
                   </Space>
                 </Descriptions.Item>
-                <Descriptions.Item label='Completed Season'>{farm.completeSeasons}</Descriptions.Item>
+                <Descriptions.Item label='Completed Season'>{farm.completedSeasons}</Descriptions.Item>
                 <Descriptions.Item label='State'>
                   <Tag color='#7546C9'>{farm.season}</Tag>
                 </Descriptions.Item>
@@ -175,15 +223,18 @@ function Farmpage({ usdRate, isLoading }) {
           <Col xs={24} xl={24} className='column_con'>
             <Tabs>
               <TabPane tab='Seasons' key='1'>
-                <Table dataSource={seasons} columns={seasonColumns} />
+                <Table dataSource={farm.seasons} columns={seasonColumns} />
               </TabPane>
               <TabPane tab='Bookings' key='2'>
-                <Table dataSource={bookings} columns={bookingColumns} />
+                <Table dataSource={farm.farmBookings} columns={bookingColumns} />
               </TabPane>
             </Tabs>
           </Col>
         )} 
       </Row>
+        </>
+      )}
+      
     </>
   )
 }
@@ -191,12 +242,14 @@ function Farmpage({ usdRate, isLoading }) {
 Farmpage.propTypes = {
   usdRate: PropTypes.number,
   isLoading: PropTypes.bool,
+  farm: PropTypes.object,
 }
 
 function mapStateToProps(state) {
   return {
     isLoading: state.loading.farmDashLoading,
     usdRate: Number(state.currency.ethusd),
+    farm: state.farm,
   }
 }
 

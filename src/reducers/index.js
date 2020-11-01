@@ -7,6 +7,7 @@ import { dashboard } from './dashboard'
 import { loading } from './loading'
 import { currency } from './currency'
 import { user } from './user'
+import { farm } from './farm'
 
 export default combineReducers({
   wallet,
@@ -15,5 +16,6 @@ export default combineReducers({
   loading,
   currency,
   user,
+  farm,
 })
 
