@@ -10,17 +10,12 @@ import {
   Button,
   Typography,
   Space,
-  Form,
-  Input,
-  Select,
-  Upload,
   List,
 } from 'antd'
 import {
   LoadingOutlined,
   SyncOutlined,
   CheckCircleTwoTone,
-  UploadOutlined,
 } from '@ant-design/icons'
 import { connect } from 'react-redux'
 import makeBlockie from 'ethereum-blockies-base64'
@@ -31,6 +26,7 @@ import {
 } from '../dashboard'
 import Loading from '../loading'
 import { Farm, Nofarm } from '../farm'
+import { Register } from '../forms'
 
 // Redux action
 import {
@@ -52,7 +48,6 @@ import { initContract } from '../../utils'
 
 const { TabPane } = Tabs
 const { Text, Title, Link } = Typography
-const { Option } = Select
 
 const columns = [
   {
@@ -281,53 +276,7 @@ function User({ wallet, userData, isLoading, usdRate }) {
                     </List>
                   </Col>
                   <Col xs={24} xl={12} className='column_con'>
-                    <Form name='basic' layout='vertical' style={{ width: '400px' }}>
-                      <Form.Item
-                        label='Farm Name'
-                        name='name'
-                      >
-                        <Input type='text' />
-                      </Form.Item>
-                      <Form.Item
-                        label='Farm Size'
-                        name='size'
-                      >
-                        <Input type='number' />
-                      </Form.Item>
-                      <Form.Item
-                        label='Farm Size Unit'
-                        name='unit'
-                      >
-                        <Select
-                          placeholder='Acres/Hectares'
-                          allowClear
-                        >
-                          <Option value='acres'>Acres</Option>
-                          <Option value='ha'>Hectares</Option>
-                        </Select>
-                      </Form.Item>
-                      <Form.Item
-                        label='Farm Soil Type'
-                        name='soil'
-                      >
-                        <Input type='text' />
-                      </Form.Item>
-                      <Form.Item
-                        label='Upload farm image'
-                        name='upload'
-                      >
-                        <Upload>
-                          <Button icon={<UploadOutlined style={{ color: '#7546C9' }} />}>Upload farm image</Button>
-                        </Upload>
-                      </Form.Item>
-                      <Form.Item>
-                        <Button
-                          type='primary'
-                        >
-                          Register
-                        </Button>
-                      </Form.Item>
-                    </Form>
+                    <Register /> 
                   </Col>
                 </Row>
               </TabPane>
