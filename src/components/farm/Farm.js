@@ -5,8 +5,12 @@ import {
   Typography,
   Card,
 } from 'antd'
+import {
+  ShareAltOutlined,
+  EyeTwoTone,
+} from '@ant-design/icons'
 
-const { Text } = Typography
+const { Text, Link } = Typography
 
 function Farm({ farm, img }) {
   return (
@@ -15,12 +19,17 @@ function Farm({ farm, img }) {
       style={{ width: 320 }}
       cover={<img alt='img' height='230px' src={`https://ipfs.io/ipfs/${img}`} />}
       actions={[
-        <Text
-          underline
-          strong
+        <Link
+          href={`/farm/${farm.tokenId}`}
         >
-          <a>View</a>
-        </Text>
+          <EyeTwoTone twoToneColor='#7546C9' style={{ fontSize: '18px', marginLeft: '5px' }} />
+        </Link>,
+        <Text
+          copyable={{
+            text: `${window.location.href}farm/${farm.tokenId}/`,
+            icon: <ShareAltOutlined style={{ fontSize: '18px' }} />
+          }}
+        />
       ]}
     >
       <Card.Meta title={'#' + farm.tokenId} description={<Tag color='#7546C9'>{farm.season}</Tag>} />

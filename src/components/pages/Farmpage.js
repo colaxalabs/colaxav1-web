@@ -15,8 +15,9 @@ import {
   Typography,
   Space,
   Empty,
+  Button,
 } from 'antd'
-import { LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
 
 // Components
@@ -45,7 +46,7 @@ import { seasonColumns, bookingColumns } from '../../utils'
 const { Text } = Typography
 const { TabPane } = Tabs
 
-function Farmpage({ farm, usdRate, isLoading }) {
+function Farmpage({ wallet, farm, usdRate, isLoading }) {
   const { id } = useParams()
 
   useEffect(() => {
@@ -92,7 +93,6 @@ function Farmpage({ farm, usdRate, isLoading }) {
             farm.farmBookings[i] = await seasonContract.methods.getFarmBooking(farm.tokenId, i).call()
           }
         }
-        console.log(farm)
         // Fetch Eth price
         const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
         const { result } = await etherPrice.json()
@@ -183,6 +183,14 @@ function Farmpage({ farm, usdRate, isLoading }) {
                 hoverable
                 style={{ width: 320 }}
                 cover={<img src={`https://ipfs.io/ipfs/${farm.img}`} alt='img' heigth='230px' />}
+                actions={[
+                  <Text
+                    copyable={{
+                      text: `${window.location.href}`,
+                      icon: <ShareAltOutlined style={{ fontSize: '18px' }} />
+                    }}
+                  />,
+                ]}
               >
                 <Card.Meta
                   description={<Tag color='#7546C9'>{farm.season}</Tag>}
@@ -245,6 +253,7 @@ Farmpage.propTypes = {
   usdRate: PropTypes.number,
   isLoading: PropTypes.bool,
   farm: PropTypes.object,
+  wallet: PropTypes.object,
 }
 
 function mapStateToProps(state) {
@@ -252,6 +261,7 @@ function mapStateToProps(state) {
     isLoading: state.loading.farmDashLoading,
     usdRate: Number(state.currency.ethusd),
     farm: state.farm,
+    wallet: state.wallet,
   }
 }
 
