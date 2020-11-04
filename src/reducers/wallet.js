@@ -2,12 +2,15 @@ import {
   CONNECT_WALLET,
   WALLET_FOUND,
   WALLET_DISCONNECT,
+  LOCATION_ACCESS,
 } from '../types'
 
 const INITIAL_STATE = {
   loaded: false,
   isMetamask: false,
   address: [],
+  longitude: '0.0',
+  latitude: '0.0'
 }
 
 export function wallet(state = INITIAL_STATE, action = {}) {
@@ -25,6 +28,11 @@ export function wallet(state = INITIAL_STATE, action = {}) {
     case WALLET_DISCONNECT:
       return {
         loaded: false,
+      }
+    case LOCATION_ACCESS:
+      return {
+        ...state,
+        ...action.coords,
       }
     default:
       return state

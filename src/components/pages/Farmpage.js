@@ -49,8 +49,8 @@ function Farmpage({ farm, usdRate, isLoading }) {
   const { id } = useParams()
 
   useEffect(() => {
-    const registryContract = initContract(Registry, Contracts.dev.FRMRegistry[0])
-    const seasonContract = initContract(Season, Contracts.dev.Season[0])
+    const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
+    const seasonContract = initContract(Season, Contracts['4'].Season[0])
 
     async function loadFarmDashboard() {
       const loadingState = {}
@@ -72,25 +72,27 @@ function Farmpage({ farm, usdRate, isLoading }) {
         farm.soil = _farm.soil
         farm.season = _farm.season
         farm.owner = _farm.owner
+        farm.totalBookings = await seasonContract.methods.totalFarmBookings(farm.tokenId).call()
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(farm.tokenId).call()
         const tx = await seasonContract.methods.farmTransactions(farm.tokenId).call()
         farm.txs = Web3.utils.fromWei(tx, 'ether')
         farm.seasons = []
-        if (farm.completedSeasons === 0) {
+        if (Number(farm.completedSeasons) === 0) {
           farm.seasons = []
         } else {
-          for (let i = 1; i <= farm.completedSeasons + 1; i++) {
+          for (let i = 1; i <= Number(farm.completedSeasons) + 1; i++) {
             farm.seasons[i] = await seasonContract.methods.querySeasonData(farm.tokenId, i).call()
           }
         }
         farm.farmBookings = []
-        if (farm.totalBookings === 0) {
+        if (Number(farm.totalBookings) === 0) {
           farm.farmBookings = []
         } else {
-          for (let i = 1; i <= farm.totalBookings; i++) {
+          for (let i = 1; i <= Number(farm.totalBookings); i++) {
             farm.farmBookings[i] = await seasonContract.methods.getFarmBooking(farm.tokenId, i).call()
           }
         }
+        console.log(farm)
         // Fetch Eth price
         const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
         const { result } = await etherPrice.json()
@@ -100,7 +102,7 @@ function Farmpage({ farm, usdRate, isLoading }) {
         loadingState.farmDashLoading = false
         store.dispatch(isFarmDashLoading({ ...loadingState }))
       }
-      farm.notFound = true
+      farm.notFound = !tokenExists
       store.dispatch(loadFarm({ ...farm }))
       // Fetch Eth price anyway
       const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
@@ -180,7 +182,7 @@ function Farmpage({ farm, usdRate, isLoading }) {
               <Card
                 hoverable
                 style={{ width: 320 }}
-                cover={<img src={`${farm.img}`} alt='img' heigth='230px' />}
+                cover={<img src={`https://ipfs.io/ipfs/${farm.img}`} alt='img' heigth='230px' />}
               >
                 <Card.Meta
                   description={<Tag color='#7546C9'>{farm.season}</Tag>}

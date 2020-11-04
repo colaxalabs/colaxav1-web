@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import PropTypes from 'prop-types'
+import React, { useState, useEffect } from 'react'
 import {
   Form,
   Select,
@@ -7,13 +8,48 @@ import {
   Typography,
 } from 'antd'
 import Validator from 'validator'
+import { connect } from 'react-redux'
+
+// Redux actions
+import { connectLocation, submitting } from '../../actions'
+
+// Redux store
+import { store } from '../../store'
 
 const { Option } = Select
 const { Text } = Typography
 
-function Register() {
+function Register({ wallet, farmConfirming, submittingForm, lon, lat, tokenize }) {
   const [form] = Form.useForm()
   const [upload, setUpload] = useState()
+
+  function onsuccess(position) {
+    const coords = {}
+    const longitude = String(position.coords.longitude)
+    const latitude = String(position.coords.latitude)
+    coords.longitude = longitude
+    coords.latitude = latitude
+    store.dispatch(connectLocation({ ...coords }))
+  }
+
+  function onerror() {
+    window.alert('Unable to get your current position')
+  }
+
+  useEffect(() => {
+    function locationQuery() {
+      navigator.permissions.query({name: 'geolocation'}).then(function(result) {
+        if (result.state === 'prompt') {
+          navigator.geolocation.getCurrentPosition(onsuccess, onerror)
+        } else if (result.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(onsuccess, onerror)
+        }
+      })
+    }
+
+    locationQuery()
+
+  })
 
   const convertToBuffer = async reader => {
     const buffer = await Buffer.from(reader.result)
@@ -35,9 +71,14 @@ function Register() {
       requiredMark={false}
       style={{ width: '400px' }}
       onFinish={(values) => {
-        values.upload = upload
+        values.file = upload
+        const { name, size, unit, soil, file } = values
+        const farmSize = size + unit
+        const status = {}
+        status.formSubmitting = true
+        store.dispatch(submitting({ ...status }))
+        tokenize(name, farmSize, lon, lat, file, soil, wallet)
         form.resetFields()
-        console.log(values)
       }}
       initialValues={{
         name: '',
@@ -139,14 +180,34 @@ function Register() {
       <Form.Item>
         <Button
           type='primary'
+          loading={submittingForm}
           htmlType='submit'
         >
-          Register
+          {submittingForm ? 'Submitting...' : farmConfirming ? 'Confirming...' : 'Register'}
         </Button>
       </Form.Item>
     </Form>
   )
 }
 
-export default Register
+Register.propTypes = {
+  lon: PropTypes.string,
+  lat: PropTypes.string,
+  submitting: PropTypes.bool,
+  confirming: PropTypes.bool,
+  wallet: PropTypes.object,
+  tokenize: PropTypes.func,
+}
+
+function mapStateToProp(state) {
+  return {
+    lon: state.wallet.longitude,
+    lat: state.wallet.latitude,
+    submittingForm: state.loading.formSubmitting,
+    farmConfirming: state.loading.confirmingFarm,
+    wallet: state.wallet,
+  }
+}
+
+export default connect(mapStateToProp)(Register)
 

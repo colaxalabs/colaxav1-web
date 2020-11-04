@@ -33,6 +33,7 @@ import {
   loadCurrency,
   loadUser,
   isUserDashLoading,
+  tokenize,
 } from '../../actions'
 
 // Redux store
@@ -112,12 +113,12 @@ const cons = [
   'Receive farm harvest booking without middlemen',
 ]
 
-function User({ wallet, userData, isLoading, usdRate }) {
+function User({ tokenize, wallet, userData, isLoading, usdRate }) {
 
   useEffect(() => {
 
-    const registryContract = initContract(Registry, Contracts.dev.FRMRegistry[0])
-    const seasonContract = initContract(Season, Contracts.dev.Season[0])
+    const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
+    const seasonContract = initContract(Season, Contracts['4'].Season[0])
 
     async function loadUserDashboard() {
       const user = {}
@@ -237,7 +238,7 @@ function User({ wallet, userData, isLoading, usdRate }) {
                   ) : (
                     userData.userFarms.map(userFarm => (
                       <Col key={userFarm.tokenId} xs={24} xl={8} className='column_con'>
-                        <Farm farm={userFarm} />
+                        <Farm farm={userFarm} imageHash={userFarm.imageHash}/>
                       </Col>
                     ))
                   )}
@@ -276,7 +277,7 @@ function User({ wallet, userData, isLoading, usdRate }) {
                     </List>
                   </Col>
                   <Col xs={24} xl={12} className='column_con'>
-                    <Register /> 
+                    <Register tokenize={tokenize} /> 
                   </Col>
                 </Row>
               </TabPane>
@@ -293,6 +294,7 @@ User.propTypes = {
   usdRate: PropTypes.number,
   wallet: PropTypes.array,
   userData: PropTypes.object,
+  tokenize: PropTypes.func,
 }
 
 function mapStateToProps(state) {
@@ -304,5 +306,5 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps)(User)
+export default connect(mapStateToProps, { tokenize })(User)
 

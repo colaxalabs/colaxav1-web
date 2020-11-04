@@ -41,8 +41,8 @@ import {
 function Homepage({ dash, isLoading, usdRate }) {
 
   useEffect(() => {
-    const registryContract = initContract(Registry, Contracts.dev.FRMRegistry[0])
-    const seasonContract = initContract(Season, Contracts.dev.Season[0])
+    const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
+    const seasonContract = initContract(Season, Contracts['4'].Season[0])
 
     async function loadDashboardData() {
       const dashboard = {}
@@ -70,7 +70,7 @@ function Homepage({ dash, isLoading, usdRate }) {
         // Randomize querying the 1st 3 farms
         for (let i = 1; i <= 3; i++) {
           try {
-            dashboard.farms[i] = await registryContract.methods.queryUserTokenizedFarm(Math.floor(Math.random() * Number(dashboard.lands) + 1))
+            dashboard.farms[i] = await registryContract.methods.queryTokenizedFarm(Math.floor(Math.random() * Number(dashboard.lands) + 1)).call()
           } catch(err) {
             console.log(err)
           }
@@ -78,7 +78,7 @@ function Homepage({ dash, isLoading, usdRate }) {
       } else {
         for (let i = 1; i <= Number(dashboard.lands); i++) {
           try {
-            dashboard.farms[i] = await registryContract.methods.queryUserTokenizedFarm(i).call()
+            dashboard.farms[i] = await registryContract.methods.queryTokenizedFarm(i).call()
           } catch(err) {
             console.log(err)
           }
@@ -157,7 +157,7 @@ function Homepage({ dash, isLoading, usdRate }) {
           )}
         </Col>
       </Row>
-      <Row justify='center' align='center'>
+      <Row>
         {isLoading ? (
           <Col xs={24} xl={24} className='column_con' style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
             <LoadingOutlined style={{ marginTop: '150px' }}/>
@@ -166,7 +166,7 @@ function Homepage({ dash, isLoading, usdRate }) {
           <Nofarm />
         ) : dash.farms.map(farm => (
           <Col key={farm.tokenId} xs={24} xl={8} className='column_con'>
-            <Farm farm={farm} />
+            <Farm farm={farm} img={farm.imageHash} />
           </Col>
         ))}
       </Row>

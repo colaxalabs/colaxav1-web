@@ -8,6 +8,7 @@ import {
   walletConnected,
   connectWallet,
   disconnectWallet,
+  connectLocation,
 } from './wallet'
 import {
   loadDashboard,
@@ -17,7 +18,12 @@ import {
 } from './dashboard'
 import { loadCurrency } from './currency'
 import { loadUser } from './user'
-import { loadFarm } from './farm'
+import {
+  loadFarm,
+  tokenize,
+  submitting,
+  confirming,
+} from './farm'
 
 const networkFound = net => ({
   type: LOAD_NETWORK,
@@ -37,5 +43,9 @@ export {
   loadUser,
   isFarmDashLoading,
   loadFarm,
+  tokenize,
+  connectLocation,
+  submitting,
+  confirming,
 }
 

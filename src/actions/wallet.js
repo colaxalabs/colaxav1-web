@@ -4,6 +4,7 @@ import {
   WALLET_FOUND,
   CONNECT_WALLET,
   WALLET_DISCONNECT,
+  LOCATION_ACCESS,
 } from '../types'
 
 export const walletFound = wallet => ({
@@ -18,6 +19,11 @@ export const walletConnected = wallet => ({
 
 export const disconnectWallet = () => ({
   type: WALLET_DISCONNECT,
+})
+
+export const connectLocation = coords => ({
+  type: LOCATION_ACCESS,
+  coords,
 })
 
 export const connectWallet = () => async dispatch => {
