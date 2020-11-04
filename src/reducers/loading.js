@@ -39,7 +39,7 @@ export function loading(state = INITIAL_STATE, action = {}) {
     case CONFIRMING_FARM:
       return {
         ...state,
-        confirmingFarm: action.status.confirming,
+        confirmingFarm: action.status.confirmingFarm,
       }
     default:
       return state

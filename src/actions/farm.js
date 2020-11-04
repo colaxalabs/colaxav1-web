@@ -25,36 +25,34 @@ export const confirming = status => ({
   status,
 })
 
-export const tokenize = (name, size, lon, lat, file, soil, wallet) => async dispatch => {
+export const tokenize = (name, size, lon, lat, file, soil, message) => async dispatch => {
   // Init contracts
   const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
   // Upload file to IPFS
   const { cid } = await ipfs.add(file)
   const fileHash = cid.string
   const token = randInt(999, 999999999)
-const status = {}
+  const status = {}
   const accounts = await window.web3.eth.getAccounts()
-  console.log(accounts)
   registryContract.methods.tokenizeLand(name, size, lon, lat, fileHash, soil, token).send({ from: accounts[0] })
     .on('transactionHash', (hash) => {
-      console.log(hash)
-      status.formSubmitting = false
-            dispatch(submitting({ ...status }))
-            status.confirmingFarm = true
-            dispatch(confirming({ ...status }))
+      message.info('Confirming transaction...')
+      status.confirmingFarm = true
+      dispatch(confirming({ ...status }))
     })
     .on('confirmation', (confirmationNumber, receipt) => {
-if (confirmationNumber === 1) {
-              status.confirmingFarm = false
-              dispatch(confirming({ ...status }))
-}
-      console.log(receipt)
+      if (confirmationNumber === 1) {
+        status.confirmingFarm = false
+        dispatch(confirming({ ...status }))
+        message.success('Registration was successful!')
+        console.log(receipt)
+      }
     })
   .on('error', error => {
     status.formSubmitting = false
-            dispatch(submitting({ ...status }))
-            window.alert(`Error: ${error.message}`)
-            console.log(error)
+    dispatch(submitting({ ...status }))
+    window.alert(`Error: ${error.message}`)
+    console.log(error)
   })
 }
 

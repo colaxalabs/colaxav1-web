@@ -143,7 +143,7 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
       } else {
         for (let i = 1; i <= Number(user.lands); i++) {
           try {
-            user.userFarms[i] = await registryContract.methods.queryUserTokenizedFarm(i).call()
+            user.userFarms[i] = await registryContract.methods.queryUserTokenizedFarm(i).call({ from: wallet[0] })
           } catch(err) {
             console.log(err)
           }
@@ -238,7 +238,7 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
                   ) : (
                     userData.userFarms.map(userFarm => (
                       <Col key={userFarm.tokenId} xs={24} xl={8} className='column_con'>
-                        <Farm farm={userFarm} imageHash={userFarm.imageHash}/>
+                        <Farm farm={userFarm} img={userFarm.imageHash}/>
                       </Col>
                     ))
                   )}

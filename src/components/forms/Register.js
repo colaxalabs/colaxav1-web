@@ -6,6 +6,7 @@ import {
   Input,
   Button,
   Typography,
+  message,
 } from 'antd'
 import Validator from 'validator'
 import { connect } from 'react-redux'
@@ -19,7 +20,7 @@ import { store } from '../../store'
 const { Option } = Select
 const { Text } = Typography
 
-function Register({ wallet, farmConfirming, submittingForm, lon, lat, tokenize }) {
+function Register({ wallet, confirmingFarm, submittingForm, lon, lat, tokenize }) {
   const [form] = Form.useForm()
   const [upload, setUpload] = useState()
 
@@ -77,8 +78,15 @@ function Register({ wallet, farmConfirming, submittingForm, lon, lat, tokenize }
         const status = {}
         status.formSubmitting = true
         store.dispatch(submitting({ ...status }))
-        tokenize(name, farmSize, lon, lat, file, soil, wallet)
+        tokenize(name, farmSize, lon, lat, file, soil, message)
+        status.formSubmitting = false
+        store.dispatch(submitting({ ...status }))
         form.resetFields()
+      }}
+      onFinishFailed={() => {
+        const status = {}
+        status.formSubmitting = false
+        store.dispatch(submitting({ ...status }))
       }}
       initialValues={{
         name: '',
@@ -181,9 +189,10 @@ function Register({ wallet, farmConfirming, submittingForm, lon, lat, tokenize }
         <Button
           type='primary'
           loading={submittingForm}
+          disabled={submittingForm}
           htmlType='submit'
         >
-          {submittingForm ? 'Submitting...' : farmConfirming ? 'Confirming...' : 'Register'}
+          {submittingForm ? 'Submitting...' : confirmingFarm ? 'Confirming...' : 'Register'}
         </Button>
       </Form.Item>
     </Form>
@@ -193,8 +202,8 @@ function Register({ wallet, farmConfirming, submittingForm, lon, lat, tokenize }
 Register.propTypes = {
   lon: PropTypes.string,
   lat: PropTypes.string,
-  submitting: PropTypes.bool,
-  confirming: PropTypes.bool,
+  submittingForm: PropTypes.bool,
+  confirmingFarm: PropTypes.bool,
   wallet: PropTypes.object,
   tokenize: PropTypes.func,
 }
@@ -204,7 +213,7 @@ function mapStateToProp(state) {
     lon: state.wallet.longitude,
     lat: state.wallet.latitude,
     submittingForm: state.loading.formSubmitting,
-    farmConfirming: state.loading.confirmingFarm,
+    confirmingFarm: state.loading.confirmingFarm,
     wallet: state.wallet,
   }
 }
