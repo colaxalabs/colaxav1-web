@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import Web3 from 'web3'
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
@@ -58,6 +58,7 @@ const loadingInfo = {
 
 function Farmpage({ wallet, farm, usdRate, isLoading }) {
   const { id } = useParams()
+  const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
@@ -83,6 +84,7 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
         farm.soil = _farm.soil
         farm.season = _farm.season
         farm.owner = _farm.owner
+        setIsOwner(String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase())
         farm.totalBookings = await seasonContract.methods.totalFarmBookings(farm.tokenId).call()
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(farm.tokenId).call()
         const tx = await seasonContract.methods.farmTransactions(farm.tokenId).call()
@@ -140,7 +142,7 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
 
     return () => clearInterval(interval)
 
-  }, [id])
+  }, [id, wallet.address])
 
   return (
     <>
@@ -205,15 +207,20 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
                 ]}
               >
                 <Card.Meta
-                  description={<Tag color='#7546C9'>{farm.season}</Tag>}
+                  description={<Tag color={farm.season === 'Dormant' ? '#f50' :
+          farm.season === 'Preparation' ? '#b22989' :
+          farm.season === 'Planting' ? '#108ee9' :
+          farm.season === 'Crop Growth' ? '#87d068' :
+          farm.season === 'Harvesting' ? '#0aa679' :
+        farm.season === 'Booking' ? '#7546C9' : null}>{farm.season}</Tag>}
                 />
               </Card>
-              {farm.season === 'Dormant' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Opening season...')}>Open Season</Button> :
-                  farm.season === 'Preparation' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming prep...')}>Confirm Preparation</Button> :
-                  farm.season === 'Planting' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming planting...')}>Confirm Plant</Button> :
-                  farm.season === 'Crop Growth' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming growth...')}>Confirm Growth</Button> :
-                  farm.season === 'Harvesting' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming harvest...')}>Confirm Harvest</Button> :
-                  farm.season === 'Booking' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Closing season...')}>Close Season</Button> : null}
+              {farm.season === 'Dormant' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Opening season...')}>Open Season</Button> :
+                  farm.season === 'Preparation' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming prep...')}>Confirm Preparation</Button> :
+                  farm.season === 'Planting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming planting...')}>Confirm Plant</Button> :
+                  farm.season === 'Crop Growth' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming growth...')}>Confirm Growth</Button> :
+                  farm.season === 'Harvesting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming harvest...')}>Confirm Harvest</Button> :
+                  farm.season === 'Booking' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Closing season...')}>Close Season</Button> : null}
             </>
           )}
         </Col>
@@ -236,7 +243,12 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
                 </Descriptions.Item>
                 <Descriptions.Item label='Completed Season'>{farm.completedSeasons}</Descriptions.Item>
                 <Descriptions.Item label='State'>
-                  <Tag color='#7546C9'>{farm.season}</Tag>
+                  <Tag color={farm.season === 'Dormant' ? '#f50' :
+          farm.season === 'Preparation' ? '#b22989' :
+          farm.season === 'Planting' ? '#108ee9' :
+          farm.season === 'Crop Growth' ? '#87d068' :
+          farm.season === 'Harvesting' ? '#0aa679' :
+        farm.season === 'Booking' ? '#7546C9' : null}>{farm.season}</Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label='#tokenId'>{farm.tokenId}</Descriptions.Item>
               </Descriptions>

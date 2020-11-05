@@ -3,6 +3,7 @@ import {
   WALLET_FOUND,
   WALLET_DISCONNECT,
   LOCATION_ACCESS,
+  WALLET_CHANGE,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -33,6 +34,11 @@ export function wallet(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         ...action.coords,
+      }
+    case WALLET_CHANGE:
+      return {
+        ...state,
+        address: action.wallet.address,
       }
     default:
       return state

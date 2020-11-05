@@ -9,6 +9,7 @@ import {
   connectWallet,
   disconnectWallet,
   connectLocation,
+  walletChange,
 } from './wallet'
 import {
   loadDashboard,
@@ -47,5 +48,6 @@ export {
   connectLocation,
   submitting,
   confirming,
+  walletChange,
 }
 

@@ -32,7 +32,12 @@ function Farm({ farm, img }) {
         />
       ]}
     >
-      <Card.Meta title={'#' + farm.tokenId} description={<Tag color='#7546C9'>{farm.season}</Tag>} />
+      <Card.Meta title={'#' + farm.tokenId} description={<Tag color={farm.season === 'Dormant' ? '#f50' :
+          farm.season === 'Preparation' ? '#b22989' :
+          farm.season === 'Planting' ? '#108ee9' :
+          farm.season === 'Crop Growth' ? '#87d068' :
+          farm.season === 'Harvesting' ? '#0aa679' :
+        farm.season === 'Booking' ? '#7546C9' : null}>{farm.season}</Tag>} />
     </Card>
   )
 }

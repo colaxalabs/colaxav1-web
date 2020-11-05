@@ -16,6 +16,7 @@ import {
 import {
   networkFound,
   disconnectWallet,
+  walletChange,
 } from './actions'
 
 // Utils
@@ -39,6 +40,11 @@ function App() {
       const networkInfo = {}
       networkInfo.currentNetwork = Web3.utils.isHex(_chainId) ? Web3.utils.hexToNumber(_chainId) : _chainId
       store.dispatch(networkFound({ ...networkInfo }))
+    })
+    window.ethereum.on('accountsChanged', async(accounts) => {
+      const wallet = {}
+      wallet.address = accounts
+      store.dispatch(walletChange({ ...wallet }))
     })
     window.ethereum.on('disconnect', (error) => {
       store.dispatch(disconnectWallet())

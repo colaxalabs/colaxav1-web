@@ -5,10 +5,16 @@ import {
   CONNECT_WALLET,
   WALLET_DISCONNECT,
   LOCATION_ACCESS,
+  WALLET_CHANGE,
 } from '../types'
 
 export const walletFound = wallet => ({
   type: WALLET_FOUND,
+  wallet,
+})
+
+export const walletChange = wallet => ({
+  type: WALLET_CHANGE,
   wallet,
 })
 
