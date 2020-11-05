@@ -74,7 +74,7 @@ function Register({ wallet, confirmingFarm, submittingForm, lon, lat, tokenize }
       onFinish={(values) => {
         values.file = upload
         const { name, size, unit, soil, file } = values
-        const farmSize = size + unit
+        const farmSize = size + ' ' + unit
         const status = {}
         status.formSubmitting = true
         store.dispatch(submitting({ ...status }))

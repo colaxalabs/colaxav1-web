@@ -46,6 +46,16 @@ import { seasonColumns, bookingColumns } from '../../utils'
 const { Text } = Typography
 const { TabPane } = Tabs
 
+const loadingInfo = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: '#fff',
+  margin: '0 12px 20px 0',
+  textAlign: 'center',
+  borderRadius: 4,
+}
+
 function Farmpage({ wallet, farm, usdRate, isLoading }) {
   const { id } = useParams()
 
@@ -176,7 +186,9 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
       <Row justify='center' align='center'>
         <Col xs={24} xl={12} className='column_con'>
           {isLoading ? (
-            <Loading />
+            <div style={{ ...loadingInfo, height: 180, width: 320}}>
+              <LoadingOutlined stype={{ marginTop: '50px' }} />
+            </div>
           ) : (
             <>
               <Card
@@ -196,15 +208,23 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
                   description={<Tag color='#7546C9'>{farm.season}</Tag>}
                 />
               </Card>
+              {farm.season === 'Dormant' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Opening season...')}>Open Season</Button> :
+                  farm.season === 'Preparation' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming prep...')}>Confirm Preparation</Button> :
+                  farm.season === 'Planting' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming planting...')}>Confirm Plant</Button> :
+                  farm.season === 'Crop Growth' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming growth...')}>Confirm Growth</Button> :
+                  farm.season === 'Harvesting' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming harvest...')}>Confirm Harvest</Button> :
+                  farm.season === 'Booking' ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Closing season...')}>Close Season</Button> : null}
             </>
           )}
         </Col>
         <Col xs={24} xl={12} className='column_con'>
           {isLoading ? (
-            <Loading />
+            <div style={{ ...loadingInfo, height: 180, width: '100%' }}>
+              <LoadingOutlined stype={{ marginTop: '50px' }} />
+            </div>
           ) : (
             <>
-              <Descriptions title={farm.name} layout='vertical' bordered>
+              <Descriptions title={farm.name} size='middle' layout='vertical' bordered>
                 <Descriptions.Item label='Farm Size'>{farm.size}</Descriptions.Item>
                 <Descriptions.Item label='Location'>{farm.location}</Descriptions.Item>
                 <Descriptions.Item label='Soil'>{farm.soil}</Descriptions.Item>
@@ -233,10 +253,10 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
           <Col xs={24} xl={24} className='column_con'>
             <Tabs>
               <TabPane tab='Seasons' key='1'>
-                <Table dataSource={farm.seasons} columns={seasonColumns} />
+                <Table tableLayout='auto' scroll={{ x: true }} dataSource={farm.seasons} columns={seasonColumns} />
               </TabPane>
               <TabPane tab='Bookings' key='2'>
-                <Table dataSource={farm.farmBookings} columns={bookingColumns} />
+                <Table tableLayout='auto' scroll={{ x: true }} dataSource={farm.farmBookings} columns={bookingColumns} />
               </TabPane>
             </Tabs>
           </Col>

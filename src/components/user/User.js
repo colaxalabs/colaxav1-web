@@ -247,7 +247,7 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
               <TabPane tab='Bookings' key='2'>
                 <Row justify='center' align='center'>
                   <Col xs={24} xl={24} className='column_con'>
-                    <Table dataSource={userData.userBookings} columns={columns} />
+                    <Table tableLayout='auto' scroll={{ x: true }} dataSource={userData.userBookings} columns={columns} />
                   </Col>
                 </Row>
               </TabPane>
