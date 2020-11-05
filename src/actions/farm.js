@@ -2,12 +2,15 @@ import {
   LOAD_FARM_DATA,
   FORM_SUBMITTING,
   CONFIRMING_FARM,
+  OPEN_SEASON,
+  OPENING_SEASON,
 } from '../types'
 import ipfs from '../ipfs'
 import { randInt, initContract } from '../utils'
 
 // Contracts
 import Registry from '../abis/FRMRegistry.json'
+import Season from '../abis/Season.json'
 import Contracts from '../contracts.json'
 
 export const loadFarm = farm => ({
@@ -25,6 +28,16 @@ export const confirming = status => ({
   status,
 })
 
+const seasonOpened = farm => ({
+  type: OPEN_SEASON,
+  farm,
+})
+
+const openingSeason = status => ({
+  type: OPENING_SEASON,
+  status,
+})
+
 export const tokenize = (name, size, lon, lat, file, soil, message) => async dispatch => {
   // Init contracts
   const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
@@ -34,6 +47,7 @@ export const tokenize = (name, size, lon, lat, file, soil, message) => async dis
   const token = randInt(999, 999999999)
   const status = {}
   const accounts = await window.web3.eth.getAccounts()
+  // Send transaction
   registryContract.methods.tokenizeLand(name, size, lon, lat, fileHash, soil, token).send({ from: accounts[0] })
     .on('transactionHash', (hash) => {
       message.info('Confirming transaction...')
@@ -54,5 +68,35 @@ export const tokenize = (name, size, lon, lat, file, soil, message) => async dis
     window.alert(`Error: ${error.message}`)
     console.log(error)
   })
+}
+
+export const openSeason = (tokenId, message) => async dispatch => {
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  // Send transaction
+  const status = {}
+  status.openingSeason = true
+  dispatch(openingSeason({ ...status }))
+  seasonContract.methods.openSeason(tokenId).send({ from: accounts[0] })
+    .on('transactionHash', () => {
+      message.info('Confirming transaction...')
+    })
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
+        status.openingSeason = false
+        dispatch(openingSeason({ ...status }))
+        const farm = {}
+        farm.season = await seasonContract.methods.getSeason(tokenId).call()
+        dispatch(seasonOpened({ ...farm }))
+        message.success('Season opened. Start seasonal activities!')
+      }
+    })
+    .on('error', error => {
+      window.alert(`Error: ${error.message}`)
+      status.openingSeason = false
+      dispatch(openingSeason({ ...status }))
+      console.log(error)
+    })
 }
 

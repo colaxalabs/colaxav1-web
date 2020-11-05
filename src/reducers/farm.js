@@ -1,5 +1,6 @@
 import {
   LOAD_FARM_DATA,
+  OPEN_SEASON,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -24,6 +25,11 @@ export function farm(state = INITIAL_STATE, action = {}) {
     case LOAD_FARM_DATA:
       return {
         ...action.farm,
+      }
+    case OPEN_SEASON:
+      return {
+        ...state,
+        season: action.farm.season,
       }
     default:
       return state

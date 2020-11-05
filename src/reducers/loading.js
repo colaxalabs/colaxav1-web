@@ -4,6 +4,7 @@ import {
   FARM_DASH_LOADING,
   FORM_SUBMITTING,
   CONFIRMING_FARM,
+  OPENING_SEASON,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -12,6 +13,7 @@ const INITIAL_STATE = {
   farmDashLoading: false,
   formSubmitting: false,
   confirmingFarm: false,
+  openingSeason: false,
 }
 
 export function loading(state = INITIAL_STATE, action = {}) {
@@ -40,6 +42,11 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         confirmingFarm: action.status.confirmingFarm,
+      }
+    case OPENING_SEASON:
+      return {
+        ...state,
+        openingSeason: action.status.openingSeason,
       }
     default:
       return state

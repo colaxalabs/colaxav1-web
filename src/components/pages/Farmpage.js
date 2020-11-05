@@ -16,6 +16,7 @@ import {
   Space,
   Empty,
   Button,
+  message,
 } from 'antd'
 import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
@@ -29,6 +30,7 @@ import {
   isFarmDashLoading,
   loadCurrency,
   loadFarm,
+  openSeason,
 } from '../../actions'
 
 // Redux store
@@ -56,7 +58,7 @@ const loadingInfo = {
   borderRadius: 4,
 }
 
-function Farmpage({ wallet, farm, usdRate, isLoading }) {
+function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
 
@@ -215,7 +217,7 @@ function Farmpage({ wallet, farm, usdRate, isLoading }) {
         farm.season === 'Booking' ? '#7546C9' : null}>{farm.season}</Tag>}
                 />
               </Card>
-              {farm.season === 'Dormant' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Opening season...')}>Open Season</Button> :
+              {farm.season === 'Dormant' && isOwner ? <Button disabled={opening} loading={opening} style={{ width: 320, marginTop: 8 }} onClick={() => openSeason(id, message)}>Open Season</Button> :
                   farm.season === 'Preparation' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming prep...')}>Confirm Preparation</Button> :
                   farm.season === 'Planting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming planting...')}>Confirm Plant</Button> :
                   farm.season === 'Crop Growth' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming growth...')}>Confirm Growth</Button> :
@@ -286,6 +288,8 @@ Farmpage.propTypes = {
   isLoading: PropTypes.bool,
   farm: PropTypes.object,
   wallet: PropTypes.object,
+  openSeason: PropTypes.func,
+  opening: PropTypes.bool,
 }
 
 function mapStateToProps(state) {
@@ -294,8 +298,9 @@ function mapStateToProps(state) {
     usdRate: Number(state.currency.ethusd),
     farm: state.farm,
     wallet: state.wallet,
+    opening: state.loading.openingSeason,
   }
 }
 
-export default connect(mapStateToProps)(Farmpage)
+export default connect(mapStateToProps, { openSeason })(Farmpage)
 
