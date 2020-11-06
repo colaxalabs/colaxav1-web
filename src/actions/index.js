@@ -23,7 +23,6 @@ import {
   loadFarm,
   tokenize,
   submitting,
-  confirming,
   openSeason,
 } from './farm'
 
@@ -48,7 +47,6 @@ export {
   tokenize,
   connectLocation,
   submitting,
-  confirming,
   walletChange,
   openSeason,
 }

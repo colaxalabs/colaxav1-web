@@ -1,7 +1,6 @@
 import {
   LOAD_FARM_DATA,
   FORM_SUBMITTING,
-  CONFIRMING_FARM,
   OPEN_SEASON,
   OPENING_SEASON,
 } from '../types'
@@ -20,11 +19,6 @@ export const loadFarm = farm => ({
 
 export const submitting = status => ({
   type: FORM_SUBMITTING,
-  status,
-})
-
-export const confirming = status => ({
-  type: CONFIRMING_FARM,
   status,
 })
 
@@ -50,24 +44,22 @@ export const tokenize = (name, size, lon, lat, file, soil, message) => async dis
   // Send transaction
   registryContract.methods.tokenizeLand(name, size, lon, lat, fileHash, soil, token).send({ from: accounts[0] })
     .on('transactionHash', (hash) => {
-      message.info('Confirming transaction...')
-      status.confirmingFarm = true
-      dispatch(confirming({ ...status }))
+      message.info('Confirming transaction...', 5)
     })
     .on('confirmation', (confirmationNumber, receipt) => {
       if (confirmationNumber === 1) {
-        status.confirmingFarm = false
-        dispatch(confirming({ ...status }))
-        message.success('Registration was successful!')
+        status.formSubmitting = false
+        dispatch(submitting({ ...status }))
+        message.success('Registration was successful!', 5)
         console.log(receipt)
       }
     })
-  .on('error', error => {
-    status.formSubmitting = false
-    dispatch(submitting({ ...status }))
-    window.alert(`Error: ${error.message}`)
-    console.log(error)
-  })
+    .on('error', error => {
+      status.formSubmitting = false
+      dispatch(submitting({ ...status }))
+      message.error(`Error: ${error.message}`, 10)
+      console.log(error)
+    })
 }
 
 export const openSeason = (tokenId, message) => async dispatch => {
@@ -80,7 +72,7 @@ export const openSeason = (tokenId, message) => async dispatch => {
   dispatch(openingSeason({ ...status }))
   seasonContract.methods.openSeason(tokenId).send({ from: accounts[0] })
     .on('transactionHash', () => {
-      message.info('Confirming transaction...')
+      message.info('Confirming transaction...', 5)
     })
     .on('confirmation', async(confirmationNumber, receipt) => {
       if (confirmationNumber === 1) {
@@ -89,13 +81,13 @@ export const openSeason = (tokenId, message) => async dispatch => {
         const farm = {}
         farm.season = await seasonContract.methods.getSeason(tokenId).call()
         dispatch(seasonOpened({ ...farm }))
-        message.success('Season opened. Start seasonal activities!')
+        message.success('Season opened. Start seasonal activities!', 5)
       }
     })
     .on('error', error => {
-      window.alert(`Error: ${error.message}`)
       status.openingSeason = false
       dispatch(openingSeason({ ...status }))
+      message.error(`Error: ${error.message}`, 10)
       console.log(error)
     })
 }

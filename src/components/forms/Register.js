@@ -20,7 +20,7 @@ import { store } from '../../store'
 const { Option } = Select
 const { Text } = Typography
 
-function Register({ wallet, confirmingFarm, submittingForm, lon, lat, tokenize }) {
+function Register({ wallet, submittingForm, lon, lat, tokenize }) {
   const [form] = Form.useForm()
   const [upload, setUpload] = useState()
 
@@ -79,8 +79,6 @@ function Register({ wallet, confirmingFarm, submittingForm, lon, lat, tokenize }
         status.formSubmitting = true
         store.dispatch(submitting({ ...status }))
         tokenize(name, farmSize, lon, lat, file, soil, message)
-        status.formSubmitting = false
-        store.dispatch(submitting({ ...status }))
         form.resetFields()
       }}
       onFinishFailed={() => {
@@ -192,7 +190,7 @@ function Register({ wallet, confirmingFarm, submittingForm, lon, lat, tokenize }
           disabled={submittingForm}
           htmlType='submit'
         >
-          {submittingForm ? 'Submitting...' : confirmingFarm ? 'Confirming...' : 'Register'}
+          {submittingForm ? 'Submitting...' :'Register'}
         </Button>
       </Form.Item>
     </Form>
@@ -203,7 +201,6 @@ Register.propTypes = {
   lon: PropTypes.string,
   lat: PropTypes.string,
   submittingForm: PropTypes.bool,
-  confirmingFarm: PropTypes.bool,
   wallet: PropTypes.object,
   tokenize: PropTypes.func,
 }
@@ -213,7 +210,6 @@ function mapStateToProp(state) {
     lon: state.wallet.longitude,
     lat: state.wallet.latitude,
     submittingForm: state.loading.formSubmitting,
-    confirmingFarm: state.loading.confirmingFarm,
     wallet: state.wallet,
   }
 }

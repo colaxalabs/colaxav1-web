@@ -4,6 +4,7 @@ import Web3 from 'web3'
 import {
   networkFound,
   walletFound,
+  disconnectWallet,
 } from '../actions'
 
 // Redux store
@@ -16,6 +17,14 @@ async function loadWeb3() {
   const walletInfo = {}
   if (isMetamaskInstalled) {
     window.web3 = new Web3(window.ethereum)
+    const isMetamaskUnlocked = await window.ethereum._metamask.isUnlocked()
+    if (!isMetamaskUnlocked) {
+      networkInfo.currentNetwork = await window.web3.eth.net.getId()
+      walletInfo.isMetamask = window.web3.currentProvider.isMetaMask === undefined ? false : window.web3.currentProvider.isMetaMask
+      store.dispatch(networkFound({ ...networkInfo }))
+      store.dispatch(walletFound({ ...walletInfo }))
+      store.dispatch(disconnectWallet())
+    }
     networkInfo.currentNetwork = await window.web3.eth.net.getId()
     walletInfo.isMetamask = window.web3.currentProvider.isMetaMask === undefined ? false : window.web3.currentProvider.isMetaMask
     store.dispatch(networkFound({ ...networkInfo }))

@@ -28,6 +28,8 @@ export function wallet(state = INITIAL_STATE, action = {}) {
       }
     case WALLET_DISCONNECT:
       return {
+        ...state,
+        address: [],
         loaded: false,
       }
     case LOCATION_ACCESS:
