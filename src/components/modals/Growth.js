@@ -55,17 +55,36 @@ function Growth({ visible, onCreate, onCancel }) {
           {isChecked ? (
             <>
             <Form.Item
+              name='name'
+              label='Pest and Diseases'
+              extra={<Text type='secondary'>Name of the pest or disease</Text>}
+              rules={[
+                {
+                  validator: (rule, value) => {
+                    if (isChecked) {
+                      if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
+                        return Promise.resolve()
+                      } else {
+                        return Promise.reject('Invalid pest or disease name')
+                      }
+                    }
+                  }
+                }
+              ]}
+            <Form.Item
               name='pesticideUsed'
               label='Pesticide'
               extra={<Text type='secondary'>Pesticide used during the attack?</Text>}
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
-                      return Promise.resolve()
-                    } else {
-                      return Promise.reject('Invalid pesticide')
-                    }
+                    if (isChecked) {
+                      if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
+                        return Promise.resolve()
+                      } else {
+                        return Promise.reject('Invalid pesticide')
+                      }
+                    } 
                   }
                 }
               ]}
@@ -79,11 +98,13 @@ function Growth({ visible, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
-                      return Promise.resolve()
-                    } else {
-                      return Promise.reject('Invalid pesticide supplier')
-                    }
+                    if (isChecked) {
+                      if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
+                        return Promise.resolve()
+                      } else {
+                        return Promise.reject('Invalid pesticide supplier')
+                      }
+                    } 
                   }
                 }
               ]}
