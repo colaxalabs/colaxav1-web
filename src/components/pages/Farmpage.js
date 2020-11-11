@@ -28,6 +28,8 @@ import {
   Preparation,
   Planting,
   Growth,
+  Harvest,
+  Receivership,
 } from '../modals'
 
 // Redux actions
@@ -69,6 +71,8 @@ function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
   const [openPreparation, setOpenPreparation] = useState(false)
   const [openPlanting, setOpenPlanting] = useState(false)
   const [openGrowth, setOpenGrowth] = useState(false)
+  const [openHarvest, setOpenHarvest] = useState(false)
+  const [openConfirmation, setOpenConfirmation] = useState(false)
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
@@ -233,14 +237,16 @@ function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
               {farm.season === 'Dormant' && isOwner ? <Button disabled={opening} loading={opening} style={{ width: 320, marginTop: 8 }} onClick={() => openSeason(id, message)}>Open Season</Button> :
                   farm.season === 'Preparation' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPreparation(true)}>Confirm Preparation</Button> :
                   farm.season === 'Planting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPlanting(true)}>Confirm Plant</Button> :
-                  farm.season === 'Crop Growth' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming growth...')}>Confirm Growth</Button> :
-                  farm.season === 'Harvesting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Confirming harvest...')}>Confirm Harvest</Button> :
-                  farm.season === 'Booking' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => console.log('Closing season...')}>Close Season</Button> : null}
+                  farm.season === 'Crop Growth' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenGrowth(true)}>Confirm Growth</Button> :
+                  farm.season === 'Harvesting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenHarvest(true)}>Confirm Harvest</Button> :
+                  farm.season === 'Booking' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenConfirmation(true)}>Close Season</Button> : null}
             </>
           )}
           <Preparation visible={openPreparation} onCreate={onCreate} onCancel={() => setOpenPreparation(false)} />
           <Planting visible={openPlanting} onCreate={onCreate} onCancel={() => setOpenPlanting(false)} />
           <Growth visible={openGrowth} onCreate={onCreate} onCancel={() => setOpenGrowth(false)} />
+          <Harvest visible={openHarvest} onCreate={onCreate} onCancel={() => setOpenHarvest(false)} />
+          <Receivership visible={openConfirmation} onCreate={onCreate} onCancel={() => setOpenConfirmation(false)} />
         </Col>
         <Col xs={24} xl={12} className='column_con'>
           {isLoading ? (

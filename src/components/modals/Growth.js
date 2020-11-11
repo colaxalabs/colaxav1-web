@@ -71,6 +71,9 @@ function Growth({ visible, onCreate, onCancel }) {
                   }
                 }
               ]}
+            >
+              <Input type='text' />
+            </Form.Item>
             <Form.Item
               name='pesticideUsed'
               label='Pesticide'
