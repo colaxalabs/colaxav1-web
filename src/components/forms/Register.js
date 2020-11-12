@@ -190,7 +190,7 @@ function Register({ wallet, submittingForm, lon, lat, tokenize }) {
           disabled={submittingForm}
           htmlType='submit'
         >
-          {submittingForm ? 'Submitting...' :'Register'}
+          Register
         </Button>
       </Form.Item>
     </Form>
