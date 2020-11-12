@@ -49,8 +49,12 @@ import Season from '../../abis/Season.json'
 import Contracts from '../../contracts.json'
 
 // Utils
-import { initContract } from '../../utils'
-import { seasonColumns, bookingColumns } from '../../utils'
+import {
+  initContract,
+  sanitize,
+  seasonColumns,
+  bookingColumns,
+} from '../../utils'
 
 const { Text } = Typography
 const { TabPane } = Tabs
@@ -256,7 +260,7 @@ function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
           ) : (
             <>
               <Descriptions title={farm.name} size='middle' layout='vertical' bordered>
-                <Descriptions.Item label='Farm Size'>{farm.size}</Descriptions.Item>
+                <Descriptions.Item label='Farm Size'>{sanitize(farm.size)}</Descriptions.Item>
                 <Descriptions.Item label='Location'>{farm.location}</Descriptions.Item>
                 <Descriptions.Item label='Soil'>{farm.soil}</Descriptions.Item>
                 <Descriptions.Item label='Owner'>

@@ -1,5 +1,13 @@
+import PropTypes from 'prop-types'
 import React from 'react'
-import { Menu, Layout } from 'antd'
+import {
+  Space,
+  Avatar,
+  Image,
+  Menu,
+  Layout,
+  Typography,
+} from 'antd'
 import {
   WalletOutlined,
   CalendarOutlined,
@@ -8,11 +16,16 @@ import {
   AlertOutlined,
   RocketOutlined,
   Loading3QuartersOutlined,
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
 } from '@ant-design/icons'
+import { connect } from 'react-redux'
+import makeBlockie from 'ethereum-blockies-base64'
 
 import { Media } from './Media'
 
 const { Header, Sider, Content } = Layout
+const { Text } = Typography
 
 class DesktopContainer extends React.Component {
 
@@ -26,15 +39,36 @@ class DesktopContainer extends React.Component {
 
   render() {
 
-    const { children } = this.props
+    const { children, walletLoaded, wallet } = this.props
 
     return (
       <>
         <Media greaterThan='mobile'>
           <Layout style={{ minHeight: '100vh' }}>
-              <Sider breakpoint='sm' collapsedWidth='80' onCollapse={this.toggle} collapsible collapsed={this.state.isCollapsed}>
-                <div className="header">Mkulima</div>
+            <Sider
+              style={{ overflow: 'auto', height: '100vh', position: 'sticky', top: 0, left: 0 }}
+              breakpoint='sm'
+              collapsedWidth='80'
+              onCollapse={this.toggle}
+              collapsible
+              collapsed={this.state.isCollapsed}
+              trigger={null}
+            >
                 <Menu theme="dark" mode="inline">
+                  <Menu.Item
+                    disabled
+                    icon={
+                      <Image
+                        width={40}
+                        height={30}
+                        src='https://gateway.pinata.cloud/ipfs/QmaFbmHGWjUXbfyfTNPqhG1ajEyucszxDBXvzP1E9kbUCp'
+                        style={{ paddingRight: '10px' }}
+                      />
+                    }
+                    style={{ fontSize: '32px', marginBottom: '30px', fontWeight: 'bold' }}
+                  >
+                    Colaxa
+                  </Menu.Item>
                   <Menu.Item icon={<QuestionOutlined />}>
                     Dormant
                   </Menu.Item>
@@ -61,7 +95,25 @@ class DesktopContainer extends React.Component {
                 </Menu>
               </Sider>
               <Layout className="site-layout">
-                <Header className='site-layout-background' style={{ padding: 0 }} />
+                <Header className='site-layout-background' style={{ padding: 0 }}>
+                  {React.createElement(this.state.collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                    className: 'trigger',
+                    onClick: this.toggle,
+                  })}
+                  {walletLoaded ? (
+                    <Space className='logo'>
+                      <div>
+                        <Space>
+                          <Avatar
+                            src={makeBlockie(String(wallet.address[0]))}
+                            size={25}
+                          />
+                          <Text ellipsis className='addr' copyable>{wallet.address[0]}</Text>
+                        </Space>
+                      </div>
+                    </Space>
+                  ) : null}
+                </Header>
                 <Content
                   style={{
                     margin: '24px 16px 0',
@@ -77,5 +129,18 @@ class DesktopContainer extends React.Component {
   }
 }
 
-export default DesktopContainer
+DesktopContainer.propTypes = {
+  children: PropTypes.object,
+  walletLoaded: PropTypes.bool,
+  wallet: PropTypes.object,
+}
+
+function mapStateToProps(state) {
+  return {
+    walletLoaded: state.wallet.loaded,
+    wallet: state.wallet,
+  }
+}
+
+export default connect(mapStateToProps)(DesktopContainer)
 
