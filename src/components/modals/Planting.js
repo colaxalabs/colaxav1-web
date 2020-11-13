@@ -7,13 +7,14 @@ import {
   Checkbox,
   Select,
   Typography,
+  message,
 } from 'antd'
 import Validator from 'validator'
 
 const { Option } = Select
 const { Text } = Typography
 
-function Planting({ visible, onCreate, onCancel }) {
+function Planting({ tokenId, visible, onCreate, onCancel }) {
   const [form] = Form.useForm()
   const [isChecked, setIsChecked] = useState(false)
   const [type, setType] = useState('')
@@ -36,7 +37,8 @@ function Planting({ visible, onCreate, onCancel }) {
       onOk={() => {
         form.validateFields()
           .then((values) => {
-            console.log(values)
+            onCreate(tokenId, values, message)
+            onCancel()
           })
           .catch((info) => {
             console.log('Validate Failed:', info)
@@ -238,6 +240,7 @@ Planting.propTypes = {
   visible: PropTypes.bool,
   onCreate: PropTypes.func,
   onCancel: PropTypes.func,
+  tokenId: PropTypes.string,
 }
 
 export default Planting

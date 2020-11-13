@@ -7,13 +7,15 @@ import {
   Checkbox,
   Select,
   Typography,
+  message,
 } from 'antd'
+import { connect } from 'react-redux'
 import Validator from 'validator'
 
 const { Option } = Select
 const { Text } = Typography
 
-function Preparation({ visible, onCreate, onCancel }) {
+function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparation }) {
   const [form] = Form.useForm()
   const [isChecked, setIsChecked] = useState(false)
   const [type, setType] = useState('')
@@ -31,12 +33,17 @@ function Preparation({ visible, onCreate, onCancel }) {
       visible={visible}
       title='Confirm season preparation'
       okText='Confirm'
+      okButtonProps={{
+        disabled: confirmingPreparation,
+        loading: confirmingPreparation,
+      }}
       cancelText='Close'
       onCancel={onCancel}
       onOk={() => {
         form.validateFields()
           .then((values) => {
-            console.log(values)
+            onCreate(tokenId, values, message)
+            onCancel()
           })
           .catch((info) => {
             console.log('Validate Failed:', info)
@@ -199,7 +206,15 @@ Preparation.propTypes = {
   visible: PropTypes.bool,
   onCreate: PropTypes.func,
   onCancel: PropTypes.func,
+  tokenId: PropTypes.string,
+  confirmingPreparation: PropTypes.bool,
 }
 
-export default Preparation
+function mapStateToProps(state) {
+  return {
+    confirmingPreparation: state.loading.confirmingPreparation,
+  }
+}
+
+export default connect(mapStateToProps)(Preparation)
 

@@ -3,6 +3,14 @@ import {
   FORM_SUBMITTING,
   OPEN_SEASON,
   OPENING_SEASON,
+  CONFIRMING_PREPARATION,
+  CLOSE_PREPARATION,
+  CONFIRMING_PLANTING,
+  CLOSE_PLANTING,
+  CONFIRMING_GROWTH,
+  CLOSE_GROWTH,
+  CONFIRMING_HARVEST,
+  FINISH_HARVEST,
 } from '../types'
 import ipfs from '../ipfs'
 import { randInt, initContract } from '../utils'
@@ -30,6 +38,46 @@ const seasonOpened = farm => ({
 const openingSeason = status => ({
   type: OPENING_SEASON,
   status,
+})
+
+const confirmingPreparation = status => ({
+  type: CONFIRMING_PREPARATION,
+  status,
+})
+
+const closePreparation = farm => ({
+  type: CLOSE_PREPARATION,
+  farm,
+})
+
+const confirmingPlanting = status => ({
+  type: CONFIRMING_PLANTING,
+  status,
+})
+
+const closePlanting = farm => ({
+  type: CLOSE_PLANTING,
+  farm,
+})
+
+const confirmingGrowth = status => ({
+  type: CONFIRMING_GROWTH,
+  status,
+})
+
+const closeGrowth = farm => ({
+  type: CLOSE_GROWTH,
+  farm,
+})
+
+const confirmingHarvest = status => ({
+  type: CONFIRMING_HARVEST,
+  status,
+})
+
+const finishHarvesting = farm => ({
+  type: FINISH_HARVEST,
+  farm,
 })
 
 export const tokenize = (name, size, lon, lat, file, soil, message) => async dispatch => {
@@ -66,7 +114,7 @@ export const openSeason = (tokenId, message) => async dispatch => {
   // Init contracts
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
   const accounts = await window.web3.eth.getAccounts()
-  // Send transaction
+  // Send tx
   const status = {}
   status.openingSeason = true
   dispatch(openingSeason({ ...status }))
@@ -90,5 +138,183 @@ export const openSeason = (tokenId, message) => async dispatch => {
       message.error(`Error: ${error.message}`, 10)
       console.log(error)
     })
+}
+
+export const confirmPreparation = (tokenId, values, message) => async dispatch => {
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  // Send tx
+  const status = {}
+  if (values.fertilizerCheck) {
+    status.confirmingPreparation = true
+    dispatch(confirmingPreparation({ ...status }))
+    const { crop, fertilizerSupplier, fertilizerType, fertilizerUsed } = values
+    const fertilizerName = `${fertilizerType} (${fertilizerUsed})`
+    seasonContract.methods.confirmPreparations(Number(tokenId), crop, fertilizerName, fertilizerSupplier).send({ from: accounts[0] })
+      .on('transactionHash', () => {
+        message.info('Confirming transaction...', 5)
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const farm = {}
+          farm.season = await seasonContract.methods.getSeason(tokenId).call()
+          dispatch(closePreparation({ ...farm }))
+          status.confirmingPreparation = false
+          dispatch(confirmingPreparation({ ...status }))
+          message.success('Transaction confirmed!', 5)
+        }
+      })
+      .on('error', err => {
+        status.confirmingPreparation = false
+        dispatch(confirmingPreparation({ ...status }))
+        message.error(`Error: ${err.message}`, 10)
+        console.log(err)
+      })
+  } else {
+    status.confirmingPreparation = true
+    dispatch(confirmingPreparation({ ...status }))
+    const { crop } = values
+    seasonContract.methods.confirmPreparations(tokenId, crop, "", "").send({ from: accounts[0] })
+      .on('transactionHash', () => {
+        message.info('Confirming transaction...', 5)
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const farm = {}
+          farm.season = await seasonContract.methods.getSeason(tokenId).call()
+          dispatch(closePreparation({ ...farm }))
+          status.confirmingPreparation = false
+          dispatch(confirmingPreparation({ ...status }))
+          message.success('Transaction confirmed!', 5)
+        }
+      })
+      .on('error', err => {
+        status.confirmingPreparation = false
+        dispatch(confirmingPreparation({ ...status }))
+        message.error(`Error: ${err.message}`, 10)
+        console.log(err)
+      })
+  }
+}
+
+export const confirmPlanting = (tokenId, values, message) => async dispatch => {
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  // Send tx
+  const status = {}
+  const { fertilizerCheck } = values
+  if (fertilizerCheck) {
+    const { expectedYield, seedsUsed, seedsSupplier, plantingFertilizer, fertilizerType, fertilizerSupplier } = values
+    const fertilizerName = `${fertilizerType} (${plantingFertilizer})}`
+    status.confirmingPlanting = true
+    dispatch(confirmingPlanting({ ...status }))
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, expectedYield, fertilizerName, fertilizerSupplier).send({ from: accounts[0] })
+      .on('transactionHash', () => {
+        message.info('Confirming transaction...', 5)
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const farm = {}
+          farm.season = await seasonContract.methods.getSeason(tokenId).call()
+          dispatch(closePlanting({ ...farm }))
+          status.confirmingPlanting = false
+          dispatch(confirmingPlanting({ ...status }))
+          message.success('Transaction confirmed!', 5)
+        }
+      })
+      .on('error', err => {
+        status.confirmingPlanting = false
+        dispatch(confirmingPlanting({ ...status }))
+        message.error(`Error: ${err.message}`, 10)
+        console.log(err)
+      })
+  } else {
+    const { expectedYield, seedsUsed, seedsSupplier } = values
+    status.confirmingPlanting = true
+    dispatch(confirmingPlanting({ ...status }))
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, expectedYield, "", "").send({ from: accounts[0] })
+      .on('transactionHash', () => {
+        message.info('Confirming transaction...', 5)
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const farm = {}
+          farm.season = await seasonContract.methods.getSeason(tokenId).call()
+          dispatch(closePlanting({ ...farm }))
+          status.confirmingPlanting = false
+          dispatch(confirmingPlanting({ ...status }))
+          message.success('Transaction confirmed!', 5)
+        }
+      })
+      .on('error', err => {
+        status.confirmingPlanting = false
+        dispatch(confirmingPlanting({ ...status }))
+        message.error(`Error: ${err.message}`, 10)
+        console.log(err)
+      })
+  }
+}
+
+export const confirmGrowth = (tokenId, values, message) => async dispatch => {
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  // Send tx
+  const status = {}
+  const { pesticideCheck } = values
+  if (pesticideCheck) {
+    const { name, pesticideUsed, pesticideSupplier } = values
+    status.confirmingGrowth = true
+    dispatch(confirmingGrowth({ ...status }))
+    seasonContract.methods.confirmGrowth(tokenId, name, pesticideUsed, pesticideSupplier).send({ from: accounts[0] })
+      .on('transactionHash', () => {
+        message.info('Confirming transaction...')
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const farm = {}
+          farm.season = await seasonContract.methods.getSeason(tokenId).call()
+          dispatch(closeGrowth({ ...farm }))
+          status.confirmingGrowth = false
+          dispatch(confirmingGrowth({ ...status }))
+          message.success('Transaction confirmed!')
+        }
+      })
+      .on('error', err => {
+        status.confirmingGrowth = false
+        dispatch(confirmingGrowth({ ...status }))
+        message.error(`Error: ${err.message}`)
+        console.log(err)
+      })
+  } else {
+    status.confirmingGrowth = true
+    dispatch(confirmingGrowth({ ...status }))
+    seasonContract.methods.confirmGrowth(tokenId, "", "", "").send({ from: accounts[0] })
+      .on('transactionHash', () => {
+        message.info('Confirming transaction...')
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const farm = {}
+          farm.season = await seasonContract.methods.getSeason(tokenId).call()
+          dispatch(closeGrowth({ ...farm }))
+          status.confirmingGrowth = false
+          dispatch(confirmingGrowth({ ...status }))
+          message.success('Transaction confirmed!')
+        }
+      })
+      .on('error', err => {
+        status.confirmingGrowth = false
+        dispatch(confirmingGrowth({ ...status }))
+        message.error(`Error: ${err.message}`)
+        console.log(err)
+      })
+  }
+}
+
+export const confirmHarvest = (tokenId, values, message) => async dispatch => {
+  console.log(values)
 }
 

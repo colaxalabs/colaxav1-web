@@ -1,6 +1,10 @@
 import {
   LOAD_FARM_DATA,
   OPEN_SEASON,
+  CLOSE_PREPARATION,
+  CLOSE_PLANTING,
+  CLOSE_GROWTH,
+  FINISH_HARVEST,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -27,6 +31,26 @@ export function farm(state = INITIAL_STATE, action = {}) {
         ...action.farm,
       }
     case OPEN_SEASON:
+      return {
+        ...state,
+        season: action.farm.season,
+      }
+    case CLOSE_PREPARATION:
+      return {
+        ...state,
+        season: action.farm.season,
+      }
+    case CLOSE_PLANTING:
+      return {
+        ...state,
+        season: action.farm.season,
+      }
+    case CLOSE_GROWTH:
+      return {
+        ...state,
+        season: action.farm.season,
+      }
+    case FINISH_HARVEST:
       return {
         ...state,
         season: action.farm.season,

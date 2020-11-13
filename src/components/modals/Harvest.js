@@ -1,31 +1,40 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Form,
   Modal,
   Input,
   Typography,
   Select,
+  message,
+  Tooltip,
 } from 'antd'
 import Validator from 'validator'
+import { connect } from 'react-redux'
 
 const { Text } = Typography
 const { Option } = Select
 
-function Harvest({ visible, onCreate, onCancel }) {
+function Harvest({ tokenId, visible, onCreate, onCancel, confirmingHarvest, ethusd }) {
   const [form] = Form.useForm()
+  const [price, setPrice] = useState(0)
 
   return (
     <Modal
       visible={visible}
       title='Confirm crop growth'
       okText='Confirm'
+      okButtonProps={{
+        disabled: confirmingHarvest,
+        loading: confirmingHarvest,
+      }}
       cancelText='Close'
       onCancel={onCancel}
       onOk={() => {
         form.validateFields()
           .then((values) => {
-            console.log(values)
+            onCreate(tokenId, values, message)
+            onCancel()
           })
           .catch((info) => {
             console.log('Validate Failed:', info)
@@ -82,23 +91,28 @@ function Harvest({ visible, onCreate, onCancel }) {
             <Option value='tonnes'>Tonnes</Option>
           </Select>
         </Form.Item>
-        <Form.Item
-          name='price'
-          label='Price'
-          extra={<Text type='secondary'>What is your the price per 1 unit of your supply(price in Ether. eg 0.0524)</Text>}
-          rules={[
-            {
-              validator: (rule, value) => {
-                if (!Validator.isEmpty(value)) {
-                  return Promise.resolve()
-                } else {
-                  return Promise.reject('Invalid price')
+        <Form.Item label='Price'>
+          <Form.Item
+            name='price'
+            extra={<Text type='secondary'>What is the price per 1 unit of your supply</Text>}
+            noStyle
+            rules={[
+              {
+                validator: (rule, value) => {
+                  if (!Validator.isEmpty(value)) {
+                    return Promise.resolve()
+                  } else {
+                    return Promise.reject('Invalid price')
+                  }
                 }
               }
-            }
-          ]}
-        >
-          <Input type='text' />
+            ]}
+          >
+            <Input type='text' onChange={(e) => setPrice(e.target.value)} />
+          </Form.Item>
+          <Tooltip title='Amount in Fiat currency'>
+            <Text type='secondary'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(price) * Number(ethusd))}</Text>
+          </Tooltip>
         </Form.Item>
       </Form>
     </Modal>
@@ -109,7 +123,17 @@ Harvest.propTypes = {
   visible: PropTypes.bool,
   onCreate: PropTypes.func,
   onCancel: PropTypes.func,
+  tokenId: PropTypes.string,
+  confirmingHarvest: PropTypes.bool,
+  ethusd: PropTypes.string,
 }
 
-export default Harvest
+function mapStateToProps(state) {
+  return {
+    confirmingHarvest: state.loading.confirmingHarvest,
+    ethusd: state.currency.ethusd,
+  }
+}
+
+export default connect(mapStateToProps)(Harvest)
 

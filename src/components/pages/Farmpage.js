@@ -38,6 +38,10 @@ import {
   loadCurrency,
   loadFarm,
   openSeason,
+  confirmPreparation,
+  confirmPlanting,
+  confirmGrowth,
+  confirmHarvest,
 } from '../../actions'
 
 // Redux store
@@ -69,7 +73,7 @@ const loadingInfo = {
   borderRadius: 4,
 }
 
-function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
+function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest }) {
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
   const [openPreparation, setOpenPreparation] = useState(false)
@@ -111,7 +115,7 @@ function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
         if (Number(farm.completedSeasons) === 0) {
           farm.seasons = []
         } else {
-          for (let i = 1; i <= Number(farm.completedSeasons) + 1; i++) {
+          for (let i = 1; i <= Number(farm.completedSeasons); i++) {
             farm.seasons[i] = await seasonContract.methods.querySeasonData(farm.tokenId, i).call()
           }
         }
@@ -165,6 +169,22 @@ function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
   const onCreate = values => {
     console.log(values)
     setOpenPreparation(false)
+  }
+
+  const handlePreparation = (tokenId, values, message) => {
+    confirmPreparation(tokenId, values, message)
+  }
+
+  const handlePlanting = (tokenId, values, message) => {
+    confirmPlanting(tokenId, values, message)
+  }
+
+  const handleGrowth = (tokenId, values, message) => {
+    confirmGrowth(tokenId, values, message)
+  }
+
+  const handleHarvest = (tokenId, values, message) => {
+    confirmHarvest(tokenId, values, message)
   }
 
   return (
@@ -239,18 +259,18 @@ function Farmpage({ wallet, farm, usdRate, isLoading, openSeason, opening }) {
                 />
               </Card>
               {farm.season === 'Dormant' && isOwner ? <Button disabled={opening} loading={opening} style={{ width: 320, marginTop: 8 }} onClick={() => openSeason(id, message)}>Open Season</Button> :
-                  farm.season === 'Preparation' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPreparation(true)}>Confirm Preparation</Button> :
-                  farm.season === 'Planting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPlanting(true)}>Confirm Plant</Button> :
-                  farm.season === 'Crop Growth' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenGrowth(true)}>Confirm Growth</Button> :
-                  farm.season === 'Harvesting' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenHarvest(true)}>Confirm Harvest</Button> :
+                  farm.season === 'Preparation' && isOwner ? <Button disabled={closingPreparation} loading={closingPreparation} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPreparation(true)}>Confirm Preparation</Button> :
+                  farm.season === 'Planting' && isOwner ? <Button disabled={closingPlanting} loading={closingPlanting} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPlanting(true)}>Confirm Plant</Button> :
+                  farm.season === 'Crop Growth' && isOwner ? <Button disabled={closingGrowth} loading={closingGrowth} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenGrowth(true)}>Confirm Growth</Button> :
+                  farm.season === 'Harvesting' && isOwner ? <Button disabled={closingHarvest} loading={closingHarvest} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenHarvest(true)}>Confirm Harvest</Button> :
                   farm.season === 'Booking' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenConfirmation(true)}>Close Season</Button> : null}
             </>
           )}
-          <Preparation visible={openPreparation} onCreate={onCreate} onCancel={() => setOpenPreparation(false)} />
-          <Planting visible={openPlanting} onCreate={onCreate} onCancel={() => setOpenPlanting(false)} />
-          <Growth visible={openGrowth} onCreate={onCreate} onCancel={() => setOpenGrowth(false)} />
-          <Harvest visible={openHarvest} onCreate={onCreate} onCancel={() => setOpenHarvest(false)} />
-          <Receivership visible={openConfirmation} onCreate={onCreate} onCancel={() => setOpenConfirmation(false)} />
+          <Preparation tokenId={id} visible={openPreparation} onCreate={handlePreparation} onCancel={() => setOpenPreparation(false)} />
+          <Planting tokenId={id} visible={openPlanting} onCreate={handlePlanting} onCancel={() => setOpenPlanting(false)} />
+          <Growth tokenId={id} visible={openGrowth} onCreate={handleGrowth} onCancel={() => setOpenGrowth(false)} />
+          <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
+          <Receivership tokenId={id} visible={openConfirmation} onCreate={onCreate} onCancel={() => setOpenConfirmation(false)} />
         </Col>
         <Col xs={24} xl={12} className='column_con'>
           {isLoading ? (
@@ -316,6 +336,14 @@ Farmpage.propTypes = {
   wallet: PropTypes.object,
   openSeason: PropTypes.func,
   opening: PropTypes.bool,
+  confirmPreparation: PropTypes.func,
+  closingPreparation: PropTypes.bool,
+  confirmPlanting: PropTypes.func,
+  closingPlanting: PropTypes.bool,
+  confirmGrowth: PropTypes.func,
+  closingGrowth: PropTypes.bool,
+  confirmHarvest: PropTypes.func,
+  closingHarvest: PropTypes.bool,
 }
 
 function mapStateToProps(state) {
@@ -325,8 +353,18 @@ function mapStateToProps(state) {
     farm: state.farm,
     wallet: state.wallet,
     opening: state.loading.openingSeason,
+    closingPreparation: state.loading.confirmingPreparation,
+    closingPlanting: state.loading.confirmingPlanting,
+    closingGrowth: state.loading.confirmingGrowth,
+    closingHarvest: state.loading.confirmingHarvest,
   }
 }
 
-export default connect(mapStateToProps, { openSeason })(Farmpage)
+export default connect(mapStateToProps, {
+  openSeason,
+  confirmPreparation,
+  confirmPlanting,
+  confirmGrowth,
+  confirmHarvest,
+})(Farmpage)
 

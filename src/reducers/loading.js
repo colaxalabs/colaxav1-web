@@ -5,6 +5,10 @@ import {
   FORM_SUBMITTING,
   CONFIRMING_FARM,
   OPENING_SEASON,
+  CONFIRMING_PREPARATION,
+  CONFIRMING_PLANTING,
+  CONFIRMING_GROWTH,
+  CONFIRMING_HARVEST,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -14,6 +18,10 @@ const INITIAL_STATE = {
   formSubmitting: false,
   confirmingFarm: false,
   openingSeason: false,
+  confirmingPreparation: false,
+  confirmingPlanting: false,
+  confirmingGrowth: false,
+  confirmingHarvest: false,
 }
 
 export function loading(state = INITIAL_STATE, action = {}) {
@@ -47,6 +55,26 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         openingSeason: action.status.openingSeason,
+      }
+    case CONFIRMING_PREPARATION:
+      return {
+        ...state,
+        confirmingPreparation: action.status.confirmingPreparation,
+      }
+    case CONFIRMING_PLANTING:
+      return {
+        ...state,
+        confirmingPlanting: action.status.confirmingPlanting,
+      }
+    case CONFIRMING_GROWTH:
+      return {
+        ...state,
+        confirmingGrowth: action.status.confirmingGrowth,
+      }
+    case CONFIRMING_HARVEST:
+      return {
+        ...state,
+        confirmingHarvest: action.status.confirmingHarvest,
       }
     default:
       return state

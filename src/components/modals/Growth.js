@@ -6,12 +6,14 @@ import {
   Input,
   Checkbox,
   Typography,
+  message,
 } from 'antd'
 import Validator from 'validator'
+import { connect } from 'react-redux'
 
 const { Text } = Typography
 
-function Growth({ visible, onCreate, onCancel }) {
+function Growth({ tokenId, visible, onCreate, onCancel, confirmingGrowth }) {
   const [form] = Form.useForm()
   const [isChecked, setIsChecked] = useState(false)
 
@@ -24,12 +26,17 @@ function Growth({ visible, onCreate, onCancel }) {
       visible={visible}
       title='Confirm crop growth'
       okText='Confirm'
+      okButtonProps={{
+        disabled: confirmingGrowth,
+        loading: confirmingGrowth,
+      }}
       cancelText='Close'
       onCancel={onCancel}
       onOk={() => {
         form.validateFields()
           .then((values) => {
-            console.log(values)
+            onCreate(tokenId, values, message)
+            onCancel()
           })
           .catch((info) => {
             console.log('Validate Failed:', info)
@@ -125,7 +132,15 @@ Growth.propTypes = {
   visible: PropTypes.bool,
   onCreate: PropTypes.func,
   onCancel: PropTypes.func,
+  tokenId: PropTypes.string,
+  confirmingGrowth: PropTypes.bool,
 }
 
-export default Growth
+function mapStateToProps(state) {
+  return {
+    confirmingGrowth: state.loading.confirmingGrowth,
+  }
+}
+
+export default connect(mapStateToProps)(Growth)
 
