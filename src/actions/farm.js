@@ -11,6 +11,7 @@ import {
   CLOSE_GROWTH,
   CONFIRMING_HARVEST,
   FINISH_HARVEST,
+  BOOKING_HARVEST,
 } from '../types'
 import ipfs from '../ipfs'
 import Web3 from 'web3'
@@ -79,6 +80,11 @@ const confirmingHarvest = status => ({
 const finishHarvesting = farm => ({
   type: FINISH_HARVEST,
   farm,
+})
+
+const bookingHarvest = status => ({
+  type: BOOKING_HARVEST,
+  status,
 })
 
 export const tokenize = (name, size, lon, lat, file, soil, message) => async dispatch => {
@@ -271,7 +277,7 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
     dispatch(confirmingGrowth({ ...status }))
     seasonContract.methods.confirmGrowth(tokenId, name, pesticideUsed, pesticideSupplier).send({ from: accounts[0] })
       .on('transactionHash', () => {
-        message.info('Confirming transaction...')
+        message.info('Confirming transaction...', 5)
       })
       .on('confirmation', async(confirmationNumber, receipt) => {
         if (confirmationNumber === 1) {
@@ -280,13 +286,13 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
           dispatch(closeGrowth({ ...farm }))
           status.confirmingGrowth = false
           dispatch(confirmingGrowth({ ...status }))
-          message.success('Transaction confirmed!')
+          message.success('Transaction confirmed!', 5)
         }
       })
       .on('error', err => {
         status.confirmingGrowth = false
         dispatch(confirmingGrowth({ ...status }))
-        message.error(`Error: ${err.message}`)
+        message.error(`Error: ${err.message}`, 10)
         console.log(err)
       })
   } else {
@@ -294,7 +300,7 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
     dispatch(confirmingGrowth({ ...status }))
     seasonContract.methods.confirmGrowth(tokenId, "", "", "").send({ from: accounts[0] })
       .on('transactionHash', () => {
-        message.info('Confirming transaction...')
+        message.info('Confirming transaction...', 5)
       })
       .on('confirmation', async(confirmationNumber, receipt) => {
         if (confirmationNumber === 1) {
@@ -303,13 +309,13 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
           dispatch(closeGrowth({ ...farm }))
           status.confirmingGrowth = false
           dispatch(confirmingGrowth({ ...status }))
-          message.success('Transaction confirmed!')
+          message.success('Transaction confirmed!', 5)
         }
       })
       .on('error', err => {
         status.confirmingGrowth = false
         dispatch(confirmingGrowth({ ...status }))
-        message.error(`Error: ${err.message}`)
+        message.error(`Error: ${err.message}`, 10)
         console.log(err)
       })
   }
@@ -330,7 +336,7 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
   const fileHash = cid.string
   seasonContract.methods.confirmHarvesting(tokenId, supply, unit, priceWei, fileHash).send({ from: accounts[0] })
     .on('transactionHash', () => {
-      message.info('Confirming transaction...')
+      message.info('Confirming transaction...', 5)
     })
     .on('confirmation', async(confirmationNumber, receipt) => {
       if (confirmationNumber === 1) {
@@ -339,22 +345,42 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
         dispatch(finishHarvesting({ ...farm }))
         status.confirmingHarvest = false
         dispatch(confirmingHarvest({ ...status }))
-        message.success('Transaction confirmed!')
+        message.success('Transaction confirmed!', 5)
       } 
     })
     .on('error', err => {
       status.confirmingHarvest = false
       dispatch(confirmingHarvest({ ...status }))
-      message.error(`Error: ${err.message}`)
+      message.error(`Error: ${err.message}`, 10)
       console.log(err)
     })
 }
 
-export const bookHarvest = (tokenId, values) => async dispatch => {
+export const bookHarvest = (tokenId, values, price, message) => async dispatch => {
   const { volume } = values
   // Init Contract
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
   const seasonNo = await seasonContract.methods.currentSeason(tokenId).call()
-  console.log({ tokenId, volume, seasonNo })
+  const accounts = await window.web3.eth.getAccounts()
+  // Send tx
+  const status = {}
+  status.booking = true
+  dispatch(bookingHarvest({ ...status }))
+  seasonContract.methods.bookHarvest(tokenId, volume, seasonNo).send({ from: accounts[0], value: new Web3.utils.BN(price).mul(new Web3.utils.BN(volume)).toString() })
+    .on('transactionHash', () => {
+      message.info('Confirming transaction...', 5)
+    })
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
+        status.booking = false
+        dispatch(bookingHarvest({ ...status }))
+        message.success('Transaction confirmed!', 5)
+      }
+    })
+    .on('error', err => {
+      status.booking = false
+      dispatch(bookingHarvest({ ...status }))
+      message.error(`Error: ${err.message}`, 10)
+    })
 }
 

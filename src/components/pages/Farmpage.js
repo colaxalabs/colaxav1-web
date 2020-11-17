@@ -21,7 +21,7 @@ import {
   message,
   Modal,
 } from 'antd'
-import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { SyncOutlined, CheckCircleTwoTone, LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
 
 // Components
@@ -60,7 +60,6 @@ import Contracts from '../../contracts.json'
 import {
   initContract,
   sanitize,
-  bookingColumns,
 } from '../../utils'
 
 const { Text } = Typography
@@ -76,7 +75,7 @@ const loadingInfo = {
   borderRadius: 4,
 }
 
-function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest }) {
+function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking }) {
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
   const [openPreparation, setOpenPreparation] = useState(false)
@@ -178,16 +177,23 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
     key: 'actions',
     render: (text, record) => (
       <Space>
-        <Button type='primary' onClick={() => setOpenBooking(true)}>Book</Button>
+        {String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase() ? null : (
+          <>
+          <Button loading={isBooking} disabled={isBooking} type='primary' onClick={() => setOpenBooking(true)}>Book</Button>
         <Modal
           visible={openBooking}
           title="You are going to book this farm's harvest"
           okText='Confirm'
+          okButtonProps={{
+            disabled: isBooking,
+            loading: isBooking,
+          }}
           cancelText='Close'
           onOk={() => {
             form.validateFields()
               .then((values) => {
-                bookHarvest(id, values)
+                bookHarvest(id, values, record.harvestPrice, message)
+                setOpenBooking(false)
               })
               .catch((info) => {
                 console.log('Validate Failed:', info)
@@ -222,7 +228,72 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
               <Input type='number' />
             </Form.Item>
           </Form>
-        </Modal>
+        </Modal>  
+          </>
+        )}
+      </Space>
+    )
+  }
+]
+const bookingColumns = [
+  {
+    title: '#',
+    dataIndex: 'tokenId',
+    key: 'tokenId',
+  },
+  {
+    title: 'Booker',
+    dataIndex: 'booker',
+    key: 'booker',
+    render: booker => (
+      <>
+        <Space>
+          <Avatar size='small' src={<img alt='booker' src={makeBlockie(String(booker))} />} />
+          <Text style={{ width: '100px' }} ellipsis copyable>{booker}</Text>
+        </Space>
+      </>
+    )
+  },
+  {
+    title: 'Volume',
+    dataIndex: 'volume',
+    key: 'volume',
+  },
+  {
+    title: 'Deposit',
+    dataIndex: 'deposit',
+    key: 'deposit',
+    render: (text, record) => (
+      <Space>
+        <Text>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(text, 'ether')) * Number(usdRate))}</Text>
+      </Space>
+    )
+  },
+  {
+    title: 'Delivered',
+    dataIndex: 'delivered',
+    key: 'delivered',
+    render: delivered => (
+      <>
+        {!delivered ? (
+          <SyncOutlined spin style={{ color: '#7546C9' }} />
+        ) : (
+          <CheckCircleTwoTone twoToneColor='#7546C9' />
+        )}
+      </>
+    ),
+  },
+  {
+    title: 'Season',
+    dataIndex: 'season',
+    key: 'season',
+  },
+  {
+    title: 'Action',
+    dataIndex: 'action',
+    render: (text, record) => (
+      <Space>
+        <Button type='primary' onClick={() => console.log('Confirming...')}>Confirm</Button>
       </Space>
     )
   }
@@ -490,6 +561,7 @@ Farmpage.propTypes = {
   confirmHarvest: PropTypes.func,
   closingHarvest: PropTypes.bool,
   bookHarvest: PropTypes.func,
+  isBooking: PropTypes.bool,
 }
 
 function mapStateToProps(state) {
@@ -503,6 +575,7 @@ function mapStateToProps(state) {
     closingPlanting: state.loading.confirmingPlanting,
     closingGrowth: state.loading.confirmingGrowth,
     closingHarvest: state.loading.confirmingHarvest,
+    isBooking: state.loading.booking,
   }
 }
 

@@ -9,6 +9,7 @@ import {
   CONFIRMING_PLANTING,
   CONFIRMING_GROWTH,
   CONFIRMING_HARVEST,
+  BOOKING_HARVEST,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -22,6 +23,7 @@ const INITIAL_STATE = {
   confirmingPlanting: false,
   confirmingGrowth: false,
   confirmingHarvest: false,
+  booking: false,
 }
 
 export function loading(state = INITIAL_STATE, action = {}) {
@@ -75,6 +77,11 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         confirmingHarvest: action.status.confirmingHarvest,
+      }
+    case BOOKING_HARVEST:
+      return {
+        ...state,
+        booking: action.status.booking,
       }
     default:
       return state
