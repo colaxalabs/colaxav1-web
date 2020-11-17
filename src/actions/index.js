@@ -28,6 +28,7 @@ import {
   confirmPlanting,
   confirmGrowth,
   confirmHarvest,
+  bookHarvest,
 } from './farm'
 
 const networkFound = net => ({
@@ -57,5 +58,6 @@ export {
   confirmPlanting,
   confirmGrowth,
   confirmHarvest,
+  bookHarvest,
 }
 

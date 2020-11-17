@@ -18,6 +18,20 @@ const { Option } = Select
 function Harvest({ tokenId, visible, onCreate, onCancel, confirmingHarvest, ethusd }) {
   const [form] = Form.useForm()
   const [price, setPrice] = useState(0)
+  const [upload, setUpload] = useState()
+
+  const convertToBuffer = async reader => {
+    const buffer = await Buffer.from(reader.result)
+    setUpload(buffer)
+  }
+
+  const handleChange = e => {
+    e.preventDefault()
+    const file = e.target.files[0]
+    const reader = new window.FileReader()
+    reader.readAsArrayBuffer(file)
+    reader.onloadend = () => convertToBuffer(reader)
+  }
 
   return (
     <Modal
@@ -33,6 +47,7 @@ function Harvest({ tokenId, visible, onCreate, onCancel, confirmingHarvest, ethu
       onOk={() => {
         form.validateFields()
           .then((values) => {
+            values.file = upload
             onCreate(tokenId, values, message)
             onCancel()
           })
@@ -114,6 +129,19 @@ function Harvest({ tokenId, visible, onCreate, onCancel, confirmingHarvest, ethu
             <Text type='secondary'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(price) * Number(ethusd))}</Text>
           </Tooltip>
         </Form.Item>
+        <Form.Item
+          name='upload'
+          label='Upload harvest image'
+          extra={<Text type='secondary'>Pictures speak to us. Provide a picture of your fresh harvest</Text>}
+          rules={[
+            {
+              required: true,
+              message: 'Harvest image is required'
+            }
+          ]}
+        >
+          <Input type='file' onChange={handleChange} bordered={false} />
+        </Form.Item>
       </Form>
     </Modal>
   )
@@ -125,13 +153,13 @@ Harvest.propTypes = {
   onCancel: PropTypes.func,
   tokenId: PropTypes.string,
   confirmingHarvest: PropTypes.bool,
-  ethusd: PropTypes.string,
+  ethusd: PropTypes.number,
 }
 
 function mapStateToProps(state) {
   return {
     confirmingHarvest: state.loading.confirmingHarvest,
-    ethusd: state.currency.ethusd,
+    ethusd: Number(state.currency.ethusd),
   }
 }
 

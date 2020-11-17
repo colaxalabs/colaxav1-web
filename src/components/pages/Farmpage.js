@@ -14,9 +14,12 @@ import {
   Avatar,
   Typography,
   Space,
+  Form,
+  Input,
   Empty,
   Button,
   message,
+  Modal,
 } from 'antd'
 import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
@@ -42,6 +45,7 @@ import {
   confirmPlanting,
   confirmGrowth,
   confirmHarvest,
+  bookHarvest,
 } from '../../actions'
 
 // Redux store
@@ -56,7 +60,6 @@ import Contracts from '../../contracts.json'
 import {
   initContract,
   sanitize,
-  seasonColumns,
   bookingColumns,
 } from '../../utils'
 
@@ -73,7 +76,7 @@ const loadingInfo = {
   borderRadius: 4,
 }
 
-function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest }) {
+function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest }) {
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
   const [openPreparation, setOpenPreparation] = useState(false)
@@ -81,7 +84,149 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
   const [openGrowth, setOpenGrowth] = useState(false)
   const [openHarvest, setOpenHarvest] = useState(false)
   const [openConfirmation, setOpenConfirmation] = useState(false)
-
+  const [openBooking, setOpenBooking] = useState(false)
+  const [form] = Form.useForm()
+  const seasonColumns = [
+  {
+    title: '#',
+    dataIndex: 'tokenId',
+    key: 'tokenId',
+  },
+  {
+    title: 'Crop',
+    dataIndex: 'crop',
+    key: 'crop',
+  },
+  {
+    title: 'Preparation Fertilizer',
+    dataIndex: 'preparationFertilizer',
+    key: 'preparationFertilizer',
+  },
+  {
+    title: 'Preparation Fertilizer Supplier',
+    dataIndex: 'preparationFertilizerSupplier',
+    key: 'preparationFertilizerSupplier',
+  },
+  {
+    title: 'Seeds Used',
+    dataIndex: 'seedsUsed',
+    key: 'seedsUsed',
+  },
+  {
+    title: 'Seeds Supplier',
+    dataIndex: 'seedsSupplier',
+    key: 'seedsSupplier',
+  },
+  {
+    title: 'Expected Yield',
+    dataIndex: 'expectedYield',
+    key: 'expectedYield',
+  },
+  {
+    title: 'Planting Fertilizer Used',
+    dataIndex: 'plantingFertilizer',
+    key: 'plantingFertilizer',
+  },
+  {
+    title: 'Planting Fertilizer Supplier',
+    dataIndex: 'plantingFertilizerSupplier',
+    key: 'plantingFertilizerSupplier',
+  },
+  {
+    title: 'Pesticide Used',
+    dataIndex: 'pesticideUsed',
+    key: 'pesticideUsed',
+  },
+  {
+    title: 'Pesticide Supplier',
+    dataIndex: 'pesticideSupplier',
+    key: 'pesticideSupplier',
+  },
+  {
+    title: 'Harvest Yield',
+    dataIndex: 'harvestSupply',
+    key: 'harvestSupply',
+    render: (text, record) => (
+      <>
+        <Text>{new Intl.NumberFormat('en-US', { style: 'unit', unit: 'kilogram' }).format(Number(record.harvestSupply))}</Text>
+      </>
+    )
+  },
+  {
+    title: 'Harvest Price(per supply)',
+    dataIndex: 'harvestPrice',
+    key: 'harvestPrice',
+    render: (text, record) => (
+      <Text>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(record.harvestPrice)) * Number(usdRate))}</Text>
+    )
+  },
+  {
+    title: 'Bookers',
+    dataIndex: 'bookers',
+    key: 'bookers',
+  },
+    {
+      title: 'Trace ID',
+      dataIndex: 'traceHash',
+      key: 'traceHash',
+      render: (text, record) => (
+        <Text style={{ width: '100px' }} ellipsis copyable>{text}</Text>
+      )
+    },
+  {
+    title: 'Action',
+    key: 'actions',
+    render: (text, record) => (
+      <Space>
+        <Button type='primary' onClick={() => setOpenBooking(true)}>Book</Button>
+        <Modal
+          visible={openBooking}
+          title="You are going to book this farm's harvest"
+          okText='Confirm'
+          cancelText='Close'
+          onOk={() => {
+            form.validateFields()
+              .then((values) => {
+                bookHarvest(id, values)
+              })
+              .catch((info) => {
+                console.log('Validate Failed:', info)
+              })
+          }}
+          onCancel={() => setOpenBooking(false)}
+        >
+          <Form
+            form={form}
+            layout='vertical'
+            name='form_in_modal'
+            initialValues={{
+              volume: 0,
+            }}
+          >
+            <Form.Item
+              name='volume'
+              label='Volume'
+              extra={<Text type='secondary'>How much of the harvest supply are you booking?</Text>}
+              rules={[
+                {
+                  validator: (rule, value) => {
+                    if (Number(value) !== 0) {
+                      return Promise.resolve()
+                    } else {
+                      return Promise.reject('Invalid volume')
+                    }
+                  }
+                }
+              ]}
+            >
+              <Input type='number' />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Space>
+    )
+  }
+]
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
     const seasonContract = initContract(Season, Contracts['4'].Season[0])
@@ -260,7 +405,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
               </Card>
               {farm.season === 'Dormant' && isOwner ? <Button disabled={opening} loading={opening} style={{ width: 320, marginTop: 8 }} onClick={() => openSeason(id, message)}>Open Season</Button> :
                   farm.season === 'Preparation' && isOwner ? <Button disabled={closingPreparation} loading={closingPreparation} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPreparation(true)}>Confirm Preparation</Button> :
-                  farm.season === 'Planting' && isOwner ? <Button disabled={closingPlanting} loading={closingPlanting} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPlanting(true)}>Confirm Plant</Button> :
+                  farm.season === 'Planting' && isOwner ? <Button disabled={closingPlanting} loading={closingPlanting} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPlanting(true)}>Confirm Planting</Button> :
                   farm.season === 'Crop Growth' && isOwner ? <Button disabled={closingGrowth} loading={closingGrowth} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenGrowth(true)}>Confirm Growth</Button> :
                   farm.season === 'Harvesting' && isOwner ? <Button disabled={closingHarvest} loading={closingHarvest} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenHarvest(true)}>Confirm Harvest</Button> :
                   farm.season === 'Booking' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenConfirmation(true)}>Close Season</Button> : null}
@@ -344,6 +489,7 @@ Farmpage.propTypes = {
   closingGrowth: PropTypes.bool,
   confirmHarvest: PropTypes.func,
   closingHarvest: PropTypes.bool,
+  bookHarvest: PropTypes.func,
 }
 
 function mapStateToProps(state) {
@@ -366,5 +512,6 @@ export default connect(mapStateToProps, {
   confirmPlanting,
   confirmGrowth,
   confirmHarvest,
+  bookHarvest,
 })(Farmpage)
 

@@ -13,6 +13,7 @@ import {
   FINISH_HARVEST,
 } from '../types'
 import ipfs from '../ipfs'
+import Web3 from 'web3'
 import { randInt, initContract } from '../utils'
 
 // Contracts
@@ -315,6 +316,45 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
 }
 
 export const confirmHarvest = (tokenId, values, message) => async dispatch => {
-  console.log(values)
+  const { file, price, unit, supply } = values
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  const priceWei = Web3.utils.toWei(price, 'ether')
+  // Send tx
+  const status = {}
+  status.confirmingHarvest = true
+  dispatch(confirmingHarvest({ ...status }))
+  // Upload file to IPFS
+  const { cid } = await ipfs.add(file)
+  const fileHash = cid.string
+  seasonContract.methods.confirmHarvesting(tokenId, supply, unit, priceWei, fileHash).send({ from: accounts[0] })
+    .on('transactionHash', () => {
+      message.info('Confirming transaction...')
+    })
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
+        const farm = {}
+        farm.season = await seasonContract.methods.getSeason(tokenId).call()
+        dispatch(finishHarvesting({ ...farm }))
+        status.confirmingHarvest = false
+        dispatch(confirmingHarvest({ ...status }))
+        message.success('Transaction confirmed!')
+      } 
+    })
+    .on('error', err => {
+      status.confirmingHarvest = false
+      dispatch(confirmingHarvest({ ...status }))
+      message.error(`Error: ${err.message}`)
+      console.log(err)
+    })
+}
+
+export const bookHarvest = (tokenId, values) => async dispatch => {
+  const { volume } = values
+  // Init Contract
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const seasonNo = await seasonContract.methods.currentSeason(tokenId).call()
+  console.log({ tokenId, volume, seasonNo })
 }
 

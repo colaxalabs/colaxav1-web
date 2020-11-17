@@ -67,7 +67,7 @@ class DesktopContainer extends React.Component {
                     }
                     style={{ fontSize: '32px', marginBottom: '30px', fontWeight: 'bold' }}
                   >
-                    Colaxa
+                    Reap
                   </Menu.Item>
                   <Menu.Item icon={<QuestionOutlined />}>
                     Dormant
