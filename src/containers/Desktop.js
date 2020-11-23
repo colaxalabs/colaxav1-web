@@ -7,25 +7,33 @@ import {
   Menu,
   Layout,
   Typography,
+  Dropdown,
+  Button,
 } from 'antd'
 import {
-  WalletOutlined,
-  CalendarOutlined,
-  HourglassOutlined,
-  QuestionOutlined,
-  AlertOutlined,
-  RocketOutlined,
-  Loading3QuartersOutlined,
+  PlusCircleOutlined,
+  GlobalOutlined,
+  ScanOutlined,
+  SwapOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
+  EyeOutlined,
+  LogoutOutlined,
+  DownOutlined,
 } from '@ant-design/icons'
 import { connect } from 'react-redux'
 import makeBlockie from 'ethereum-blockies-base64'
+
+// Redux actions
+import { disconnectWallet, connectWallet } from '../actions'
 
 import { Media } from './Media'
 
 const { Header, Sider, Content } = Layout
 const { Text } = Typography
+const { SubMenu } = Menu
+
+
 
 class DesktopContainer extends React.Component {
 
@@ -39,14 +47,32 @@ class DesktopContainer extends React.Component {
 
   render() {
 
-    const { children, walletLoaded, wallet } = this.props
+    const { children, walletLoaded, wallet, connectWallet, disconnectWallet } = this.props
+    const menu = (
+      <Menu>
+        <Menu.Item icon={<EyeOutlined />}>
+          <a href='/wallet/'>
+            View Profile
+          </a>
+        </Menu.Item>
+        <Menu.Divider />
+        <Menu.Item icon={<LogoutOutlined />}>
+          <a onClick={(e) => {
+            e.preventDefault()
+            disconnectWallet()
+          }}>
+            Sign Out
+          </a>
+        </Menu.Item>
+      </Menu>
+    )
 
     return (
       <>
         <Media greaterThan='mobile'>
           <Layout style={{ minHeight: '100vh' }}>
             <Sider
-              style={{ overflow: 'auto', height: '100vh', position: 'sticky', top: 0, left: 0 }}
+              style={{ backgroundColor: '#fff', overflow: 'auto', height: '100vh', position: 'sticky', top: 0, left: 0 }}
               breakpoint='sm'
               collapsedWidth='80'
               onCollapse={this.toggle}
@@ -54,7 +80,7 @@ class DesktopContainer extends React.Component {
               collapsed={this.state.isCollapsed}
               trigger={null}
             >
-                <Menu theme="dark" mode="inline">
+                <Menu mode="inline">
                   <Menu.Item
                     disabled
                     icon={
@@ -69,28 +95,18 @@ class DesktopContainer extends React.Component {
                   >
                     Reap
                   </Menu.Item>
-                  <Menu.Item icon={<QuestionOutlined />}>
-                    Dormant
+                  <SubMenu key='sub1' icon={<SwapOutlined />} title='Tokenization'>
+                    <Menu.Item key='1' icon={<PlusCircleOutlined />}>
+                      <a href='/register/'>
+                        Register
+                      </a>
+                    </Menu.Item>
+                  </SubMenu>
+                  <Menu.Item key='2' icon={<GlobalOutlined />}>
+                    Market
                   </Menu.Item>
-                  <Menu.Item icon={<Loading3QuartersOutlined />}>
-                    Preparation
-                  </Menu.Item>
-                  <Menu.Item icon={<RocketOutlined />}>
-                    Planting
-                  </Menu.Item>
-                  <Menu.Item icon={<HourglassOutlined />}>
-                    Crop Growth
-                  </Menu.Item>
-                  <Menu.Item icon={<AlertOutlined />}>
-                    Harvesting
-                  </Menu.Item>
-                  <Menu.Item icon={<CalendarOutlined />}>
-                    Booking
-                  </Menu.Item>
-                  <Menu.Item style={{ marginTop: '25px' }} icon={<WalletOutlined />}>
-                    <a href='/wallet/'>
-                      Wallet
-                    </a>
+                  <Menu.Item key='3' icon={<ScanOutlined />}>
+                    Trace
                   </Menu.Item>
                 </Menu>
               </Sider>
@@ -101,18 +117,25 @@ class DesktopContainer extends React.Component {
                     onClick: this.toggle,
                   })}
                   {walletLoaded ? (
-                    <Space className='logo'>
-                      <div>
-                        <Space>
-                          <Avatar
-                            src={makeBlockie(String(wallet.address[0]))}
-                            size={25}
-                          />
+                     <Dropdown overlay={menu} className='logo'>
+                       <a onClick={(e) => e.preventDefault()}>
+                         <Space>
+                          <Avatar src={makeBlockie(String(wallet.address[0]))} size={25} />
                           <Text ellipsis className='addr' copyable>{wallet.address[0]}</Text>
-                        </Space>
-                      </div>
+                          <DownOutlined />
+                         </Space>
+                       </a>
+                     </Dropdown>
+                  ) : (
+                    <Space className='logo'>
+                      <Button
+                        type='primary'
+                        onClick={connectWallet}
+                      >
+                        Connect Wallet
+                      </Button>
                     </Space>
-                  ) : null}
+                  )}
                 </Header>
                 <Content
                   style={{
@@ -133,6 +156,8 @@ DesktopContainer.propTypes = {
   children: PropTypes.object,
   walletLoaded: PropTypes.bool,
   wallet: PropTypes.object,
+  connectWallet: PropTypes.func,
+  disconnectWallet: PropTypes.func,
 }
 
 function mapStateToProps(state) {
@@ -142,5 +167,5 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps)(DesktopContainer)
+export default connect(mapStateToProps, { disconnectWallet, connectWallet })(DesktopContainer)
 

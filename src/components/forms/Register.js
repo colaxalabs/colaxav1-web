@@ -70,7 +70,7 @@ function Register({ wallet, submittingForm, lon, lat, tokenize }) {
       name='basic'
       layout='vertical'
       requiredMark={false}
-      style={{ width: '400px' }}
+      style={{ width: '280px' }}
       onFinish={(values) => {
         values.file = upload
         const { name, size, unit, soil, file } = values
