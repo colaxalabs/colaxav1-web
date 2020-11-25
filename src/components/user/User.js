@@ -10,7 +10,6 @@ import {
   Button,
   Typography,
   Space,
-  List,
 } from 'antd'
 import {
   LoadingOutlined,
@@ -26,7 +25,6 @@ import {
 } from '../dashboard'
 import Loading from '../loading'
 import { Farm, Nofarm } from '../farm'
-import { Register } from '../forms'
 
 // Redux action
 import {
@@ -48,7 +46,7 @@ import Contracts from '../../contracts.json'
 import { initContract } from '../../utils'
 
 const { TabPane } = Tabs
-const { Text, Title, Link } = Typography
+const { Text } = Typography
 
 const columns = [
   {
@@ -105,12 +103,6 @@ const columns = [
       </>
     )
   }
-]
-
-const cons = [
-  'Your farm is unique and belongs to you and only you!',
-  'Its an open, borderless, & censorship-resistant digital marketplace',
-  'Receive farm harvest booking without middlemen',
 ]
 
 function User({ tokenize, wallet, userData, isLoading, usdRate }) {
@@ -247,37 +239,7 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
               <TabPane tab='Bookings' key='2'>
                 <Row justify='center' align='center'>
                   <Col xs={24} xl={24} className='column_con'>
-                    <Table tableLayout='auto' scroll={{ x: true }} dataSource={userData.userBookings} columns={columns} />
-                  </Col>
-                </Row>
-              </TabPane>
-              <TabPane tab='Register' key='3'>
-                <Row>
-                  <Col xs={24} xl={12} className='column_con'>
-                    <Title level={3}>
-                      Register your farm land
-                    </Title>
-                    <List
-                      dataSource={cons}
-                      renderItem={item => (
-                        <List.Item>
-                          <Text>
-                            <CheckCircleTwoTone style={{ paddingRight: '10px' }} twoToneColor='#7546C9' />
-                            {item}
-                          </Text>
-                        </List.Item>
-                      )}
-                    >
-                      <List.Item>
-                        <Text>
-                          <CheckCircleTwoTone style={{ paddingRight: '10px' }} twoToneColor='#7546C9' />
-                          Deliver farm harvest & transact in <Link href='https://ethereum.org/en/what-is-ethereum/' target='_blank'>Ethereum cryptocurrency</Link>
-                        </Text>
-                      </List.Item>
-                    </List>
-                  </Col>
-                  <Col xs={24} xl={12} className='column_con'>
-                    <Register tokenize={tokenize} /> 
+                    <Table size='small' tableLayout='auto' scroll={{ x: true }} dataSource={userData.userBookings} columns={columns} />
                   </Col>
                 </Row>
               </TabPane>

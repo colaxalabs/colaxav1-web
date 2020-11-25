@@ -8,20 +8,15 @@ import {
   Col,
   Card,
   Tag,
-  Table,
-  Tabs,
   Descriptions,
   Avatar,
   Typography,
   Space,
-  Form,
-  Input,
   Empty,
   Button,
   message,
-  Modal,
 } from 'antd'
-import { SyncOutlined, CheckCircleTwoTone, LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
 
 // Components
@@ -63,7 +58,6 @@ import {
 } from '../../utils'
 
 const { Text } = Typography
-const { TabPane } = Tabs
 
 const loadingInfo = {
   display: 'flex',
@@ -83,221 +77,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
   const [openGrowth, setOpenGrowth] = useState(false)
   const [openHarvest, setOpenHarvest] = useState(false)
   const [openConfirmation, setOpenConfirmation] = useState(false)
-  const [openBooking, setOpenBooking] = useState(false)
-  const [form] = Form.useForm()
-  const seasonColumns = [
-  {
-    title: '#',
-    dataIndex: 'tokenId',
-    key: 'tokenId',
-  },
-  {
-    title: 'Crop',
-    dataIndex: 'crop',
-    key: 'crop',
-  },
-  {
-    title: 'Preparation Fertilizer',
-    dataIndex: 'preparationFertilizer',
-    key: 'preparationFertilizer',
-  },
-  {
-    title: 'Preparation Fertilizer Supplier',
-    dataIndex: 'preparationFertilizerSupplier',
-    key: 'preparationFertilizerSupplier',
-  },
-  {
-    title: 'Seeds Used',
-    dataIndex: 'seedsUsed',
-    key: 'seedsUsed',
-  },
-  {
-    title: 'Seeds Supplier',
-    dataIndex: 'seedsSupplier',
-    key: 'seedsSupplier',
-  },
-  {
-    title: 'Expected Yield',
-    dataIndex: 'expectedYield',
-    key: 'expectedYield',
-  },
-  {
-    title: 'Planting Fertilizer Used',
-    dataIndex: 'plantingFertilizer',
-    key: 'plantingFertilizer',
-  },
-  {
-    title: 'Planting Fertilizer Supplier',
-    dataIndex: 'plantingFertilizerSupplier',
-    key: 'plantingFertilizerSupplier',
-  },
-  {
-    title: 'Pesticide Used',
-    dataIndex: 'pesticideUsed',
-    key: 'pesticideUsed',
-  },
-  {
-    title: 'Pesticide Supplier',
-    dataIndex: 'pesticideSupplier',
-    key: 'pesticideSupplier',
-  },
-  {
-    title: 'Harvest Yield',
-    dataIndex: 'harvestSupply',
-    key: 'harvestSupply',
-    render: (text, record) => (
-      <>
-        <Text>{new Intl.NumberFormat('en-US', { style: 'unit', unit: 'kilogram' }).format(Number(record.harvestSupply))}</Text>
-      </>
-    )
-  },
-  {
-    title: 'Harvest Price(per supply)',
-    dataIndex: 'harvestPrice',
-    key: 'harvestPrice',
-    render: (text, record) => (
-      <Text>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(record.harvestPrice)) * Number(usdRate))}</Text>
-    )
-  },
-  {
-    title: 'Bookers',
-    dataIndex: 'bookers',
-    key: 'bookers',
-  },
-    {
-      title: 'Trace ID',
-      dataIndex: 'traceHash',
-      key: 'traceHash',
-      render: (text, record) => (
-        <Text style={{ width: '100px' }} ellipsis copyable>{text}</Text>
-      )
-    },
-  {
-    title: 'Action',
-    key: 'actions',
-    render: (text, record) => (
-      <Space>
-        {String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase() ? null : (
-          <>
-          <Button loading={isBooking} disabled={isBooking} type='primary' onClick={() => setOpenBooking(true)}>Book</Button>
-        <Modal
-          visible={openBooking}
-          title="You are going to book this farm's harvest"
-          okText='Confirm'
-          okButtonProps={{
-            disabled: isBooking,
-            loading: isBooking,
-          }}
-          cancelText='Close'
-          onOk={() => {
-            form.validateFields()
-              .then((values) => {
-                bookHarvest(id, values, record.harvestPrice, message)
-                setOpenBooking(false)
-              })
-              .catch((info) => {
-                console.log('Validate Failed:', info)
-              })
-          }}
-          onCancel={() => setOpenBooking(false)}
-        >
-          <Form
-            form={form}
-            layout='vertical'
-            name='form_in_modal'
-            initialValues={{
-              volume: 0,
-            }}
-          >
-            <Form.Item
-              name='volume'
-              label='Volume'
-              extra={<Text type='secondary'>How much of the harvest supply are you booking?</Text>}
-              rules={[
-                {
-                  validator: (rule, value) => {
-                    if (Number(value) !== 0) {
-                      return Promise.resolve()
-                    } else {
-                      return Promise.reject('Invalid volume')
-                    }
-                  }
-                }
-              ]}
-            >
-              <Input type='number' />
-            </Form.Item>
-          </Form>
-        </Modal>  
-          </>
-        )}
-      </Space>
-    )
-  }
-]
-const bookingColumns = [
-  {
-    title: '#',
-    dataIndex: 'tokenId',
-    key: 'tokenId',
-  },
-  {
-    title: 'Booker',
-    dataIndex: 'booker',
-    key: 'booker',
-    render: booker => (
-      <>
-        <Space>
-          <Avatar size='small' src={<img alt='booker' src={makeBlockie(String(booker))} />} />
-          <Text style={{ width: '100px' }} ellipsis copyable>{booker}</Text>
-        </Space>
-      </>
-    )
-  },
-  {
-    title: 'Volume',
-    dataIndex: 'volume',
-    key: 'volume',
-  },
-  {
-    title: 'Deposit',
-    dataIndex: 'deposit',
-    key: 'deposit',
-    render: (text, record) => (
-      <Space>
-        <Text>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(text, 'ether')) * Number(usdRate))}</Text>
-      </Space>
-    )
-  },
-  {
-    title: 'Delivered',
-    dataIndex: 'delivered',
-    key: 'delivered',
-    render: delivered => (
-      <>
-        {!delivered ? (
-          <SyncOutlined spin style={{ color: '#7546C9' }} />
-        ) : (
-          <CheckCircleTwoTone twoToneColor='#7546C9' />
-        )}
-      </>
-    ),
-  },
-  {
-    title: 'Season',
-    dataIndex: 'season',
-    key: 'season',
-  },
-  {
-    title: 'Action',
-    dataIndex: 'action',
-    render: (text, record) => (
-      <Space>
-        <Button type='primary' onClick={() => console.log('Confirming...')}>Confirm</Button>
-      </Space>
-    )
-  }
-]
+
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
     const seasonContract = initContract(Season, Contracts['4'].Season[0])
@@ -445,7 +225,7 @@ const bookingColumns = [
         </Col>
       </Row>
       <Row justify='center' align='center'>
-        <Col xs={24} xl={12} className='column_con'>
+        <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 5 }}>
           {isLoading ? (
             <div style={{ ...loadingInfo, height: 180, width: 320}}>
               <LoadingOutlined stype={{ marginTop: '50px' }} />
@@ -488,7 +268,7 @@ const bookingColumns = [
           <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
           <Receivership tokenId={id} visible={openConfirmation} onCreate={onCreate} onCancel={() => setOpenConfirmation(false)} />
         </Col>
-        <Col xs={24} xl={12} className='column_con'>
+        <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 5 }}>
           {isLoading ? (
             <div style={{ ...loadingInfo, height: 180, width: '100%' }}>
               <LoadingOutlined stype={{ marginTop: '50px' }} />
@@ -521,22 +301,6 @@ const bookingColumns = [
         </Col>
       </Row>
       <Row justify='center' align='center'>
-        {isLoading ? (
-          <Col xs={24} xl={24} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-            <LoadingOutlined style={{ marginTop: '150px' }} />
-          </Col>
-        ) : (
-          <Col xs={24} xl={24} className='column_con'>
-            <Tabs>
-              <TabPane tab='Seasons' key='1'>
-                <Table tableLayout='auto' scroll={{ x: true }} dataSource={farm.seasons} columns={seasonColumns} />
-              </TabPane>
-              <TabPane tab='Bookings' key='2'>
-                <Table tableLayout='auto' scroll={{ x: true }} dataSource={farm.farmBookings} columns={bookingColumns} />
-              </TabPane>
-            </Tabs>
-          </Col>
-        )} 
       </Row>
         </>
       )}

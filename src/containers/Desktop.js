@@ -20,6 +20,7 @@ import {
   EyeOutlined,
   LogoutOutlined,
   DownOutlined,
+  UserOutlined,
 } from '@ant-design/icons'
 import { connect } from 'react-redux'
 import makeBlockie from 'ethereum-blockies-base64'
@@ -50,9 +51,14 @@ class DesktopContainer extends React.Component {
     const { children, walletLoaded, wallet, connectWallet, disconnectWallet } = this.props
     const menu = (
       <Menu>
-        <Menu.Item icon={<EyeOutlined />}>
+        <Menu.Item icon={<UserOutlined />}>
           <a href='/wallet/'>
             View Profile
+          </a>
+        </Menu.Item>
+        <Menu.Item icon={<EyeOutlined />}>
+          <a href={`https://rinkeby.etherscan.io/address/${wallet.address[0]}`} target='_blank' rel='noopener noreferrer'>
+            View Address on Etherscan
           </a>
         </Menu.Item>
         <Menu.Divider />
@@ -129,6 +135,7 @@ class DesktopContainer extends React.Component {
                   ) : (
                     <Space className='logo'>
                       <Button
+                        size='large'
                         type='primary'
                         onClick={connectWallet}
                       >

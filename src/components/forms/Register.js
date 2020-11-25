@@ -67,6 +67,7 @@ function Register({ wallet, submittingForm, lon, lat, tokenize }) {
   return (
     <Form
       form={form}
+      size='large'
       name='basic'
       layout='vertical'
       requiredMark={false}
