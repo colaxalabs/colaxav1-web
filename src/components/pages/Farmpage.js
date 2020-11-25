@@ -225,7 +225,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         </Col>
       </Row>
       <Row justify='center' align='center'>
-        <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 5 }}>
+        <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (
             <div style={{ ...loadingInfo, height: 180, width: 320}}>
               <LoadingOutlined stype={{ marginTop: '50px' }} />
@@ -268,7 +268,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
           <Receivership tokenId={id} visible={openConfirmation} onCreate={onCreate} onCancel={() => setOpenConfirmation(false)} />
         </Col>
-        <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 5 }}>
+        <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (
             <div style={{ ...loadingInfo, height: 180, width: '100%' }}>
               <LoadingOutlined stype={{ marginTop: '50px' }} />
