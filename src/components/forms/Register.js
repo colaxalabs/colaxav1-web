@@ -216,4 +216,3 @@ function mapStateToProp(state) {
 }
 
 export default connect(mapStateToProp)(Register)
-
