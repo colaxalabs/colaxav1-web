@@ -12,6 +12,7 @@ import history from './history'
 import * as serviceWorker from './serviceWorker';
 
 import './index.css'
+import './fonts/Apercu.ttf'
 
 ReactDOM.render(
   <React.StrictMode>

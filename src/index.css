@@ -1,8 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK&display=swap');
+@font-face {
+  font-family: 'Apercu';
+  src: local('Apercu'), url('./fonts/Apercu.ttf') format('truetype');
+  font-weight: normal;
+}
 
 body {
   margin: 0;
-  font-family: 'Noto Sans HK', sans-serif;
+  font-family: "Apercu", -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
