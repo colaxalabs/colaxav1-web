@@ -63,12 +63,12 @@ class DesktopContainer extends React.Component {
         </Menu.Item>
         <Menu.Divider />
         <Menu.Item icon={<LogoutOutlined />}>
-          <a onClick={(e) => {
+          <Button type='link' onClick={(e) => {
             e.preventDefault()
             disconnectWallet()
           }}>
             Sign Out
-          </a>
+          </Button>
         </Menu.Item>
       </Menu>
     )
@@ -124,13 +124,13 @@ class DesktopContainer extends React.Component {
                   })}
                   {walletLoaded ? (
                      <Dropdown overlay={menu} className='logo'>
-                       <a onClick={(e) => e.preventDefault()}>
+                       <Button style={{ padding: '17px' }} type='link' onClick={(e) => e.preventDefault()}>
                          <Space>
                           <Avatar src={makeBlockie(String(wallet.address[0]))} size={25} />
                           <Text ellipsis className='addr' copyable>{wallet.address[0]}</Text>
                           <DownOutlined />
                          </Space>
-                       </a>
+                       </Button>
                      </Dropdown>
                   ) : (
                     <Space className='logo'>

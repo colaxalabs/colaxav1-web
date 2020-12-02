@@ -58,8 +58,8 @@ function App() {
       <Switch>
         <Route exact path='/' component={Homepage} />
         <Route exact path='/wallet/' component={Userpage} />
-        <Route exact path='/register' component={Registerpage} />
-        <Route path='/farm/:id' component={Farmpage} />
+        <Route exact path='/register/' component={Registerpage} />
+        <Route path='/farm/:id/' component={Farmpage} />
       </Switch>
     </DesktopContainer>
   );
