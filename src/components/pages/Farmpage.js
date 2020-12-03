@@ -49,6 +49,7 @@ import { store } from '../../store'
 // Contracts
 import Registry from '../../abis/FRMRegistry.json'
 import Season from '../../abis/Season.json'
+import Market from '../../abis/Market.json'
 import Contracts from '../../contracts.json'
 
 // Utils
@@ -81,6 +82,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
     const seasonContract = initContract(Season, Contracts['4'].Season[0])
+    const marketContract = initContract(Market, Contracts['4'].Market[0])
 
     async function loadFarmDashboard() {
       const loadingState = {}
@@ -103,24 +105,16 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         farm.season = _farm.season
         farm.owner = _farm.owner
         setIsOwner(String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase())
-        farm.totalBookings = await seasonContract.methods.totalFarmBookings(farm.tokenId).call()
+        farm.totalBookings = await marketContract.methods.totalMarketBookers(farm.tokenId).call()
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(farm.tokenId).call()
-        const tx = await seasonContract.methods.farmTransactions(farm.tokenId).call()
+        const tx = await marketContract.methods.farmTransactions(farm.tokenId).call()
         farm.txs = Web3.utils.fromWei(tx, 'ether')
-        farm.seasons = []
-        if (Number(farm.completedSeasons) === 0) {
-          farm.seasons = []
-        } else {
-          for (let i = 1; i <= Number(farm.completedSeasons); i++) {
-            farm.seasons[i] = await seasonContract.methods.querySeasonData(farm.tokenId, i).call()
-          }
-        }
         farm.farmBookings = []
         if (Number(farm.totalBookings) === 0) {
           farm.farmBookings = []
         } else {
           for (let i = 1; i <= Number(farm.totalBookings); i++) {
-            farm.farmBookings[i] = await seasonContract.methods.getFarmBooking(farm.tokenId, i).call()
+            farm.farmBookings[i] = await marketContract.methods.getMarketBooking(farm.tokenId, i).call()
           }
         }
         // Fetch Eth price
@@ -227,7 +221,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
       <Row justify='center' align='center'>
         <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (
-            <div style={{ ...loadingInfo, height: 180, width: 320}}>
+            <div style={{ ...loadingInfo, height: 350, width: '100%' }}>
               <LoadingOutlined stype={{ marginTop: '50px' }} />
             </div>
           ) : (
@@ -270,7 +264,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         </Col>
         <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (
-            <div style={{ ...loadingInfo, height: 180, width: '100%' }}>
+            <div style={{ ...loadingInfo, height: 350, width: '100%' }}>
               <LoadingOutlined stype={{ marginTop: '50px' }} />
             </div>
           ) : (

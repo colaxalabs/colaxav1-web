@@ -23,6 +23,7 @@ import Loading from '../loading'
 // Contracts
 import Registry from '../../abis/FRMRegistry.json'
 import Season from '../../abis/Season.json'
+import Market from '../../abis/Market.json'
 import Contracts from '../../contracts.json'
 
 // Utils
@@ -43,6 +44,7 @@ function Homepage({ dash, isLoading, usdRate }) {
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
     const seasonContract = initContract(Season, Contracts['4'].Season[0])
+    const marketContract = initContract(Market, Contracts['4'].Market[0])
 
     async function loadDashboardData() {
       const dashboard = {}
@@ -58,9 +60,9 @@ function Homepage({ dash, isLoading, usdRate }) {
       store.dispatch(loadCurrency({ ...conversionRate }))
       // Query app dashboard info from the blockchain
       dashboard.lands = await registryContract.methods.totalSupply().call()
-      dashboard.bookings = await seasonContract.methods.totalBooking().call()
+      dashboard.markets = await marketContract.methods.totalMarkets().call()
       dashboard.traces = await seasonContract.methods.allTraces().call()
-      const tx = await seasonContract.methods.platformTransactions().call()
+      const tx = await marketContract.methods.platformTransactions().call()
       dashboard.txs = Web3.utils.fromWei(tx, 'ether')
       dashboard.farms = []
       // Load the first 3 farms
@@ -128,9 +130,9 @@ function Homepage({ dash, isLoading, usdRate }) {
             <Loading />
           ) : (
             <Stats
-              title='Bookings'
-              description='Number of completed bookings'
-              dispValue={dash.bookings}
+              title='Markets'
+              description='Number of created markets'
+              dispValue={dash.markets}
             />
           )}
         </Col>
@@ -140,7 +142,7 @@ function Homepage({ dash, isLoading, usdRate }) {
           ) : (
             <Stats
               title='Traces'
-              description='Number of performed bookings'
+              description='Number of performed traces'
               dispValue={dash.traces}
             />
           )}

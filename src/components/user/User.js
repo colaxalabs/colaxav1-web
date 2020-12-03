@@ -39,7 +39,7 @@ import { store } from '../../store'
 
 // Contracts
 import Registry from '../../abis/FRMRegistry.json'
-import Season from '../../abis/Season.json'
+import Market from '../../abis/Market.json'
 import Contracts from '../../contracts.json'
 
 // Utils
@@ -110,7 +110,7 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
   useEffect(() => {
 
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
-    const seasonContract = initContract(Season, Contracts['4'].Season[0])
+    const marketContract = initContract(Market, Contracts['4'].Market[0])
 
     async function loadUserDashboard() {
       const user = {}
@@ -126,8 +126,8 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
       store.dispatch(loadCurrency({ ...conversionRate }))
       // Query user info from the blockchain
       user.lands = await registryContract.methods.balanceOf(wallet[0]).call()
-      user.totalBookings = await seasonContract.methods.totalBookingDeliveredForBooker(wallet[0]).call()
-      const tx = await seasonContract.methods.addressTransactions(wallet[0]).call()
+      user.totalBookings = await marketContract.methods.totalBookerBooking(wallet[0]).call()
+      const tx = await marketContract.methods.userTransactions(wallet[0]).call()
       user.txs = Web3.utils.fromWei(tx, 'ether')
       user.userFarms = []
       if (Number(user.lands) === 0) {
@@ -147,8 +147,8 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
       } else {
         for (let i = 1; i <= Number(user.totalBookings); i++) {
           try {
-            let seasonBooked = await seasonContract.methods.getSeasonBooked(i).call()
-            user.userBookings[i] = await seasonContract.methods.getBookerBooking(seasonBooked, wallet[0]).call()
+            let seasonBooked = await marketContract.methods.getSeasonBooked(i).call()
+            user.userBookings[i] = await marketContract.methods.getBookerBooking(seasonBooked, wallet[0]).call()
           } catch(err) {
             console.log(err)
           }
@@ -198,7 +198,7 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
           ) : (
             <Stats
               title='Bookings'
-              description='Number of completed bookings'
+              description='Number of bookings'
               dispValue={userData.totalBookings}
             />
           )}
@@ -215,10 +215,10 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
           )}
         </Col>
       </Row>
-      <Row justify='center' align='center'>
+      <Row className='site-layout-background' style={{ padding: '0 20px' }} justify='center' align='center'>
         {isLoading ? (
-          <Col xs={24} xl={24} className='column_con' style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-            <LoadingOutlined style={{ marginTop: '150px' }} />
+          <Col xs={24} xl={24} className='column_con' style={{ height: '300px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            <LoadingOutlined />
           </Col>
         ) : (
           <Col xs={24} xl={24} className='column_con'>
