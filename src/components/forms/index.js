@@ -1,5 +1,9 @@
-import Register from './Register'
+import Details from './Details'
+import Measurement from './Measurement'
+import UploadDocument from './UploadDocument'
 
 export {
-  Register,
+  Details,
+  Measurement,
+  UploadDocument,
 }

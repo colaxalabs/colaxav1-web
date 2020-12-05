@@ -8,6 +8,7 @@ import { loading } from './loading'
 import { currency } from './currency'
 import { user } from './user'
 import { farm } from './farm'
+import { form } from './form'
 
 export default combineReducers({
   wallet,
@@ -17,5 +18,6 @@ export default combineReducers({
   currency,
   user,
   farm,
+  form,
 })
 
