@@ -34,6 +34,7 @@ import {
   collectDetails,
   collectMeasurements,
   collectFarmImage,
+  collectLocation,
 } from './form'
 
 const networkFound = net => ({
@@ -67,5 +68,6 @@ export {
   collectDetails,
   collectMeasurements,
   collectFarmImage,
+  collectLocation,
 }
 

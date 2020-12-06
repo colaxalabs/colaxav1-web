@@ -2,6 +2,7 @@ import {
   COLLECT_DETAILS,
   COLLECT_MEASUREMENTS,
   COLLECT_FARM_IMAGE,
+  COLLECT_LOCATION,
 } from '../types'
 
 export const collectDetails = details => ({
@@ -17,5 +18,10 @@ export const collectMeasurements = measurements => ({
 export const collectFarmImage = buffer => ({
   type: COLLECT_FARM_IMAGE,
   buffer,
+})
+
+export const collectLocation = location => ({
+  type: COLLECT_LOCATION,
+  location,
 })
 

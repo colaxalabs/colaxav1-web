@@ -2,6 +2,7 @@ import {
   COLLECT_DETAILS,
   COLLECT_MEASUREMENTS,
   COLLECT_FARM_IMAGE,
+  COLLECT_LOCATION
 } from '../types'
 
 const INITIAL_STATE = {
@@ -31,6 +32,11 @@ export function form(state = INITIAL_STATE, action={}) {
       return {
         ...state,
         farmImage: action.buffer,
+      }
+    case COLLECT_LOCATION:
+      return {
+        ...state,
+        farmLocation: action.location,
       }
     default:
       return state
