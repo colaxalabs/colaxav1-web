@@ -63,8 +63,8 @@ function Measurement({ nextPage, prevPage, farmValues }) {
           placeholder='Size Unit'
           allowClear
         >
-          <Option value='acres'>Acres</Option>
-          <Option value='ha'>Hectares</Option>
+          <Option value='ACRES'>ACRES</Option>
+          <Option value='HECTARES'>HECTARES</Option>
         </Select>
       </Form.Item>
       <Form.Item

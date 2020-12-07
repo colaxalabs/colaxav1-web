@@ -213,11 +213,12 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
   const status = {}
   const { fertilizerCheck } = values
   if (fertilizerCheck) {
-    const { expectedYield, seedsUsed, seedsSupplier, plantingFertilizer, fertilizerType, fertilizerSupplier } = values
+    const { expectedYield, yieldUnit, seedsUsed, seedsSupplier, plantingFertilizer, fertilizerType, fertilizerSupplier } = values
     const fertilizerName = `${fertilizerType} (${plantingFertilizer})}`
+    const eYield = `${expectedYield} ${yieldUnit}`
     status.confirmingPlanting = true
     dispatch(confirmingPlanting({ ...status }))
-    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, expectedYield, fertilizerName, fertilizerSupplier).send({ from: accounts[0] })
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, eYield, fertilizerName, fertilizerSupplier).send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -238,10 +239,11 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
         console.log(err)
       })
   } else {
-    const { expectedYield, seedsUsed, seedsSupplier } = values
+    const { expectedYield, yieldUnit, seedsUsed, seedsSupplier } = values
+    const eYield = `${expectedYield} ${yieldUnit}`
     status.confirmingPlanting = true
     dispatch(confirmingPlanting({ ...status }))
-    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, expectedYield, "", "").send({ from: accounts[0] })
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, eYield, "", "").send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })

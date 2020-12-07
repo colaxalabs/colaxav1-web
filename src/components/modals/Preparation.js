@@ -12,6 +12,9 @@ import {
 import { connect } from 'react-redux'
 import Validator from 'validator'
 
+// Utils
+import { handleUpload } from '../../utils'
+
 const { Option } = Select
 const { Text } = Typography
 
@@ -19,6 +22,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
   const [form] = Form.useForm()
   const [isChecked, setIsChecked] = useState(false)
   const [type, setType] = useState('')
+  const [fertilizerProof, setFertilizerProof] = useState('')
 
   const onChange = e => {
     setIsChecked(e.target.checked)
@@ -42,7 +46,9 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
       onOk={() => {
         form.validateFields()
           .then((values) => {
+            values.fertilizerProof = fertilizerProof
             onCreate(tokenId, values, message)
+            console.log(values)
             onCancel()
           })
           .catch((info) => {
@@ -84,7 +90,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
           name='fertilizerCheck'
           valuePropName='checked'
         >
-          <Checkbox onChange={onChange}>Did you use any fertilizer during preparations??</Checkbox>
+          <Checkbox indeterminate={isChecked} disabled={isChecked} onChange={onChange}>Did you use any fertilizer during preparations?</Checkbox>
         </Form.Item>
         {isChecked ? (
           <Form.Item
@@ -153,6 +159,19 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
             >
               <Input type='text' />
             </Form.Item>
+            <Form.Item
+              label='Proof Of Transaction with Supplier'
+              name='proofFertilizer'
+              extra={<Text type='secondary'>Upload a proof that you transacted with Supplier. i.e., receipt image</Text>}
+              rules={[
+                {
+                  required: true,
+                  message: 'Required!'
+                }
+              ]}
+            >
+              <Input type='file' onChange={(e) => handleUpload(e, setFertilizerProof)} bordered={false} />
+            </Form.Item>
           </>
         ) : null}
         {type === 'organic' && isChecked ? (
@@ -194,6 +213,19 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
               ]}
             >
               <Input type='text' />
+            </Form.Item>
+            <Form.Item
+              label='Proof Of Transaction with Supplier'
+              name='proofFertilizer'
+              extra={<Text type='secondary'>Upload a proof that you transacted with Supplier. i.e., receipt image</Text>}
+              rules={[
+                {
+                  required: true,
+                  message: 'Required!'
+                }
+              ]}
+            >
+              <Input type='file' onChange={(e) => handleUpload(e, setFertilizerProof)} bordered={false} />
             </Form.Item>
           </>
         ) : null}

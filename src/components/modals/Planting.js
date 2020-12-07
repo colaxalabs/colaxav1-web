@@ -11,6 +11,9 @@ import {
 } from 'antd'
 import Validator from 'validator'
 
+// Utils
+import { handleUpload } from '../../utils'
+
 const { Option } = Select
 const { Text } = Typography
 
@@ -18,6 +21,8 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
   const [form] = Form.useForm()
   const [isChecked, setIsChecked] = useState(false)
   const [type, setType] = useState('')
+  const [fertilizerProof, setFertilizerProof] = useState('')
+  const [seedProof, setSeedProof] = useState()
 
   const onChange = e => {
     setIsChecked(e.target.checked)
@@ -37,7 +42,10 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
       onOk={() => {
         form.validateFields()
           .then((values) => {
+            values.fertilizerProof = fertilizerProof
+            values.seedProof = seedProof
             onCreate(tokenId, values, message)
+            console.log(values)
             onCancel()
           })
           .catch((info) => {
@@ -95,13 +103,26 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
           <Input type='text' />
         </Form.Item>
         <Form.Item
+          label='Proof Of Transaction with Supplier'
+          name='proofSeed'
+          extra={<Text type='secondary'>Upload a proof that you transacted with Supplier. i.e., receipt image</Text>}
+          rules={[
+            {
+              required: true,
+              message: 'Required!'
+            }
+          ]}
+        >
+          <Input type='file' onChange={(e) => handleUpload(e, setSeedProof)} bordered={false} />
+        </Form.Item>
+        <Form.Item
           name='expectedYield'
           label='Expected Yield'
           extra={<Text type='secondary'>What your expected yield this season?</Text>}
           rules={[
             {
               validator: (rule, value) => {
-                if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
+                if (Number(value) !== 0 && Validator.isNumeric(value)) {
                   return Promise.resolve()
                 } else {
                   return Promise.reject('Invalid yield value')
@@ -113,10 +134,28 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
           <Input type='text' />
         </Form.Item>
         <Form.Item
+          name='yieldUnit'
+          label='Yield Unit'
+          extra={<Text type='secondary'>Expected Yield Unit</Text>}
+          rules={[
+            {
+              required: true,
+              message: 'Required'
+            }
+          ]}
+        >
+          <Select
+            placeholder='Yield Unit'
+            allowClear
+          >
+            <Option value='KG'>KILOGRAM</Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
           name='fertilizerCheck'
           valuePropName='checked'
         >
-          <Checkbox onChange={onChange}>Did you use any fertilizer during planting??</Checkbox>
+          <Checkbox indeterminate={isChecked} disabled={isChecked} onChange={onChange}>Did you use any fertilizer during planting?</Checkbox>
         </Form.Item>
         {isChecked ? (
           <Form.Item
@@ -185,6 +224,19 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             >
               <Input type='text' />
             </Form.Item>
+            <Form.Item
+              label='Proof Of Transaction with Supplier'
+              name='proofFertilizer'
+              extra={<Text type='secondary'>Upload a proof that you transacted with Supplier. i.e., receipt image</Text>}
+              rules={[
+                {
+                  required: true,
+                  message: 'Required!'
+                }
+              ]}
+            >
+              <Input type='file' onChange={(e) => handleUpload(e, setFertilizerProof)} bordered={false} />
+            </Form.Item>
           </>
         ) : null}
         {type === 'organic' && isChecked ? (
@@ -228,6 +280,19 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
               ]}
             >
               <Input type='text' />
+            </Form.Item>
+            <Form.Item
+              label='Proof Of Transaction with Supplier'
+              name='proofFertilizer'
+              extra={<Text type='secondary'>Upload a proof that you transacted with Supplier. i.e., receipt image</Text>}
+              rules={[
+                {
+                  required: true,
+                  message: 'Required!'
+                }
+              ]}
+            >
+              <Input type='file' onChange={(e) => handleUpload(e, setFertilizerProof)} bordered={false} />
             </Form.Item>
           </>
         ) : null}
