@@ -4,12 +4,11 @@ import {
   Form,
   Modal,
   Input,
-  Checkbox,
+  Switch,
   Select,
   Typography,
   message,
 } from 'antd'
-import { connect } from 'react-redux'
 import Validator from 'validator'
 
 // Utils
@@ -18,14 +17,14 @@ import { handleUpload } from '../../utils'
 const { Option } = Select
 const { Text } = Typography
 
-function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparation }) {
+function Preparation({ visible, tokenId, onCreate, onCancel }) {
   const [form] = Form.useForm()
   const [isChecked, setIsChecked] = useState(false)
   const [type, setType] = useState('')
   const [fertilizerProof, setFertilizerProof] = useState('')
 
-  const onChange = e => {
-    setIsChecked(e.target.checked)
+  const onChange = checked => {
+    setIsChecked(checked)
   }
 
   const handleSelect = value => {
@@ -37,10 +36,6 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
       visible={visible}
       title='Confirm season preparation'
       okText='Confirm'
-      okButtonProps={{
-        disabled: confirmingPreparation,
-        loading: confirmingPreparation,
-      }}
       cancelText='Close'
       onCancel={onCancel}
       onOk={() => {
@@ -48,7 +43,6 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
           .then((values) => {
             values.fertilizerProof = fertilizerProof
             onCreate(tokenId, values, message)
-            console.log(values)
             onCancel()
           })
           .catch((info) => {
@@ -90,7 +84,12 @@ function Preparation({ visible, tokenId, onCreate, onCancel, confirmingPreparati
           name='fertilizerCheck'
           valuePropName='checked'
         >
-          <Checkbox indeterminate={isChecked} disabled={isChecked} onChange={onChange}>Did you use any fertilizer during preparations?</Checkbox>
+          <Switch
+            checked={isChecked}
+            disabled={isChecked}
+            onChange={onChange}
+            unCheckedChildren={<Text>Did you use any fertilizer during preparation?</Text>}
+          />
         </Form.Item>
         {isChecked ? (
           <Form.Item
@@ -239,14 +238,7 @@ Preparation.propTypes = {
   onCreate: PropTypes.func,
   onCancel: PropTypes.func,
   tokenId: PropTypes.string,
-  confirmingPreparation: PropTypes.bool,
 }
 
-function mapStateToProps(state) {
-  return {
-    confirmingPreparation: state.loading.confirmingPreparation,
-  }
-}
-
-export default connect(mapStateToProps)(Preparation)
+export default Preparation
 

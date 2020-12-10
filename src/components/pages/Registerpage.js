@@ -1,5 +1,10 @@
+import PropTypes from 'prop-types'
 import React from 'react'
-import { Row, Col, Steps } from 'antd'
+import { Row, Col, Steps, message } from 'antd'
+import { connect } from 'react-redux'
+
+// Redux actions
+import { tokenize } from '../../actions'
 
 import { Details, Measurement, UploadDocument } from '../forms'
 
@@ -17,7 +22,7 @@ const steps = [
   }
 ]
 
-function Registerpage() {
+function Registerpage({ tokenize, loaded }) {
 
   const [current, setCurrent] = React.useState(1)
 
@@ -30,7 +35,7 @@ function Registerpage() {
   }
 
   const handleSubmit = (values) => {
-    console.log(values)
+    tokenize(values, message)
   }
 
   return (
@@ -43,11 +48,22 @@ function Registerpage() {
       <Col xs={24} xl={24} className='align_center'>
         {current === 1 && <Details nextPage={nextPage} />}
         {current === 2 && <Measurement prevPage={prevPage} nextPage={nextPage} /> }
-        {current === 3 && <UploadDocument prevPage={prevPage} submit={handleSubmit} />}
+        {current === 3 && <UploadDocument prevPage={prevPage} submit={loaded ? handleSubmit : () => window.alert('Connect wallet!')} />}
       </Col>
     </Row>
   )
 }
 
-export default Registerpage
+Registerpage.propTypes = {
+  loaded: PropTypes.bool,
+  tokenize: PropTypes.func.isRequired,
+}
+
+function mapStateToProps(state) {
+  return {
+    loaded: state.wallet.loaded,
+  }
+}
+
+export default connect(mapStateToProps, { tokenize })(Registerpage)
 

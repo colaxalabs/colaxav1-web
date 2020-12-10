@@ -4,7 +4,7 @@ import {
   Form,
   Modal,
   Input,
-  Checkbox,
+  Switch,
   Typography,
   message,
 } from 'antd'
@@ -23,8 +23,8 @@ function Growth({ tokenId, visible, onCreate, onCancel, confirmingGrowth }) {
   const [pestProof, setPestProof] = useState('')
   const [pesticideProof, setPesticideProof] = useState('')
 
-  const onChange = e => {
-    setIsChecked(e.target.checked)
+  const onChange = checked => {
+    setIsChecked(checked)
   }
 
   return (
@@ -47,7 +47,6 @@ function Growth({ tokenId, visible, onCreate, onCancel, confirmingGrowth }) {
             values.pestProof = pestProof
             values.pesticideProof = pesticideProof
             onCreate(tokenId, values, message)
-            console.log(values)
             onCancel()
             form.resetFields()
           })
@@ -71,7 +70,12 @@ function Growth({ tokenId, visible, onCreate, onCancel, confirmingGrowth }) {
           name='pesticideCheck'
           valuePropName='checked'
         >
-          <Checkbox disabled={isChecked} indeterminate={isChecked} onChange={onChange}>Click this box to confirm you were infested by pest and diseases during crop growth</Checkbox>
+          <Switch
+            disabled={isChecked}
+            onChange={onChange}
+            checked={isChecked}
+            unCheckedChildren={<Text>Any weed pest or disease attack?</Text>}
+          />
         </Form.Item>
           {isChecked ? (
             <>

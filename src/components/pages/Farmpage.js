@@ -71,6 +71,7 @@ const loadingInfo = {
 }
 
 function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking }) {
+
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
   const [openPreparation, setOpenPreparation] = useState(false)
@@ -98,8 +99,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         farm.tokenId = id
         farm.name = _farm.name
         farm.size = _farm.size
-        farm.lon = _farm.longitude
-        farm.lat = _farm.latitude
+        farm.location = _farm.location
         farm.img = _farm.imageHash
         farm.soil = _farm.soil
         farm.season = _farm.season

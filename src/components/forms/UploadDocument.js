@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import { connect } from 'react-redux'
 import { Form, Button, Input, Space } from 'antd'
 
 // Redux store
@@ -8,7 +9,7 @@ import { store } from '../../store'
 // Actions
 import { collectFarmImage } from '../../actions'
 
-function UploadDocument({ submit, prevPage }) {
+function UploadDocument({ submit, prevPage, formSubmitting }) {
 
   const [upload, setUpload] = React.useState()
 
@@ -58,6 +59,8 @@ function UploadDocument({ submit, prevPage }) {
           <Button
             type='primary'
             htmlType='submit'
+            loading={formSubmitting}
+            disabled={formSubmitting}
           >
             Done
           </Button>
@@ -68,8 +71,15 @@ function UploadDocument({ submit, prevPage }) {
 }
 
 UploadDocument.propTypes = {
+  formSubmitting: PropTypes.bool,
   submit: PropTypes.func.isRequired,
 }
 
-export default UploadDocument
+function mapStateToProps(state) {
+  return {
+    formSubmitting: state.loading.formSubmitting,
+  }
+}
+
+export default connect(mapStateToProps)(UploadDocument)
 

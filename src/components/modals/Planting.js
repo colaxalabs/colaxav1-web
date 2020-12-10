@@ -4,7 +4,7 @@ import {
   Form,
   Modal,
   Input,
-  Checkbox,
+  Switch,
   Select,
   Typography,
   message,
@@ -21,11 +21,11 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
   const [form] = Form.useForm()
   const [isChecked, setIsChecked] = useState(false)
   const [type, setType] = useState('')
-  const [fertilizerProof, setFertilizerProof] = useState('')
+  const [fertilizerProof, setFertilizerProof] = useState()
   const [seedProof, setSeedProof] = useState()
 
-  const onChange = e => {
-    setIsChecked(e.target.checked)
+  const onChange = checked => {
+    setIsChecked(checked)
   }
 
   const handleSelect = value => {
@@ -45,7 +45,6 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             values.fertilizerProof = fertilizerProof
             values.seedProof = seedProof
             onCreate(tokenId, values, message)
-            console.log(values)
             onCancel()
           })
           .catch((info) => {
@@ -62,6 +61,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
           seedsSupplier: '',
           expectedYield: '',
           fertilizerCheck: false,
+          fertilizerType: '',
           plantingFertilizer: '',
           fertilizerSupplier: '',
         }}
@@ -151,12 +151,12 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             <Option value='KG'>KILOGRAM</Option>
           </Select>
         </Form.Item>
-        <Form.Item
-          name='fertilizerCheck'
-          valuePropName='checked'
-        >
-          <Checkbox indeterminate={isChecked} disabled={isChecked} onChange={onChange}>Did you use any fertilizer during planting?</Checkbox>
-        </Form.Item>
+        <Switch
+          checked={isChecked}
+          disabled={isChecked}
+          onChange={onChange}
+          unCheckedChildren={<Text>Did you use any fertilizer during planting?</Text>}
+        />
         {isChecked ? (
           <Form.Item
             name='fertilizerType'
@@ -164,15 +164,8 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             extra={<Text type='secondary'>Did you use artificial or organic fertilizer?</Text>}
             rules={[
               {
-                validator: (rule, value) => {
-                  if (isChecked) {
-                    if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
-                      return Promise.resolve()
-                    } else {
-                      return Promise.reject('Select type')
-                    }
-                  }
-                }
+                required: true,
+                message: 'Required!'
               }
             ]}
           >
