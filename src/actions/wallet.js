@@ -38,10 +38,12 @@ export const connectWallet = () => async dispatch => {
   if (isMetaMaskInstalled) {
     window.web3 = new Web3(window.ethereum)
     wallet.address = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    wallet.isMetaMask = window.web3.currentProvider.isMetaMask === undefined ? false : window.web3.currentProvider.isMetaMask
     dispatch(walletConnected({ ...wallet }))
   } else if (window.web3) {
     window.web3 = new Web3(window.web3.currentProvider)
     wallet.address = await window.web3.eth.getAccounts()
+    wallet.isMetaMask = window.web3.currentProvider.isMetaMask === undefined ? false : window.web3.currentProvider.isMetaMask
     dispatch(walletConnected({ ...wallet }))
   } else {
     window.alert('Install Metamask Wallet!')

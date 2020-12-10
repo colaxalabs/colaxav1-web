@@ -87,17 +87,21 @@ const bookingHarvest = status => ({
   status,
 })
 
-export const tokenize = (name, size, lon, lat, file, soil, message) => async dispatch => {
+export const tokenize = (values, message) => async dispatch => {
+  const { farmImage, farmLocation, farmName, farmSize, sizeUnit, soilType } = values
+  const _size = `${farmSize} ${sizeUnit}`
+  const status = {}
+  status.formSubmitting = true
+  dispatch(submitting({ ...status }))
   // Init contracts
   const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
   // Upload file to IPFS
-  const { cid } = await ipfs.add(file)
+  const { cid } = await ipfs.add(farmImage)
   const fileHash = cid.string
   const token = randInt(999, 999999999)
-  const status = {}
   const accounts = await window.web3.eth.getAccounts()
   // Send transaction
-  registryContract.methods.tokenizeLand(name, size, lon, lat, fileHash, soil, token).send({ from: accounts[0] })
+  registryContract.methods.tokenizeLand(farmName, _size, farmLocation, fileHash, soilType, token).send({ from: accounts[0] })
     .on('transactionHash', (hash) => {
       message.info('Confirming transaction...', 5)
     })
@@ -156,9 +160,11 @@ export const confirmPreparation = (tokenId, values, message) => async dispatch =
   if (values.fertilizerCheck) {
     status.confirmingPreparation = true
     dispatch(confirmingPreparation({ ...status }))
-    const { crop, fertilizerSupplier, fertilizerType, fertilizerUsed } = values
+    const { crop, fertilizerProof, fertilizerSupplier, fertilizerType, fertilizerUsed } = values
     const fertilizerName = `${fertilizerType} (${fertilizerUsed})`
-    seasonContract.methods.confirmPreparations(Number(tokenId), crop, fertilizerName, fertilizerSupplier).send({ from: accounts[0] })
+    const { cid } = await ipfs.add(fertilizerProof)
+    const fileHash = cid.string
+    seasonContract.methods.confirmPreparations(Number(tokenId), crop, fertilizerName, fertilizerSupplier, fileHash).send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -182,7 +188,7 @@ export const confirmPreparation = (tokenId, values, message) => async dispatch =
     status.confirmingPreparation = true
     dispatch(confirmingPreparation({ ...status }))
     const { crop } = values
-    seasonContract.methods.confirmPreparations(tokenId, crop, "", "").send({ from: accounts[0] })
+    seasonContract.methods.confirmPreparations(tokenId, crop, "", "", "").send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -193,7 +199,7 @@ export const confirmPreparation = (tokenId, values, message) => async dispatch =
           dispatch(closePreparation({ ...farm }))
           status.confirmingPreparation = false
           dispatch(confirmingPreparation({ ...status }))
-          message.success('Transaction confirmed!', 5)
+          message.success('Confirmed!', 5)
         }
       })
       .on('error', err => {
@@ -209,16 +215,19 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
   // Init contracts
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
   const accounts = await window.web3.eth.getAccounts()
-  // Send tx
   const status = {}
-  const { fertilizerCheck } = values
-  if (fertilizerCheck) {
-    const { expectedYield, yieldUnit, seedsUsed, seedsSupplier, plantingFertilizer, fertilizerType, fertilizerSupplier } = values
+  // Send tx
+  if (values.fertilizerCheck) {
+    status.confirmingPlanting = true
+    dispatch(confirmPlanting({ ...status }))
+    const { expectedYield, yieldUnit, seedsUsed, seedsSupplier, seedProof, plantingFertilizer, fertilizerType, fertilizerSupplier, fertilizerProof } = values
     const fertilizerName = `${fertilizerType} (${plantingFertilizer})}`
     const eYield = `${expectedYield} ${yieldUnit}`
-    status.confirmingPlanting = true
-    dispatch(confirmingPlanting({ ...status }))
-    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, eYield, fertilizerName, fertilizerSupplier).send({ from: accounts[0] })
+    const _f = await ipfs.add(fertilizerProof)
+    const fertHash = _f.cid.string
+    const _s = await ipfs.add(seedProof)
+    const seedHash = _s.cid.string
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, fertilizerName, fertilizerSupplier, fertHash).send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -229,7 +238,7 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
           dispatch(closePlanting({ ...farm }))
           status.confirmingPlanting = false
           dispatch(confirmingPlanting({ ...status }))
-          message.success('Transaction confirmed!', 5)
+          message.success('Confirmed!', 5)
         }
       })
       .on('error', err => {
@@ -239,11 +248,13 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
         console.log(err)
       })
   } else {
-    const { expectedYield, yieldUnit, seedsUsed, seedsSupplier } = values
-    const eYield = `${expectedYield} ${yieldUnit}`
+    const { expectedYield, yieldUnit, seedsUsed, seedsSupplier, seedProof } = values
     status.confirmingPlanting = true
     dispatch(confirmingPlanting({ ...status }))
-    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, eYield, "", "").send({ from: accounts[0] })
+    const eYield = `${expectedYield} ${yieldUnit}`
+    const _s = await ipfs.add(seedProof)
+    const seedHash = _s.cid.string
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, "", "", "").send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -274,10 +285,14 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
   const status = {}
   const { pesticideCheck } = values
   if (pesticideCheck) {
-    const { name, pesticideUsed, pesticideSupplier } = values
+    const { pestName, pestProof, pesticideUsed, pesticideSupplier, pesticideProof } = values
     status.confirmingGrowth = true
     dispatch(confirmingGrowth({ ...status }))
-    seasonContract.methods.confirmGrowth(tokenId, name, pesticideUsed, pesticideSupplier).send({ from: accounts[0] })
+    const _p = await ipfs.add(pestProof)
+    const pestProofHash = _p.cid.string
+    const _pf = await ipfs.add(pesticideProof)
+    const pesticideProofHash = _pf.cid.string
+    seasonContract.methods.confirmGrowth(tokenId, pestName, pestProofHash, pesticideUsed, pesticideSupplier, pesticideProofHash).send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -300,7 +315,7 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
   } else {
     status.confirmingGrowth = true
     dispatch(confirmingGrowth({ ...status }))
-    seasonContract.methods.confirmGrowth(tokenId, "", "", "").send({ from: accounts[0] })
+    seasonContract.methods.confirmGrowth(tokenId, "", "", "", "", "").send({ from: accounts[0] })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -324,19 +339,16 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
 }
 
 export const confirmHarvest = (tokenId, values, message) => async dispatch => {
-  const { file, price, unit, supply } = values
+  const { unit, supply } = values
+  const _supply = `${supply} ${unit}`
   // Init contracts
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
   const accounts = await window.web3.eth.getAccounts()
-  const priceWei = Web3.utils.toWei(price, 'ether')
   // Send tx
   const status = {}
   status.confirmingHarvest = true
   dispatch(confirmingHarvest({ ...status }))
-  // Upload file to IPFS
-  const { cid } = await ipfs.add(file)
-  const fileHash = cid.string
-  seasonContract.methods.confirmHarvesting(tokenId, supply, unit, priceWei, fileHash).send({ from: accounts[0] })
+  seasonContract.methods.confirmHarvesting(tokenId, _supply).send({ from: accounts[0] })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
     })

@@ -8,10 +8,8 @@ import {
 
 const INITIAL_STATE = {
   loaded: false,
-  isMetamask: false,
+  isMetaMask: false,
   address: [],
-  longitude: '0.0',
-  latitude: '0.0'
 }
 
 export function wallet(state = INITIAL_STATE, action = {}) {
@@ -24,13 +22,14 @@ export function wallet(state = INITIAL_STATE, action = {}) {
     case WALLET_FOUND:
       return {
         ...state,
-        isMetamask: action.wallet.isMetamask,
+        isMetaMask: action.wallet.isMetaMask,
       }
     case WALLET_DISCONNECT:
       return {
         ...state,
         address: [],
         loaded: false,
+        isMetaMask: false,
       }
     case LOCATION_ACCESS:
       return {
