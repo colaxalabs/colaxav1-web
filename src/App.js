@@ -11,6 +11,7 @@ import {
   Userpage,
   Farmpage,
   Registerpage,
+  Tracepage,
 } from './components/pages'
 
 // Redux actions
@@ -59,6 +60,7 @@ function App() {
         <Route exact path='/' component={Homepage} />
         <Route exact path='/wallet/' component={Userpage} />
         <Route exact path='/register/' component={Registerpage} />
+        <Route exact path='/trace/' component={Tracepage} />
         <Route path='/farm/:id/' component={Farmpage} />
       </Switch>
     </DesktopContainer>

@@ -112,7 +112,9 @@ class DesktopContainer extends React.Component {
                     Market
                   </Menu.Item>
                   <Menu.Item key='3' icon={<ScanOutlined />}>
-                    Trace
+                    <a href='/trace/'>
+                      Trace
+                    </a>
                   </Menu.Item>
                 </Menu>
               </Sider>
