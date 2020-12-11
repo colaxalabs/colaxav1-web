@@ -5,6 +5,7 @@ import {
   CLOSE_PLANTING,
   CLOSE_GROWTH,
   FINISH_HARVEST,
+  CLOSING_FARM_SEASON,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -50,6 +51,12 @@ export function farm(state = INITIAL_STATE, action = {}) {
         season: action.farm.season,
       }
     case FINISH_HARVEST:
+      return {
+        ...state,
+        season: action.farm.season,
+        completedSeasons: action.farm.completedSeasons,
+      }
+    case CLOSING_FARM_SEASON:
       return {
         ...state,
         season: action.farm.season,

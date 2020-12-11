@@ -10,6 +10,8 @@ import {
   CONFIRMING_GROWTH,
   CONFIRMING_HARVEST,
   BOOKING_HARVEST,
+  CLOSING_SEASON,
+  GOING_TO_MARKET,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -24,6 +26,8 @@ const INITIAL_STATE = {
   confirmingGrowth: false,
   confirmingHarvest: false,
   booking: false,
+  closingSeason: false,
+  goingToMarket: false,
 }
 
 export function loading(state = INITIAL_STATE, action = {}) {
@@ -82,6 +86,16 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         booking: action.status.booking,
+      }
+    case CLOSING_SEASON:
+      return {
+        ...state,
+        closingSeason: action.status.closingSeason,
+      }
+    case GOING_TO_MARKET:
+      return {
+        ...state,
+        goingToMarket: action.status.goingToMarket,
       }
     default:
       return state

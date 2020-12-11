@@ -37,7 +37,7 @@ function Farm({ farm, img }) {
           farm.season === 'Planting' ? '#108ee9' :
           farm.season === 'Crop Growth' ? '#87d068' :
           farm.season === 'Harvesting' ? '#0aa679' :
-        farm.season === 'Booking' ? '#7546C9' : null}>{farm.season}</Tag>} />
+        farm.season === 'Marketing' ? '#7546C9' : null}>{farm.season}</Tag>} />
     </Card>
   )
 }

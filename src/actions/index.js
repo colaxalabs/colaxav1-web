@@ -29,6 +29,7 @@ import {
   confirmGrowth,
   confirmHarvest,
   bookHarvest,
+  seasonClosure,
 } from './farm'
 import {
   collectDetails,
@@ -69,5 +70,6 @@ export {
   collectMeasurements,
   collectFarmImage,
   collectLocation,
+  seasonClosure,
 }
 

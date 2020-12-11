@@ -14,7 +14,7 @@ import { connect } from 'react-redux'
 const { Text } = Typography
 const { Option } = Select
 
-function Harvest({ tokenId, visible, onCreate, onCancel, confirmingHarvest, ethusd }) {
+function Harvest({ tokenId, visible, onCreate, onCancel, ethusd }) {
 
   const [form] = Form.useForm()
 
@@ -23,17 +23,12 @@ function Harvest({ tokenId, visible, onCreate, onCancel, confirmingHarvest, ethu
       visible={visible}
       title='Confirm crop growth'
       okText='Confirm'
-      okButtonProps={{
-        disabled: confirmingHarvest,
-        loading: confirmingHarvest,
-      }}
       cancelText='Close'
       onCancel={onCancel}
       onOk={() => {
         form.validateFields()
           .then((values) => {
-            //onCreate(tokenId, values, message)
-            console.log(values)
+            onCreate(tokenId, values, message)
             onCancel()
           })
           .catch((info) => {
@@ -93,13 +88,11 @@ Harvest.propTypes = {
   onCreate: PropTypes.func,
   onCancel: PropTypes.func,
   tokenId: PropTypes.string,
-  confirmingHarvest: PropTypes.bool,
   ethusd: PropTypes.number,
 }
 
 function mapStateToProps(state) {
   return {
-    confirmingHarvest: state.loading.confirmingHarvest,
     ethusd: Number(state.currency.ethusd),
   }
 }

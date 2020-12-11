@@ -12,6 +12,8 @@ import {
   CONFIRMING_HARVEST,
   FINISH_HARVEST,
   BOOKING_HARVEST,
+  CLOSING_SEASON,
+  CLOSING_FARM_SEASON,
 } from '../types'
 import ipfs from '../ipfs'
 import Web3 from 'web3'
@@ -85,6 +87,16 @@ const finishHarvesting = farm => ({
 const bookingHarvest = status => ({
   type: BOOKING_HARVEST,
   status,
+})
+
+const closing = status => ({
+  type: CLOSING_SEASON,
+  status,
+})
+
+const closingSeason = farm => ({
+  type: CLOSING_FARM_SEASON,
+  farm,
 })
 
 export const tokenize = (values, message) => async dispatch => {
@@ -356,6 +368,7 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
       if (confirmationNumber === 1) {
         const farm = {}
         farm.season = await seasonContract.methods.getSeason(tokenId).call()
+        farm.completedSeasons = await seasonContract.getFarmCompleteSeasons(tokenId).call()
         dispatch(finishHarvesting({ ...farm }))
         status.confirmingHarvest = false
         dispatch(confirmingHarvest({ ...status }))
@@ -365,6 +378,36 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
     .on('error', err => {
       status.confirmingHarvest = false
       dispatch(confirmingHarvest({ ...status }))
+      message.error(`Error: ${err.message}`, 10)
+      console.log(err)
+    })
+}
+
+export const seasonClosure = (tokenId, message) => async dispatch => {
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  // Send tx
+  const status = {}
+  status.closingSeason = true
+  dispatch(closing({ ...status }))
+  seasonContract.methods.closeSeason(tokenId).send({ from: accounts[0] })
+    .on('transactionHash', () => {
+      message.info('Confirming transaction...', 5)
+    })
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
+        const farm = {}
+        farm.season = await seasonContract.methods.getSeason(tokenId).call()
+        dispatch(closingSeason({ ...farm }))
+        status.closingSeason = false
+        dispatch(closing({ ...status }))
+        message.success('Transaction confirmed!', 5)
+      } 
+    })
+    .on('error', err => {
+      status.closingSeason = false
+      dispatch(closing({ ...status }))
       message.error(`Error: ${err.message}`, 10)
       console.log(err)
     })

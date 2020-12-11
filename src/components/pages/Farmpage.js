@@ -27,7 +27,7 @@ import {
   Planting,
   Growth,
   Harvest,
-  Receivership,
+  Closure,
 } from '../modals'
 
 // Redux actions
@@ -41,6 +41,7 @@ import {
   confirmGrowth,
   confirmHarvest,
   bookHarvest,
+  seasonClosure,
 } from '../../actions'
 
 // Redux store
@@ -70,7 +71,7 @@ const loadingInfo = {
   borderRadius: 4,
 }
 
-function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking }) {
+function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure }) {
 
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
@@ -78,7 +79,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
   const [openPlanting, setOpenPlanting] = useState(false)
   const [openGrowth, setOpenGrowth] = useState(false)
   const [openHarvest, setOpenHarvest] = useState(false)
-  const [openConfirmation, setOpenConfirmation] = useState(false)
+  const [openClosing, setOpenClosing] = useState(false)
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
@@ -156,11 +157,6 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
 
   }, [id, wallet.address])
 
-  const onCreate = values => {
-    console.log(values)
-    setOpenPreparation(false)
-  }
-
   const handlePreparation = (tokenId, values, message) => {
     confirmPreparation(tokenId, values, message)
   }
@@ -175,6 +171,10 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
 
   const handleHarvest = (tokenId, values, message) => {
     confirmHarvest(tokenId, values, message)
+  }
+
+  const handleClosure = (tokenId, message) => {
+    seasonClosure(tokenId, message)
   }
 
   return (
@@ -245,22 +245,86 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           farm.season === 'Planting' ? '#108ee9' :
           farm.season === 'Crop Growth' ? '#87d068' :
           farm.season === 'Harvesting' ? '#0aa679' :
-        farm.season === 'Booking' ? '#7546C9' : null}>{farm.season}</Tag>}
+        farm.season === 'Marketing' ? '#7546C9' : null}>{farm.season}</Tag>}
                 />
               </Card>
-              {farm.season === 'Dormant' && isOwner ? <Button disabled={opening} loading={opening} style={{ width: 320, marginTop: 8 }} onClick={() => openSeason(id, message)}>Open Season</Button> :
-                  farm.season === 'Preparation' && isOwner ? <Button disabled={closingPreparation} loading={closingPreparation} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPreparation(true)}>Confirm Preparation</Button> :
-                  farm.season === 'Planting' && isOwner ? <Button disabled={closingPlanting} loading={closingPlanting} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenPlanting(true)}>Confirm Planting</Button> :
-                  farm.season === 'Crop Growth' && isOwner ? <Button disabled={closingGrowth} loading={closingGrowth} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenGrowth(true)}>Confirm Growth</Button> :
-                  farm.season === 'Harvesting' && isOwner ? <Button disabled={closingHarvest} loading={closingHarvest} style={{ width: 320, marginTop: 8 }} onClick={() => setOpenHarvest(true)}>Confirm Harvest</Button> :
-                  farm.season === 'Booking' && isOwner ? <Button style={{ width: 320, marginTop: 8 }} onClick={() => setOpenConfirmation(true)}>Close Season</Button> : null}
+              {farm.season === 'Dormant' && isOwner ? (
+                <Button
+                  disabled={opening}
+                  loading={opening}
+                  style={{ width: 320, marginTop: 8 }}
+                  onClick={() => openSeason(id, message)}
+                >
+                  Open Season
+                </Button>
+              ) :
+                  farm.season === 'Preparation' && isOwner ? (
+                    <Button
+                      disabled={closingPreparation}
+                      loading={closingPreparation}
+                      style={{ width: 320, marginTop: 8 }}
+                      onClick={() => setOpenPreparation(true)}
+                    >
+                      Confirm Preparation
+                    </Button>
+                  ) :
+                  farm.season === 'Planting' && isOwner ? (
+                    <Button
+                      disabled={closingPlanting}
+                      loading={closingPlanting}
+                      style={{ width: 320, marginTop: 8 }}
+                      onClick={() => setOpenPlanting(true)}
+                    >
+                      Confirm Planting
+                    </Button>
+                  ) :
+                  farm.season === 'Crop Growth' && isOwner ? (
+                    <Button
+                      disabled={closingGrowth}
+                      loading={closingGrowth}
+                      style={{ width: 320, marginTop: 8 }}
+                      onClick={() => setOpenGrowth(true)}
+                    >
+                      Confirm Growth
+                    </Button>
+                  ) :
+                  farm.season === 'Harvesting' && isOwner ? (
+                    <Button
+                      disabled={closingHarvest}
+                      loading={closingHarvest}
+                      style={{ width: 320, marginTop: 8 }}
+                      onClick={() => setOpenHarvest(true)}
+                    >
+                      Confirm Harvest
+                    </Button>
+                  ) :
+                  farm.season === 'Marketing' && isOwner ? (
+                    <Space size='large' split={<Text type='secondary'>OR</Text>} style={{ marginTop: '10px' }}>
+                      <Button
+                        type='primary'
+                        danger
+                        disabled={closingSeason}
+                        loading={closingSeason}
+                        onClick={() => setOpenClosing(true)}
+                      >
+                        Close Season
+                      </Button>
+                      <Button
+                        type='primary'
+                        disabled={goingToMarket}
+                        loading={goingToMarket}
+                      >
+                        Go To Market
+                      </Button>
+                    </Space>
+                  ) : null}
             </>
           )}
           <Preparation tokenId={id} visible={openPreparation} onCreate={handlePreparation} onCancel={() => setOpenPreparation(false)} />
           <Planting tokenId={id} visible={openPlanting} onCreate={handlePlanting} onCancel={() => setOpenPlanting(false)} />
           <Growth tokenId={id} visible={openGrowth} onCreate={handleGrowth} onCancel={() => setOpenGrowth(false)} />
           <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
-          <Receivership tokenId={id} visible={openConfirmation} onCreate={onCreate} onCancel={() => setOpenConfirmation(false)} />
+          <Closure tokenId={id} visible={openClosing} onCreate={handleClosure} cancel={() => setOpenClosing(false)} />
         </Col>
         <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (
@@ -286,7 +350,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           farm.season === 'Planting' ? '#108ee9' :
           farm.season === 'Crop Growth' ? '#87d068' :
           farm.season === 'Harvesting' ? '#0aa679' :
-        farm.season === 'Booking' ? '#7546C9' : null}>{farm.season}</Tag>
+        farm.season === 'Marketing' ? '#7546C9' : null}>{farm.season}</Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label='#tokenId'>{farm.tokenId}</Descriptions.Item>
               </Descriptions>
@@ -320,6 +384,9 @@ Farmpage.propTypes = {
   closingHarvest: PropTypes.bool,
   bookHarvest: PropTypes.func,
   isBooking: PropTypes.bool,
+  closingSeason: PropTypes.bool,
+  goingToMarket: PropTypes.bool,
+  seasonClosure: PropTypes.func,
 }
 
 function mapStateToProps(state) {
@@ -334,6 +401,8 @@ function mapStateToProps(state) {
     closingGrowth: state.loading.confirmingGrowth,
     closingHarvest: state.loading.confirmingHarvest,
     isBooking: state.loading.booking,
+    closingSeason: state.loading.closingSeason,
+    goingToMarket: state.loading.goingToMarket,
   }
 }
 
@@ -344,5 +413,6 @@ export default connect(mapStateToProps, {
   confirmGrowth,
   confirmHarvest,
   bookHarvest,
+  seasonClosure,
 })(Farmpage)
 
