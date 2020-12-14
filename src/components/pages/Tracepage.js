@@ -66,7 +66,6 @@ function Tracepage() {
         season.harvestDate = resp.harvestDate
         season.harvestSupply = resp.harvestSupply
         setResult(season)
-        console.log(result)
         setVisible(false)
       } else {
         setResult(undefined)
