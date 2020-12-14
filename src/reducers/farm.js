@@ -13,6 +13,7 @@ const INITIAL_STATE = {
   totalBookings: 0,
   txs: 0,
   season: '',
+  seasonMarketed: false,
   img: '',
   owner: '',
   lat: 0.0,
@@ -22,6 +23,7 @@ const INITIAL_STATE = {
   location: '',
   currentSeason: '',
   soil: '',
+  currentSeasonSupply: 0,
   farmBookings: [],
 }
 

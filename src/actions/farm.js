@@ -368,7 +368,7 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
       if (confirmationNumber === 1) {
         const farm = {}
         farm.season = await seasonContract.methods.getSeason(tokenId).call()
-        farm.completedSeasons = await seasonContract.getFarmCompleteSeasons(tokenId).call()
+        farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(tokenId).call()
         dispatch(finishHarvesting({ ...farm }))
         status.confirmingHarvest = false
         dispatch(confirmingHarvest({ ...status }))
