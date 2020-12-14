@@ -11,7 +11,7 @@ import { initContract } from '../../utils'
 import Season from '../../abis/Season.json'
 import Contracts from '../../contracts.json'
 
-const dummyHash = '0xca0cfa03651c71fc80a8d1c321279bb6e51b662b5069e0c9d49116a1995db85c'
+//const dummyHash = '0xca0cfa03651c71fc80a8d1c321279bb6e51b662b5069e0c9d49116a1995db85c'
 
 const { Text } = Typography
 
@@ -34,12 +34,12 @@ function Tracepage() {
           console.log(season)
         } else {
           setVisible(false)
-          setResolveStatus('Not Recognized! Try again.')
+          setResolveStatus('Trace ID not recognized!')
           return
         }
       } else {
         setVisible(false)
-        setResolveStatus('Invalid hash value!')
+        setResolveStatus('Invalid trace ID!')
         return
       }
       return
@@ -63,9 +63,9 @@ function Tracepage() {
         visible={visible}
         title='Place your QR code at the center'
         onCancel={() => setVisible(false)}
+        footer={null}
       >
         <QrReader
-          delay={300}
           onError={(err) => console.log(err)}
           onScan={handleScan}
           style={{ width: '100%' }}
