@@ -20,6 +20,7 @@ const INITIAL_STATE = {
   completedSeasons: 0,
   size: '',
   location: '',
+  currentSeason: '',
   soil: '',
   farmBookings: [],
 }

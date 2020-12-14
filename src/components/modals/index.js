@@ -3,6 +3,7 @@ import Planting from './Planting'
 import Growth from './Growth'
 import Harvest from './Harvest'
 import Closure from './Receivership'
+import QR from './QR'
 
 export {
   Preparation,
@@ -10,5 +11,6 @@ export {
   Growth,
   Harvest,
   Closure,
+  QR,
 }
 

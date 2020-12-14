@@ -17,6 +17,7 @@
     "history": "^5.0.0",
     "ipfs-http-client": "^48.0.0",
     "prop-types": "^15.7.2",
+    "qrcode.react": "^1.0.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-load-script": "0.0.6",

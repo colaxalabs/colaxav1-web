@@ -28,6 +28,7 @@ import {
   Growth,
   Harvest,
   Closure,
+  QR,
 } from '../modals'
 
 // Redux actions
@@ -80,6 +81,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
   const [openGrowth, setOpenGrowth] = useState(false)
   const [openHarvest, setOpenHarvest] = useState(false)
   const [openClosing, setOpenClosing] = useState(false)
+  const [openQr, setOpenQr] = useState(false)
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
@@ -105,6 +107,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         farm.soil = _farm.soil
         farm.season = _farm.season
         farm.owner = _farm.owner
+        farm.currentSeason = await seasonContract.methods.currentSeason(Number(farm.tokenId)).call()
         setIsOwner(String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase())
         farm.totalBookings = await marketContract.methods.totalMarketBookers(farm.tokenId).call()
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(farm.tokenId).call()
@@ -175,6 +178,17 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
 
   const handleClosure = (tokenId, message) => {
     seasonClosure(tokenId, message)
+  }
+
+  const downloadQR = (_id, _season) => {
+    const canvas = document.getElementById(`${id + farm.currentSeason}`)
+    const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream')
+    let downloadLink = document.createElement('a')
+    downloadLink.href = pngUrl
+    downloadLink.download = `${Number(_id) + Number(_season)}.png`
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
   }
 
   return (
@@ -316,6 +330,12 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                       >
                         Go To Market
                       </Button>
+                      <Button
+                        type='link'
+                        onClick={() => setOpenQr(true)}
+                      >
+                        Get Trace ID
+                      </Button>
                     </Space>
                   ) : null}
             </>
@@ -325,6 +345,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           <Growth tokenId={id} visible={openGrowth} onCreate={handleGrowth} onCancel={() => setOpenGrowth(false)} />
           <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
           <Closure tokenId={id} visible={openClosing} onCreate={handleClosure} cancel={() => setOpenClosing(false)} />
+          <QR tokenId={id} runningSeason={farm.currentSeason} visible={openQr} onClick={downloadQR} cancel={() => setOpenQr(false)} />
         </Col>
         <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (
