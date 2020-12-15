@@ -35,6 +35,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
   return (
     <Modal
       visible={visible}
+      centered
       title='Confirm season planting'
       okText='Confirm'
       cancelText='Close'

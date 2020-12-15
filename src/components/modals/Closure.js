@@ -15,6 +15,7 @@ function Closure({ visible, onCreate, cancel, tokenId }) {
   return (
     <Modal
       visible={visible}
+      centered
       title='Closing Season'
       okText='Confirm'
       cancelText='Close'

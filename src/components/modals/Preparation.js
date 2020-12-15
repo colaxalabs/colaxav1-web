@@ -34,6 +34,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
   return (
     <Modal
       visible={visible}
+      centered
       title='Confirm season preparation'
       okText='Confirm'
       cancelText='Close'

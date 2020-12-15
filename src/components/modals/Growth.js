@@ -30,6 +30,7 @@ function Growth({ tokenId, visible, onCreate, onCancel, confirmingGrowth }) {
   return (
     <Modal
       visible={visible}
+      centered
       title='Confirm crop growth'
       okText='Confirm'
       okButtonProps={{

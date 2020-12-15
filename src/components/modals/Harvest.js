@@ -21,6 +21,7 @@ function Harvest({ tokenId, visible, onCreate, onCancel, ethusd }) {
   return (
     <Modal
       visible={visible}
+      centered
       title='Confirm crop growth'
       okText='Confirm'
       cancelText='Close'
