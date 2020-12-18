@@ -11,6 +11,7 @@ import { store, persistor } from './store'
 import history from './history'
 import * as serviceWorker from './serviceWorker';
 
+// Styling and fonts
 import './index.css'
 import './fonts/Apercu.ttf'
 
