@@ -48,7 +48,7 @@ class DesktopContainer extends React.Component {
 
   render() {
 
-    const { children, walletLoaded, wallet, connectWallet, disconnectWallet } = this.props
+    const { children, walletLoaded, wallet, isMetamask, connectWallet, disconnectWallet } = this.props
     const menu = (
       <Menu>
         <Menu.Item icon={<UserOutlined />}>
@@ -139,7 +139,10 @@ class DesktopContainer extends React.Component {
                       <Button
                         size='large'
                         type='primary'
-                        onClick={connectWallet}
+                        onClick={isMetamask ? connectWallet : () => {
+                          window.alert('You need MetaMask wallet to interact with decentralized applications(dAPP). We are redirecting you to install MetaMask.')
+                          window.location.assign('https://metamask.io/download.html')
+                        }}
                       >
                         Connect Wallet
                       </Button>
@@ -167,12 +170,14 @@ DesktopContainer.propTypes = {
   wallet: PropTypes.object,
   connectWallet: PropTypes.func,
   disconnectWallet: PropTypes.func,
+  isMetamask: PropTypes.bool,
 }
 
 function mapStateToProps(state) {
   return {
     walletLoaded: state.wallet.loaded,
     wallet: state.wallet,
+    isMetamask: state.wallet.isMetaMask,
   }
 }
 

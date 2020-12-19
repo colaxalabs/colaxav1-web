@@ -6,6 +6,9 @@ import { Provider } from 'react-redux'
 // Redux persistor gate
 import { PersistGate } from 'redux-persist/integration/react'
 
+// Utils
+import { loadWeb3 } from './utils'
+
 import App from './App';
 import { store, persistor } from './store'
 import history from './history'
@@ -14,6 +17,8 @@ import * as serviceWorker from './serviceWorker';
 // Styling and fonts
 import './index.css'
 import './fonts/Apercu.ttf'
+
+loadWeb3()
 
 ReactDOM.render(
   <React.StrictMode>

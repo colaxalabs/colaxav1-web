@@ -29,7 +29,6 @@ export function wallet(state = INITIAL_STATE, action = {}) {
         ...state,
         address: [],
         loaded: false,
-        isMetaMask: false,
       }
     case LOCATION_ACCESS:
       return {

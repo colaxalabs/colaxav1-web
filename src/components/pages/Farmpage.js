@@ -15,8 +15,9 @@ import {
   Empty,
   Button,
   message,
+  Modal,
 } from 'antd'
-import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { ExclamationCircleOutlined, LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
 
 // Components
@@ -72,7 +73,7 @@ const loadingInfo = {
   borderRadius: 4,
 }
 
-function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure }) {
+function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure, network }) {
 
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
@@ -196,6 +197,25 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
 
   return (
     <>
+      <Modal
+        centered
+        footer={null}
+        visible={network !== 4 && window.ethereum}
+        closable={false}
+      >
+        <Space>
+          <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: 20 }} />
+          <Text>
+            Current network {
+              network === 1 ? 'Mainnet' : 
+              network === 3 ? 'Ropsten' :
+              network === 4 ? 'Rinkeby' :
+              network === 5 ? 'Goerli' : 
+              network === 42 ? 'Kovan' : 'Localhost'}.
+            Change your network to Rinkeby.
+          </Text>
+        </Space>
+      </Modal>
       {farm.notFound ? (
         <Empty description='Not Found' style={{ marginTop: '150px' }} />
       ) : (
@@ -413,6 +433,7 @@ Farmpage.propTypes = {
   closingSeason: PropTypes.bool,
   goingToMarket: PropTypes.bool,
   seasonClosure: PropTypes.func,
+  network: PropTypes.number,
 }
 
 function mapStateToProps(state) {
@@ -429,6 +450,7 @@ function mapStateToProps(state) {
     isBooking: state.loading.booking,
     closingSeason: state.loading.closingSeason,
     goingToMarket: state.loading.goingToMarket,
+    network: state.network.currentNetwork,
   }
 }
 

@@ -35,7 +35,7 @@ export function loading(state = INITIAL_STATE, action = {}) {
     case DASHBOARD_LOADING:
       return {
         ...state,
-        dashboardLoading: action.loading.dashLoading,
+        dashLoading: action.loading.dashLoading,
       }
     case USER_DASH_LOADING:
       return {
