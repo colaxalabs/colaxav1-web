@@ -1,4 +1,6 @@
+import PropTypes from 'prop-types'
 import React, { useEffect } from 'react';
+import { connect } from 'react-redux'
 import { Switch, Route } from 'react-router-dom'
 import Web3 from 'web3'
 
@@ -13,6 +15,7 @@ import {
   Registerpage,
   Tracepage,
 } from './components/pages'
+import { InfiniteModal } from './components/modals'
 
 // Redux actions
 import {
@@ -29,7 +32,7 @@ import { store } from './store'
 
 import './App.less'
 
-function App() {
+function App({ network }) {
 
   const isMetamaskInstalled = typeof window.ethereum !== 'undefined'
 
@@ -56,6 +59,7 @@ function App() {
 
   return (
     <DesktopContainer>
+      <InfiniteModal network={network} />
       <Switch>
         <Route exact path='/' component={Homepage} />
         <Route exact path='/wallet/' component={Userpage} />
@@ -67,5 +71,15 @@ function App() {
   );
 }
 
-export default App;
+App.propTypes = {
+  network: PropTypes.number,
+}
+
+function mapStateToProps(state) {
+  return {
+    network: state.network.currentNetwork,
+  }
+}
+
+export default connect(mapStateToProps)(App);
 

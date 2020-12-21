@@ -105,7 +105,7 @@ const columns = [
   }
 ]
 
-function User({ tokenize, wallet, userData, isLoading, usdRate }) {
+function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
 
   useEffect(() => {
 
@@ -176,7 +176,7 @@ function User({ tokenize, wallet, userData, isLoading, usdRate }) {
 
     return () => clearInterval(interval)
 
-  }, [wallet])
+  }, [wallet, network])
 
   return (
     <div>
@@ -257,6 +257,7 @@ User.propTypes = {
   wallet: PropTypes.array,
   userData: PropTypes.object,
   tokenize: PropTypes.func,
+  network: PropTypes.number,
 }
 
 function mapStateToProps(state) {
@@ -265,6 +266,7 @@ function mapStateToProps(state) {
     usdRate: Number(state.currency.ethusd),
     wallet: state.wallet.address,
     userData: state.user,
+    network: state.network.currentNetwork,
   }
 }
 

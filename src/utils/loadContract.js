@@ -2,7 +2,7 @@ import Contract from 'web3-eth-contract'
 
 export function initContract(contract, contractAddress) {
   // Set provider for all instances
- const isWeb3Window = typeof window.web3 !== 'undefined'
+  const isWeb3Window = typeof window.ethereum !== 'undefined'
   if (isWeb3Window) {
     Contract.setProvider(window.web3.currentProvider)
   } else {

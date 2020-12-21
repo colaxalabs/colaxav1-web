@@ -15,9 +15,8 @@ import {
   Empty,
   Button,
   message,
-  Modal,
 } from 'antd'
-import { ExclamationCircleOutlined, LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
 
 // Components
@@ -162,7 +161,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
 
     return () => clearInterval(interval)
 
-  }, [id, wallet.address])
+  }, [id, network, wallet.address])
 
   const handlePreparation = (tokenId, values, message) => {
     confirmPreparation(tokenId, values, message)
@@ -197,25 +196,6 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
 
   return (
     <>
-      <Modal
-        centered
-        footer={null}
-        visible={network !== 4 && window.ethereum}
-        closable={false}
-      >
-        <Space>
-          <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: 20 }} />
-          <Text>
-            Current network {
-              network === 1 ? 'Mainnet' : 
-              network === 3 ? 'Ropsten' :
-              network === 4 ? 'Rinkeby' :
-              network === 5 ? 'Goerli' : 
-              network === 42 ? 'Kovan' : 'Localhost'}.
-            Change your network to Rinkeby.
-          </Text>
-        </Space>
-      </Modal>
       {farm.notFound ? (
         <Empty description='Not Found' style={{ marginTop: '150px' }} />
       ) : (

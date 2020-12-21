@@ -6,10 +6,8 @@ import {
   Col,
 } from 'antd'
 import { connect } from 'react-redux'
-import { Modal, Typography, Space } from 'antd'
 import {
   LoadingOutlined,
-  ExclamationCircleOutlined,
 } from '@ant-design/icons'
 
 // Components
@@ -41,9 +39,7 @@ import {
   loadCurrency,
 } from '../../actions'
 
-const { Text } = Typography
-
-function Homepage({ dash, network, isLoading, usdRate, isMetamask }) {
+function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
@@ -113,29 +109,10 @@ function Homepage({ dash, network, isLoading, usdRate, isMetamask }) {
 
     return () => clearInterval(interval)
 
-  }, [])
+  }, [wallet, network])
 
   return (
     <>
-      <Modal
-        centered
-        footer={null}
-        visible={network !== 4 && window.ethereum}
-        closable={false}
-      >
-        <Space>
-          <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: 20 }} />
-          <Text>
-            Current network {
-              network === 1 ? 'Mainnet' : 
-              network === 3 ? 'Ropsten' :
-              network === 4 ? 'Rinkeby' :
-              network === 5 ? 'Goerli' : 
-              network === 42 ? 'Kovan' : 'Localhost'}.
-            Change your network to Rinkeby.
-          </Text>
-        </Space>
-      </Modal>
       <Row justify='center' align='middle'>
         <Col xs={24} xl={6} className='column_con'>
           {isLoading ? (
@@ -205,6 +182,7 @@ Homepage.propTypes = {
   usdRate: PropTypes.number,
   network: PropTypes.number,
   isMetamask: PropTypes.bool,
+  wallet: PropTypes.array,
 }
 
 function mapStateToProps(state) {
@@ -214,6 +192,7 @@ function mapStateToProps(state) {
     dash: state.dashboard,
     network: state.network.currentNetwork,
     isMetamask: state.wallet.isMetaMask,
+    wallet: state.wallet.address,
   }
 }
 

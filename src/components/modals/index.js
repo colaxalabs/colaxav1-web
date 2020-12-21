@@ -4,6 +4,7 @@ import Growth from './Growth'
 import Harvest from './Harvest'
 import Closure from './Closure'
 import QR from './QR'
+import InfiniteModal from './Infinitemodal'
 
 export {
   Preparation,
@@ -12,5 +13,6 @@ export {
   Harvest,
   Closure,
   QR,
+  InfiniteModal,
 }
 

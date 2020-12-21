@@ -165,7 +165,7 @@ class DesktopContainer extends React.Component {
 }
 
 DesktopContainer.propTypes = {
-  children: PropTypes.object,
+  children: PropTypes.array,
   walletLoaded: PropTypes.bool,
   wallet: PropTypes.object,
   connectWallet: PropTypes.func,
