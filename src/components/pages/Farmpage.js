@@ -30,6 +30,7 @@ import {
   Closure,
   QR,
 } from '../modals'
+import { Line } from '../charts'
 
 // Redux actions
 import {
@@ -385,6 +386,13 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         </Col>
       </Row>
       <Row justify='center' align='center'>
+        {isLoading ? (
+          <div style={{ ...loadingInfo, height: 350, width: '100%' }}>
+            <LoadingOutlined stype={{ marginTop: '50px' }} />
+          </div>
+        ) : (
+          <Line />
+        )}
       </Row>
         </>
       )}
