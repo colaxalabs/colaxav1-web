@@ -44,7 +44,7 @@ function Line() {
         options: {
           title: {
             display: true,
-            text: 'Supply (KG)',
+            text: 'Production (KG)',
             fontSize: 35
           },
           
