@@ -130,9 +130,9 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             <Loading />
           ) : (
             <Stats
-              title='Markets'
-              description='Number of created markets'
-              dispValue={dash.markets}
+              title='Traces'
+              description='Number of performed traces'
+              dispValue={dash.traces}
             />
           )}
         </Col>
@@ -141,9 +141,9 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             <Loading />
           ) : (
             <Stats
-              title='Traces'
-              description='Number of performed traces'
-              dispValue={dash.traces}
+              title='Markets'
+              description='Number of created markets'
+              dispValue={dash.markets}
             />
           )}
         </Col>
