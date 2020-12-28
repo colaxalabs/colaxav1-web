@@ -253,7 +253,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                     <Button
                       disabled={opening}
                       loading={opening}
-                      style={{ width: 320, marginTop: 8 }}
+                      type='link'
                       onClick={() => openSeason(id, message)}
                     >
                       Open Season
@@ -263,7 +263,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                     <Button
                       disabled={closingPreparation}
                       loading={closingPreparation}
-                      style={{ width: 320, marginTop: 8 }}
+                      type='link'
                       onClick={() => setOpenPreparation(true)}
                     >
                       Confirm Preparation
@@ -273,7 +273,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                     <Button
                       disabled={closingPlanting}
                       loading={closingPlanting}
-                      style={{ width: 320, marginTop: 8 }}
+                      type='link'
                       onClick={() => setOpenPlanting(true)}
                     >
                       Confirm Planting
@@ -283,7 +283,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                     <Button
                       disabled={closingGrowth}
                       loading={closingGrowth}
-                      style={{ width: 320, marginTop: 8 }}
+                      type='link'
                       onClick={() => setOpenGrowth(true)}
                     >
                       Confirm Growth
@@ -293,7 +293,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                     <Button
                       disabled={closingHarvest}
                       loading={closingHarvest}
-                      style={{ width: 320, marginTop: 8 }}
+                      type='link'
                       onClick={() => setOpenHarvest(true)}
                     >
                       Confirm Harvest

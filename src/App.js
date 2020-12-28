@@ -32,7 +32,7 @@ import { store } from './store'
 
 import './App.less'
 
-function App({ network }) {
+function App({ network, isMetamask }) {
 
   const isMetamaskInstalled = typeof window.ethereum !== 'undefined'
 
@@ -59,7 +59,7 @@ function App({ network }) {
 
   return (
     <DesktopContainer>
-      <InfiniteModal network={network} />
+      <InfiniteModal network={network} isMetamask={isMetamask} />
       <Switch>
         <Route exact path='/' component={Homepage} />
         <Route exact path='/wallet/' component={Userpage} />
@@ -73,11 +73,13 @@ function App({ network }) {
 
 App.propTypes = {
   network: PropTypes.number,
+  isMetamask: PropTypes.bool,
 }
 
 function mapStateToProps(state) {
   return {
     network: state.network.currentNetwork,
+    isMetamask: state.wallet.isMetaMask,
   }
 }
 

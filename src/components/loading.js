@@ -13,7 +13,7 @@ const loadingInfo = {
 function Loading() {
   return (
     <div style={loadingInfo} className='head_line_con'>
-      <LoadingOutlined style={{ marginTop: '20px' }} />
+      <LoadingOutlined />
     </div>
   )
 }

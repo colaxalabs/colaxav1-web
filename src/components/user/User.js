@@ -179,7 +179,7 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
   }, [wallet, network])
 
   return (
-    <div>
+    <>
       <Row justify='center' align='center'>
         <Col xs={24} xl={8} className='column_con'>
           {isLoading ? (
@@ -215,22 +215,24 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
           )}
         </Col>
       </Row>
-      <Row className='site-layout-background' style={{ padding: '0 20px' }} justify='center' align='center'>
+      <Row>
         {isLoading ? (
           <Col xs={24} xl={24} className='column_con' style={{ height: '300px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
             <LoadingOutlined />
           </Col>
         ) : (
           <Col xs={24} xl={24} className='column_con'>
-            <Tabs>
+            <Tabs type='card'>
               <TabPane tab='Farms' key='1'>
                 <Row>
                   {userData.userFarms.length === 0 ? (
-                    <Nofarm />
+                    <Col xs={24} xl={24} className='column_con'>
+                      <Nofarm />
+                    </Col>
                   ) : (
                     userData.userFarms.map(userFarm => (
                       <Col key={userFarm.tokenId} xs={24} xl={8} className='column_con'>
-                        <Farm farm={userFarm} img={userFarm.imageHash}/>
+                        <Farm farm={userFarm} img={userFarm.imageHash} />
                       </Col>
                     ))
                   )}
@@ -247,7 +249,7 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
           </Col>
         )}
       </Row>
-    </div>
+    </>
   )
 }
 

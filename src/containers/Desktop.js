@@ -12,7 +12,6 @@ import {
 } from 'antd'
 import {
   PlusCircleOutlined,
-  GlobalOutlined,
   ScanOutlined,
   SwapOutlined,
   MenuUnfoldOutlined,
@@ -88,7 +87,6 @@ class DesktopContainer extends React.Component {
             >
                 <Menu mode="inline">
                   <Menu.Item
-                    disabled
                     icon={
                       <Image
                         width={40}
@@ -99,7 +97,9 @@ class DesktopContainer extends React.Component {
                     }
                     style={{ fontSize: '32px', marginBottom: '30px', fontWeight: 'bold' }}
                   >
-                    Reap
+                    <a href='/'>
+                      Reap
+                    </a>
                   </Menu.Item>
                   <SubMenu key='sub1' icon={<SwapOutlined />} title='Tokenization'>
                     <Menu.Item key='1' icon={<PlusCircleOutlined />}>
@@ -108,9 +108,6 @@ class DesktopContainer extends React.Component {
                       </a>
                     </Menu.Item>
                   </SubMenu>
-                  <Menu.Item key='2' icon={<GlobalOutlined />}>
-                    Market
-                  </Menu.Item>
                   <Menu.Item key='3' icon={<ScanOutlined />}>
                     <a href='/trace/'>
                       Trace

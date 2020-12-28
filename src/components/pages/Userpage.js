@@ -7,13 +7,13 @@ import { Nowallet, User } from '../user'
 
 function Userpage({ isWalletConnected }) {
   return (
-    <div>
+    <>
       {isWalletConnected ? (
         <User />
       ) : (
         <Nowallet /> 
       )}
-    </div>
+    </>
   )
 }
 

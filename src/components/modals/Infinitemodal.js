@@ -5,12 +5,12 @@ import { ExclamationCircleOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
 
-function InfiniteModal({ network }) {
+function InfiniteModal({ network, isMetamask }) {
   return (
     <Modal
       centered
       footer={null}
-      visible={network !== 4 && window.ethereum}
+      visible={network !== 4 && window.ethereum && isMetamask}
       closable={false}
     >
       <Space>
