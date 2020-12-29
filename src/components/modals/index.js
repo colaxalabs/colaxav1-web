@@ -5,6 +5,7 @@ import Harvest from './Harvest'
 import Closure from './Closure'
 import QR from './QR'
 import InfiniteModal from './Infinitemodal'
+import MarketModal from './Market'
 
 export {
   Preparation,
@@ -14,5 +15,6 @@ export {
   Closure,
   QR,
   InfiniteModal,
+  MarketModal,
 }
 

@@ -14,6 +14,8 @@ import {
   BOOKING_HARVEST,
   CLOSING_SEASON,
   CLOSING_FARM_SEASON,
+  GOING_TO_MARKET,
+  SEASON_MARKETED,
 } from '../types'
 import ipfs from '../ipfs'
 import Web3 from 'web3'
@@ -22,6 +24,7 @@ import { randInt, initContract } from '../utils'
 // Contracts
 import Registry from '../abis/FRMRegistry.json'
 import Season from '../abis/Season.json'
+import Market from '../abis/Market.json'
 import Contracts from '../contracts.json'
 
 export const loadFarm = farm => ({
@@ -96,6 +99,16 @@ const closing = status => ({
 
 const closingSeason = farm => ({
   type: CLOSING_FARM_SEASON,
+  farm,
+})
+
+const goingtoMarket = status => ({
+  type: GOING_TO_MARKET,
+  status,
+})
+
+const seasonMarketed = farm => ({
+  type: SEASON_MARKETED,
   farm,
 })
 
@@ -437,6 +450,40 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
     .on('error', err => {
       status.booking = false
       dispatch(bookingHarvest({ ...status }))
+      message.error(`Error: ${err.message}`, 10)
+    })
+}
+
+export const gotoMarket = (tokenId, values, message) => async dispatch => {
+  const { price, supply, unit } = values
+  // Init contracts
+  const marketContract = initContract(Market, Contracts['4'].Market[0])
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  // Send tx
+  const accounts = await window.web3.eth.getAccounts()
+  const status = {}
+  const farm = {}
+  status.goingToMarket = true
+  dispatch(goingtoMarket({ ...status }))
+  marketContract.methods.createMarket(Number(tokenId), Web3.utils.toWei(String(price), 'ether'), Number(supply), unit).send({ from: accounts[0] })
+    .on('transactionHash', () => {
+      message.info('Confirming transactions...', 5)
+    })
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
+        status.goingToMarket = false
+        const _season = await seasonContract.methods.currentSeason(Number(tokenId)).call()
+        farm.seasonMarketed = await marketContract.methods.isSeasonMarketed(Number(tokenId), _season).call()
+        const _market = await marketContract.methods.getCurrentFarmMarket(Number(tokenId)).call()
+        farm.currentSeasonSupply = _market.remainingSupply
+        dispatch(seasonMarketed({ ...farm }))
+        dispatch(goingtoMarket({ ...status }))
+        message.success('Transaction confirmed!', 5)
+      }
+    })
+    .on('error', err => {
+      status.goingToMarket = false
+      dispatch(goingtoMarket({ ...status }))
       message.error(`Error: ${err.message}`, 10)
     })
 }

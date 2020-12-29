@@ -29,6 +29,7 @@ import {
   Harvest,
   Closure,
   QR,
+  MarketModal,
 } from '../modals'
 import { Line } from '../charts'
 
@@ -44,6 +45,7 @@ import {
   confirmHarvest,
   bookHarvest,
   seasonClosure,
+  gotoMarket,
 } from '../../actions'
 
 // Redux store
@@ -73,7 +75,7 @@ const loadingInfo = {
   borderRadius: 4,
 }
 
-function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure, network }) {
+function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure, network, gotoMarket }) {
 
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
@@ -83,6 +85,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
   const [openHarvest, setOpenHarvest] = useState(false)
   const [openClosing, setOpenClosing] = useState(false)
   const [openQr, setOpenQr] = useState(false)
+  const [openMarket, setOpenMarket] = useState(false)
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
@@ -109,6 +112,9 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         farm.season = _farm.season
         farm.owner = _farm.owner
         farm.currentSeason = await seasonContract.methods.currentSeason(Number(farm.tokenId)).call()
+        const seasonData = await seasonContract.methods.querySeasonData(Number(farm.tokenId), Number(farm.currentSeason)).call()
+        farm.seasonCrop = seasonData.crop
+        farm.seasonSupply = seasonData.harvestSupply
         farm.seasonMarketed = await marketContract.methods.isSeasonMarketed(Number(farm.tokenId), Number(farm.currentSeason)).call()
         setIsOwner(String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase())
         farm.totalBookings = await marketContract.methods.totalMarketBookers(farm.tokenId).call()
@@ -193,6 +199,10 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
     document.body.appendChild(downloadLink)
     downloadLink.click()
     document.body.removeChild(downloadLink)
+  }
+
+  const handleGotoMarket = (tokenId, values, message) => {
+    gotoMarket(tokenId, values, message)
   }
 
   return (
@@ -299,19 +309,20 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                       Confirm Harvest
                     </Button>
                   ) : null,
-                  farm.season === 'Marketing' && isOwner ? (
+                  farm.season === 'Marketing' && isOwner && !farm.seasonMarketed ? (
                     <>
                       <Button
                         type='link'
-                        disabled={goingToMarket || farm.seasonMarketed}
+                        disabled={goingToMarket}
                         loading={goingToMarket}
+                        onClick={() => setOpenMarket(true)}
                       >
-                        Go To Market
+                        Sell
                       </Button>
                       <Button
                         type='link'
                         danger
-                        disabled={closingSeason || farm.currentSeasonSupply === 0}
+                        disabled={closingSeason}
                         loading={closingSeason}
                         onClick={() => setOpenClosing(true)}
                       >
@@ -319,12 +330,23 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                       </Button>
                     </>
                   ) : null,
+                  farm.season === 'Marketing' && isOwner && farm.seasonMarketed && Number(farm.currentSeasonSupply) === 0 ? (
+                      <Button
+                        type='link'
+                        danger
+                        disabled={closingSeason}
+                        loading={closingSeason}
+                        onClick={handleClosure}
+                      >
+                        Close Season
+                      </Button>
+                  ) : null,
                   farm.season === 'Marketing' ? (
                     <Button
                       type='link'
                       onClick={() => setOpenQr(true)}
                     >
-                      Get Trace ID
+                      Trace
                     </Button>
                   ) : null,
                   <Text
@@ -352,6 +374,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
           <Closure tokenId={id} visible={openClosing} onCreate={handleClosure} cancel={() => setOpenClosing(false)} />
           <QR tokenId={id} runningSeason={farm.currentSeason} visible={openQr} onClick={downloadQR} onCancel={() => setOpenQr(false)} />
+          <MarketModal tokenId={id} visible={openMarket} onCreate={handleGotoMarket} cancel={() => setOpenMarket(false)} harvestSupply={farm.seasonSupply ? farm.seasonSupply.split(' ')[0] : '0'} supplyUnit={farm.seasonSupply ? farm.seasonSupply.split(' ')[1] : '0'} />
         </Col>
         <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (
@@ -450,5 +473,6 @@ export default connect(mapStateToProps, {
   confirmHarvest,
   bookHarvest,
   seasonClosure,
+  gotoMarket,
 })(Farmpage)
 

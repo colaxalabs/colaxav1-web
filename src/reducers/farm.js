@@ -6,6 +6,7 @@ import {
   CLOSE_GROWTH,
   FINISH_HARVEST,
   CLOSING_FARM_SEASON,
+  SEASON_MARKETED,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -22,6 +23,8 @@ const INITIAL_STATE = {
   size: '',
   location: '',
   currentSeason: '',
+  seasonCrop: '',
+  seasonSupply: '',
   soil: '',
   currentSeasonSupply: 0,
   farmBookings: [],
@@ -63,6 +66,12 @@ export function farm(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         season: action.farm.season,
+      }
+    case SEASON_MARKETED:
+      return {
+        ...state,
+        seasonMarketed: action.farm.seasonMarketed,
+        currentSeasonSupply: action.farm.currentSeasonSupply,
       }
     default:
       return state

@@ -30,6 +30,7 @@ import {
   confirmHarvest,
   bookHarvest,
   seasonClosure,
+  gotoMarket,
 } from './farm'
 import {
   collectDetails,
@@ -37,6 +38,9 @@ import {
   collectFarmImage,
   collectLocation,
 } from './form'
+import {
+  loadMarkets,
+} from './markets'
 
 const networkFound = net => ({
   type: LOAD_NETWORK,
@@ -71,5 +75,7 @@ export {
   collectFarmImage,
   collectLocation,
   seasonClosure,
+  loadMarkets,
+  gotoMarket,
 }
 

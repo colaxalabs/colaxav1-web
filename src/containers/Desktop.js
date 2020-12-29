@@ -11,6 +11,7 @@ import {
   Button,
 } from 'antd'
 import {
+  GlobalOutlined,
   PlusCircleOutlined,
   ScanOutlined,
   SwapOutlined,
@@ -20,6 +21,7 @@ import {
   LogoutOutlined,
   DownOutlined,
   UserOutlined,
+  ShoppingCartOutlined,
 } from '@ant-design/icons'
 import { connect } from 'react-redux'
 import makeBlockie from 'ethereum-blockies-base64'
@@ -105,6 +107,13 @@ class DesktopContainer extends React.Component {
                     <Menu.Item key='1' icon={<PlusCircleOutlined />}>
                       <a href='/register/'>
                         Register
+                      </a>
+                    </Menu.Item>
+                  </SubMenu>
+                  <SubMenu key='sub2' icon={<GlobalOutlined />} title='Markets'>
+                    <Menu.Item key='2' icon={<ShoppingCartOutlined />}>
+                      <a href='/crops/'>
+                        Crops
                       </a>
                     </Menu.Item>
                   </SubMenu>

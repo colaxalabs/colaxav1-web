@@ -53,7 +53,7 @@ function Harvest({ tokenId, visible, onCreate, onCancel, ethusd }) {
           rules={[
             {
               validator: (rule, value) => {
-                if (Number(value) !== 0 && Validator.isNumeric(value)) {
+                if (Number(value) !== 0 && Validator.isInt(value)) {
                   return Promise.resolve()
                 } else {
                   return Promise.reject('Invalid supply')

@@ -14,6 +14,7 @@ import {
   Farmpage,
   Registerpage,
   Tracepage,
+  CropMarket,
 } from './components/pages'
 import { InfiniteModal } from './components/modals'
 
@@ -66,6 +67,7 @@ function App({ network, isMetamask }) {
         <Route exact path='/register/' component={Registerpage} />
         <Route exact path='/trace/' component={Tracepage} />
         <Route path='/farm/:id/' component={Farmpage} />
+        <Route exact path='/crops/' component={CropMarket} />
       </Switch>
     </DesktopContainer>
   );

@@ -69,10 +69,10 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
       if (Number(dashboard.lands) === 0) {
         dashboard.farms = []
       } else if (Number(dashboard.lands) > 3) {
-        // Randomize querying the 1st 3 farms
+        // Query the 1st 3 farms
         for (let i = 1; i <= 3; i++) {
           try {
-            dashboard.farms[i] = await registryContract.methods.queryTokenizedFarm(Math.floor(Math.random() * Number(dashboard.lands) + 1)).call()
+            dashboard.farms[i] = await registryContract.methods.queryTokenizedFarm(i).call()
           } catch(err) {
             console.log(err)
           }
