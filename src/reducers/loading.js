@@ -12,6 +12,7 @@ import {
   BOOKING_HARVEST,
   CLOSING_SEASON,
   GOING_TO_MARKET,
+  MARKET_DASH_LOADING,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -28,6 +29,7 @@ const INITIAL_STATE = {
   booking: false,
   closingSeason: false,
   goingToMarket: false,
+  marketdashLoading: false,
 }
 
 export function loading(state = INITIAL_STATE, action = {}) {
@@ -96,6 +98,11 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         goingToMarket: action.status.goingToMarket,
+      }
+    case MARKET_DASH_LOADING:
+      return {
+        ...state,
+        marketdashLoading: action.status.marketdashLoading,
       }
     default:
       return state

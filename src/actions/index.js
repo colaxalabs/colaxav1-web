@@ -40,6 +40,7 @@ import {
 } from './form'
 import {
   loadMarkets,
+  loadMarketDash,
 } from './markets'
 
 const networkFound = net => ({
@@ -77,5 +78,6 @@ export {
   seasonClosure,
   loadMarkets,
   gotoMarket,
+  loadMarketDash,
 }
 

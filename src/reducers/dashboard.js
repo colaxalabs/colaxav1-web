@@ -5,7 +5,7 @@ import {
 const INITIAL_STATE = {
   lands: 0,
   bookings: 0,
-  traces: 0,
+  seasons: 0,
   txs: 0,
   farms: [],
 }

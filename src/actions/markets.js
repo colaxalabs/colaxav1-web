@@ -1,9 +1,15 @@
 import {
   LOAD_MARKETS,
+  MARKET_DASH_LOADING,
 } from '../types'
 
-export const loadMarkets = markets => ({
+export const loadMarkets = marketsData => ({
   type: LOAD_MARKETS,
-  markets,
+  marketsData,
+})
+
+export const loadMarketDash = status => ({
+  type: MARKET_DASH_LOADING,
+  status,
 })
 

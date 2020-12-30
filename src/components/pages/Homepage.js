@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types'
-import Web3 from 'web3'
 import React, { useEffect } from 'react'
 import {
   Row,
@@ -61,9 +60,7 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
       // Query app dashboard info from the blockchain
       dashboard.lands = await registryContract.methods.totalSupply().call()
       dashboard.markets = await marketContract.methods.totalMarkets().call()
-      dashboard.traces = await seasonContract.methods.allTraces().call()
-      const tx = await marketContract.methods.platformTransactions().call()
-      dashboard.txs = Web3.utils.fromWei(tx, 'ether')
+      dashboard.seasons = await seasonContract.methods.completeSeasons().call()
       dashboard.farms = []
       // Load the first 3 farms
       if (Number(dashboard.lands) === 0) {
@@ -113,8 +110,8 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
 
   return (
     <>
-      <Row justify='center' align='middle'>
-        <Col xs={24} xl={6} className='column_con'>
+      <Row justify='center' align='center'>
+        <Col xs={24} xl={8} className='column_con'>
           {isLoading ? (
             <Loading />  
           ) : (
@@ -125,18 +122,18 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             />
           )} 
         </Col>
-        <Col xs={24} xl={6} className='column_con'>
+        <Col xs={24} xl={8} className='column_con'>
           {isLoading ? (
             <Loading />
           ) : (
             <Stats
-              title='Traces'
-              description='Number of performed traces'
-              dispValue={dash.traces}
+              title='Seasons'
+              description='Number of completed seasons'
+              dispValue={dash.seasons}
             />
           )}
         </Col>
-        <Col xs={24} xl={6} className='column_con'>
+        <Col xs={24} xl={8} className='column_con'>
           {isLoading ? (
             <Loading />
           ) : (
@@ -147,22 +144,11 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             />
           )}
         </Col>
-        <Col xs={24} xl={6} className='column_con'>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <Stats
-              title='Transactions'
-              description='Total amount transacted'
-              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(dash.txs) * Number(usdRate))}`}
-            />
-          )}
-        </Col>
       </Row>
       <Row>
         {isLoading ? (
           <Col xs={24} xl={24} className='column_con' style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-            <LoadingOutlined style={{ marginTop: '150px' }}/>
+            <LoadingOutlined style={{ marginTop: '50px' }}/>
           </Col>
         ) : dash.farms.length === 0 ? (
           <Nofarm />
