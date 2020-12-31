@@ -458,7 +458,7 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
 }
 
 export const gotoMarket = (tokenId, values, message) => async dispatch => {
-  const { price, supply, unit } = values
+  const { price, supply, unit, seasonCrop } = values
   // Init contracts
   const marketContract = initContract(Market, Contracts['4'].Market[0])
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
@@ -468,7 +468,7 @@ export const gotoMarket = (tokenId, values, message) => async dispatch => {
   const farm = {}
   status.goingToMarket = true
   dispatch(goingtoMarket({ ...status }))
-  marketContract.methods.createMarket(Number(tokenId), Web3.utils.toWei(String(price), 'ether'), Number(supply), unit).send({ from: accounts[0] })
+  marketContract.methods.createMarket(Number(tokenId), seasonCrop, Web3.utils.toWei(String(price), 'ether'), Number(supply), unit).send({ from: accounts[0] })
     .on('transactionHash', () => {
       message.info('Confirming transactions...', 5)
     })

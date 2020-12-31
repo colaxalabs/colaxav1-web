@@ -15,6 +15,7 @@ import { LoadingOutlined } from '@ant-design/icons'
 // Contracts
 import Market from '../../abis/Market.json'
 import Season from '../../abis/Season.json'
+import Registry from '../../abis/FRMRegistry.json'
 import Contracts from '../../contracts.json'
 
 // Utils
@@ -44,6 +45,11 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       title: 'Crop',
       dataIndex: 'crop',
       key: 'crop',
+    },
+    {
+      title: 'Location',
+      dataIndex: 'location',
+      key: 'location',
     },
     {
       title: 'Supply',
@@ -121,6 +127,7 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       // Init contracts
       const marketContract = initContract(Market, Contracts['4'].Market[0])
       const seasonContract = initContract(Season, Contracts['4'].Season[0])
+      const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
 
       const marketsData = {}
       const status = {}
@@ -137,15 +144,18 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       } else {
         for (let i = 1; i <= marketsData.totalMarkets; i++) {
           try {
-            const _market = await marketContract.methods.getEnlistedMarket(i).call()
+            const { tokenId, crop, bookers, closeDate, openDate, originalSupply, remainingSupply, price, supplyUnit } = await marketContract.methods.getEnlistedMarket(i).call()
+            const { location } = await registryContract.methods.getFarm(Number(tokenId)).call()
             marketResponse.key = i
-            marketResponse.bookers = _market.bookers
-            marketResponse.closeDate = _market.closeDate
-            marketResponse.openDate = _market.openDate
-            marketResponse.originalSupply = _market.originalSupply
-            marketResponse.price = _market.price
-            marketResponse.remainingSupply = _market.remainingSupply
-            marketResponse.supplyUnit = _market.supplyUnit
+            marketResponse.crop = crop
+            marketResponse.location = location
+            marketResponse.bookers = bookers
+            marketResponse.closeDate = closeDate
+            marketResponse.openDate = openDate
+            marketResponse.originalSupply = originalSupply
+            marketResponse.price = price
+            marketResponse.remainingSupply = remainingSupply
+            marketResponse.supplyUnit = supplyUnit
             marketsData.enlistedMarkets[i-1] = marketResponse
           } catch(err) {
             console.log(err)

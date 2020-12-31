@@ -18,6 +18,7 @@ function MarketModal({
   cancel,
   tokenId,
   harvestSupply,
+  crop,
   supplyUnit,
   ethusd,
 }) {
@@ -52,9 +53,17 @@ function MarketModal({
         initialValues={{
           supply: harvestSupply,
           unit: supplyUnit,
+          seasonCrop: crop,
           price: 0,
         }}
       >
+        <Form.Item
+          name='seasonCrop'
+          label='Crop'
+          extra={<Text type='secondary'>Current season crop going to market</Text>}
+        >
+          <Input disabled={true} value={crop} />
+        </Form.Item>
         <Form.Item
           name='supply'
           label='Supply'
