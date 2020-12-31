@@ -14,7 +14,6 @@ import { LoadingOutlined } from '@ant-design/icons'
 
 // Contracts
 import Market from '../../abis/Market.json'
-import Season from '../../abis/Season.json'
 import Registry from '../../abis/FRMRegistry.json'
 import Contracts from '../../contracts.json'
 
@@ -126,7 +125,6 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
     async function queryMarkets() {
       // Init contracts
       const marketContract = initContract(Market, Contracts['4'].Market[0])
-      const seasonContract = initContract(Season, Contracts['4'].Season[0])
       const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
 
       const marketsData = {}
@@ -135,7 +133,7 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       status.marketdashLoading = true
       store.dispatch(loadMarketDash({ ...status }))
       marketsData.totalMarkets = Number(await marketContract.methods.totalMarkets().call())
-      marketsData.traces = await seasonContract.methods.allTraces().call()
+      marketsData.traces = 0
       marketsData.enlistedMarkets = []
       const tx = await marketContract.methods.platformTransactions().call()
       marketsData.txs = Web3.utils.fromWei(tx, 'ether')
