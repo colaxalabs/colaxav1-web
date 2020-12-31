@@ -13,11 +13,7 @@ export function markets(state = INITIAL_STATE, action = {}) {
   switch(action.type) {
     case LOAD_MARKETS:
       return {
-        ...state,
-        traces: action.marketsData.traces,
-        totalMarkets: action.marketsData.totalMarkets,
-        txs: action.marketsData.txs,
-        enlistedMarkets: [...action.marketsData.enlistedMarkets].filter(item => item !== null),
+        ...action.marketsData,
       }
     default:
       return state

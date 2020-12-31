@@ -10,7 +10,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { CloseCircleFilled, LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined } from '@ant-design/icons'
 
 // Contracts
 import Market from '../../abis/Market.json'
@@ -28,7 +28,7 @@ import Loading from '../loading'
 import { Stats } from '../dashboard'
 
 // Redux actions
-import { loadMarkets, loadMarketDash } from '../../actions'
+import { loadCurrency, loadMarkets, loadMarketDash } from '../../actions'
 
 const { Text } = Typography
 
@@ -50,7 +50,9 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       dataIndex: 'originalSupply',
       key: 'originalSupply',
       render: (text, record) => (
-        <Text>{`${record.originalSupply} ${record.supplyUnit}`}</Text>
+        <>
+          <Text>{`${record.originalSupply} ${record.supplyUnit}`}</Text>
+        </>
       )
     },
     {
@@ -58,9 +60,11 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       dataIndex: 'price',
       key: 'price',
       render: price => (
-        <Text>
-          {`${Web3.utils.fromWei(price, 'ether')} ETH / ${new Intl.NumberFormat('en-US').format(parseInt(parseFloat(Web3.utils.fromWei(price, 'ether')) * parseFloat(usdRate)), 10)}`}
-        </Text>
+        <>
+          <Text>
+            {`${Web3.utils.fromWei(price, 'ether')} ETH / ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(price, 'ether')) * usdRate)}`}
+          </Text>
+        </>
       )
     },
     {
@@ -68,17 +72,19 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       dataIndex: 'openDate',
       key: 'openDate',
       render: openDate => (
-        <Text>{new Date(openDate * 1000)}</Text>
+        <>
+          <Text>{`${new Date(openDate * 1000).toLocaleDateString()}`}</Text>
+        </>
       )
     },
     {
-      title: 'Closed',
+      title: 'Status',
       dataIndex: 'closeDate',
       key: 'closeDate',
-      render: closeDate => (
+      render: (text, record) => (
         <>
-          {Date.now() >= closeDate ? (
-            <CloseCircleFilled />
+          {record.closeDate >= record.openDate ? (
+            <Tag color='red'>Closed</Tag>
           ) : (
             <Tag color='green'>Open</Tag>
           )}
@@ -90,7 +96,9 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       dataIndex: 'remainingSupply',
       key: 'remainingSupply',
       render: (text, record) => (
-        <Text>{`${record.remainingSupply} ${record.supplyUnit}`}</Text>
+        <>
+          <Text>{`${record.remainingSupply} ${record.supplyUnit}`}</Text>
+        </>
       )
     },
     {
@@ -116,17 +124,32 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
 
       const marketsData = {}
       const status = {}
+      const marketResponse = {}
       status.marketdashLoading = true
       store.dispatch(loadMarketDash({ ...status }))
       marketsData.totalMarkets = Number(await marketContract.methods.totalMarkets().call())
       marketsData.traces = await seasonContract.methods.allTraces().call()
+      marketsData.enlistedMarkets = []
       const tx = await marketContract.methods.platformTransactions().call()
       marketsData.txs = Web3.utils.fromWei(tx, 'ether')
       if (marketsData.totalMarkets === 0) {
         marketsData.enlistedMarkets = []
       } else {
         for (let i = 1; i <= marketsData.totalMarkets; i++) {
-          marketsData.enlistedMarkets[i] = await marketContract.methods.getEnlistedMarket(i).call()
+          try {
+            const _market = await marketContract.methods.getEnlistedMarket(i).call()
+            marketResponse.key = i
+            marketResponse.bookers = _market.bookers
+            marketResponse.closeDate = _market.closeDate
+            marketResponse.openDate = _market.openDate
+            marketResponse.originalSupply = _market.originalSupply
+            marketResponse.price = _market.price
+            marketResponse.remainingSupply = _market.remainingSupply
+            marketResponse.supplyUnit = _market.supplyUnit
+            marketsData.enlistedMarkets[i-1] = marketResponse
+          } catch(err) {
+            console.log(err)
+          }
         } 
       }
       store.dispatch(loadMarkets({ ...marketsData }))
@@ -136,7 +159,20 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       store.dispatch(loadMarketDash({ ...status }))
     }
 
+    async function fetchEtherConversionRate() {
+      const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
+      const { result } = await etherPrice.json()
+      const conversionRate = {}
+      conversionRate.ethusd = result.ethusd
+      store.dispatch(loadCurrency({ ...conversionRate }))
+    }
+
+    const interval = setInterval(() => {
+      fetchEtherConversionRate()
+    }, 2500)
     queryMarkets()
+
+    return () => clearInterval(interval)
 
   }, [wallet, network])
 
@@ -197,7 +233,7 @@ CropMarket.propTypes = {
   wallet: PropTypes.array,
   isLoading: PropTypes.bool,
   markets: PropTypes.object,
-  usdRate: PropTypes.string,
+  usdRate: PropTypes.number,
 }
 
 function mapStateToProps(state) {
@@ -206,7 +242,7 @@ function mapStateToProps(state) {
     wallet: state.wallet.address,
     isLoading: state.loading.marketdashLoading,
     markets: state.markets,
-    usdRate: state.currency.ethusd,
+    usdRate: Number(state.currency.ethusd),
   }
 }
 

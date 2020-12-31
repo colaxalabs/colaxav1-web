@@ -58,26 +58,26 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
       conversionRate.ethusd = result.ethusd
       store.dispatch(loadCurrency({ ...conversionRate }))
       // Query app dashboard info from the blockchain
-      dashboard.lands = await registryContract.methods.totalSupply().call()
-      dashboard.markets = await marketContract.methods.totalMarkets().call()
-      dashboard.seasons = await seasonContract.methods.completeSeasons().call()
+      dashboard.lands = Number(await registryContract.methods.totalSupply().call())
+      dashboard.markets = Number(await marketContract.methods.totalMarkets().call())
+      dashboard.seasons = Number(await seasonContract.methods.completeSeasons().call())
       dashboard.farms = []
       // Load the first 3 farms
-      if (Number(dashboard.lands) === 0) {
+      if (dashboard.lands === 0) {
         dashboard.farms = []
-      } else if (Number(dashboard.lands) > 3) {
+      } else if (dashboard.lands > 3) {
         // Query the 1st 3 farms
         for (let i = 1; i <= 3; i++) {
           try {
-            dashboard.farms[i] = await registryContract.methods.queryTokenizedFarm(i).call()
+            dashboard.farms[i-1] = await registryContract.methods.queryTokenizedFarm(i).call()
           } catch(err) {
             console.log(err)
           }
         }
       } else {
-        for (let i = 1; i <= Number(dashboard.lands); i++) {
+        for (let i = 1; i <= dashboard.lands; i++) {
           try {
-            dashboard.farms[i] = await registryContract.methods.queryTokenizedFarm(i).call()
+            dashboard.farms[i-1] = await registryContract.methods.queryTokenizedFarm(i).call()
           } catch(err) {
             console.log(err)
           }
