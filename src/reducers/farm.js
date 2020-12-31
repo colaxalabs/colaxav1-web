@@ -28,6 +28,7 @@ const INITIAL_STATE = {
   soil: '',
   currentSeasonSupply: 0,
   farmBookings: [],
+  traceId: '',
 }
 
 export function farm(state = INITIAL_STATE, action = {}) {
@@ -61,6 +62,7 @@ export function farm(state = INITIAL_STATE, action = {}) {
         ...state,
         season: action.farm.season,
         completedSeasons: action.farm.completedSeasons,
+        traceId: action.farm.traceId,
       }
     case CLOSING_FARM_SEASON:
       return {

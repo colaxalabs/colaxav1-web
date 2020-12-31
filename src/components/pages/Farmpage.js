@@ -131,6 +131,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
             farm.farmBookings[i] = await marketContract.methods.getMarketBooking(farm.tokenId, i).call()
           }
         }
+        farm.traceId = seasonData.traceHash
         // Fetch Eth price
         const etherPrice = await fetch(`https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.REACT_APP_ETHERSCAN_API_KEYS}`)
         const { result } = await etherPrice.json()
@@ -373,7 +374,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           <Growth tokenId={id} visible={openGrowth} onCreate={handleGrowth} onCancel={() => setOpenGrowth(false)} />
           <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
           <Closure tokenId={id} visible={openClosing} onCreate={handleClosure} cancel={() => setOpenClosing(false)} />
-          <QR tokenId={id} runningSeason={farm.currentSeason} visible={openQr} onClick={downloadQR} onCancel={() => setOpenQr(false)} />
+          <QR tokenId={id} traceId={farm.traceId} runningSeason={farm.currentSeason} visible={openQr} onClick={downloadQR} onCancel={() => setOpenQr(false)} />
           <MarketModal tokenId={id} visible={openMarket} onCreate={handleGotoMarket} cancel={() => setOpenMarket(false)} harvestSupply={farm.seasonSupply ? farm.seasonSupply.split(' ')[0] : '0'} supplyUnit={farm.seasonSupply ? farm.seasonSupply.split(' ')[1] : '0'} />
         </Col>
         <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>

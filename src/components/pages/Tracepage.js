@@ -57,6 +57,7 @@ function Tracepage() {
         season.plantingDate = resp.plantingDate
         season.seeds = resp.seedsUsed
         season.seedsSupplier = resp.seedsSupplier
+        season.expectedYield = resp.expectedYield
         season.plantingFertilizer = resp.plantingFertilizer
         season.plantingFertilizerSupplier = resp.plantingFertilizerSupplier
         season.growthDate = resp.growthDate
@@ -114,8 +115,9 @@ function Tracepage() {
                 <Space direction='vertical'>
                   <Text>Planting</Text>
                   <Text>{`${new Date(result.plantingDate * 1000)}`}</Text>
-                  <Text>{result.seedsUsed}</Text>
+                  <Text>{result.seeds}</Text>
                   <Text>{result.seedsSupplier}</Text>
+                  <Text>{`Expected Yield ${result.expectedYield}`}</Text>
                   <Text>{result.plantingFertilizer}</Text>
                   <Text>{result.plantingFertilizerSupplier}</Text>
                 </Space>

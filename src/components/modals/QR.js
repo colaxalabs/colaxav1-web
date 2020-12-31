@@ -3,28 +3,19 @@ import React from 'react'
 import { Modal } from 'antd'
 import QRCode from 'qrcode.react'
 
-// Utils
-import { initContract } from '../../utils'
+function QR({ tokenId, visible, traceId, runningSeason, onClick, onCancel }) {
 
-// Contracts
-import Season from '../../abis/Season.json'
-import Contracts from '../../contracts.json'
-
-function QR({ tokenId, visible, runningSeason, onClick, onCancel }) {
-
-  const [traceId, setTraceId] = React.useState('')
+  const [traceHash, setTraceHash] = React.useState('')
 
   React.useEffect(() => {
-    const seasonContract = initContract(Season, Contracts['4'].Season[0])
 
     async function getTraceID() {
-      const _id = await seasonContract.methods.hashedSeason(Number(tokenId), Number(runningSeason)).call()
-      setTraceId(_id)
+      setTraceHash(traceId)
     }
 
     getTraceID()
 
-  }, [tokenId, runningSeason])
+  }, [traceId])
 
   return (
     <Modal
@@ -39,7 +30,7 @@ function QR({ tokenId, visible, runningSeason, onClick, onCancel }) {
       <div className='align_center'>
         <QRCode
           id='1234_reap'
-          value={`reap:${traceId}`}
+          value={`reap:${traceHash}`}
           size={400}
           level={'H'}
           includeMargin={true}
@@ -54,6 +45,7 @@ QR.propTypes = {
   runningSeason: PropTypes.string,
   onCancel: PropTypes.func,
   onClick: PropTypes.func,
+  traceId: PropTypes.string,
 }
 
 export default QR

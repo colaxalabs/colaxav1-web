@@ -183,6 +183,7 @@ export const confirmPreparation = (tokenId, values, message) => async dispatch =
   // Send tx
   const status = {}
   if (values.fertilizerCheck) {
+    console.log(values)
     status.confirmingPreparation = true
     dispatch(confirmingPreparation({ ...status }))
     const { crop, fertilizerProof, fertilizerSupplier, fertilizerType, fertilizerUsed } = values
@@ -244,9 +245,9 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
   // Send tx
   if (values.fertilizerCheck) {
     status.confirmingPlanting = true
-    dispatch(confirmPlanting({ ...status }))
+    dispatch(confirmingPlanting({ ...status }))
     const { expectedYield, yieldUnit, seedsUsed, seedsSupplier, seedProof, plantingFertilizer, fertilizerType, fertilizerSupplier, fertilizerProof } = values
-    const fertilizerName = `${fertilizerType} (${plantingFertilizer})}`
+    const fertilizerName = `${fertilizerType} (${plantingFertilizer})`
     const eYield = `${expectedYield} ${yieldUnit}`
     const _f = await ipfs.add(fertilizerProof)
     const fertHash = _f.cid.string
@@ -382,6 +383,8 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
         const farm = {}
         farm.season = await seasonContract.methods.getSeason(tokenId).call()
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(tokenId).call()
+        const _runningSeason = await seasonContract.methods.currentSeason(tokenId).call()
+        farm.traceId = await seasonContract.methods.hashedSeason(tokenId, Number(_runningSeason)).call()
         dispatch(finishHarvesting({ ...farm }))
         status.confirmingHarvest = false
         dispatch(confirmingHarvest({ ...status }))

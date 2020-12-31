@@ -47,6 +47,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             values.seedProof = seedProof
             onCreate(tokenId, values, message)
             onCancel()
+            form.resetFields()
           })
           .catch((info) => {
             console.log('Validate Failed:', info)
@@ -61,7 +62,6 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
           seedsUsed: '',
           seedsSupplier: '',
           expectedYield: '',
-          fertilizerCheck: false,
           fertilizerType: '',
           plantingFertilizer: '',
           fertilizerSupplier: '',
@@ -152,12 +152,17 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             <Option value='KG'>KILOGRAM</Option>
           </Select>
         </Form.Item>
-        <Switch
-          checked={isChecked}
-          disabled={isChecked}
-          onChange={onChange}
-          unCheckedChildren={<Text>Did you use any fertilizer during planting?</Text>}
-        />
+        <Form.Item
+          name='fertilizerCheck'
+          valuePropName='checked'
+        >
+          <Switch
+            checked={isChecked}
+            disabled={isChecked}
+            onChange={onChange}
+            unCheckedChildren={<Text>Did you use any fertilizer during planting?</Text>}
+          />
+        </Form.Item>
         {isChecked ? (
           <Form.Item
             name='fertilizerType'
@@ -171,12 +176,12 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             ]}
           >
             <Select placeholder='Artificial/Organic' onChange={handleSelect}>
-              <Option value='artificial'>Artificial</Option>
-              <Option value='organic'>Organic</Option>
+              <Option value='Artificial'>Artificial</Option>
+              <Option value='Organic'>Organic</Option>
             </Select>
           </Form.Item>
         ) : null}
-        {type === 'artificial' && isChecked ? (
+        {type === 'Artificial' && isChecked ? (
           <>
             <Form.Item
               name='plantingFertilizer'
@@ -185,7 +190,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'artificial') {
+                    if (isChecked && type === 'Artificial') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {
@@ -205,7 +210,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'artificial') {
+                    if (isChecked && type === 'Artificial') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {
@@ -233,7 +238,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
             </Form.Item>
           </>
         ) : null}
-        {type === 'organic' && isChecked ? (
+        {type === 'Organic' && isChecked ? (
           <>
             <Form.Item
               name='plantingFertilizer'
@@ -242,7 +247,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'organic') {
+                    if (isChecked && type === 'Organic') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {
@@ -262,7 +267,7 @@ function Planting({ tokenId, visible, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'organic') {
+                    if (isChecked && type === 'Organic') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {

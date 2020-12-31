@@ -45,6 +45,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
             values.fertilizerProof = fertilizerProof
             onCreate(tokenId, values, message)
             onCancel()
+            form.resetFields()
           })
           .catch((info) => {
             console.log('Validate Failed:', info)
@@ -112,12 +113,12 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
             ]}
           >
             <Select placeholder='Artificial/Organic' onChange={handleSelect}>
-              <Option value='artificial'>Artificial</Option>
-              <Option value='organic'>Organic</Option>
+              <Option value='Artificial'>Artificial</Option>
+              <Option value='Organic'>Organic</Option>
             </Select>
           </Form.Item>
         ) : null}
-        {type === 'artificial' && isChecked ? (
+        {type === 'Artificial' && isChecked ? (
           <>
             <Form.Item
               name='fertilizerUsed'
@@ -126,7 +127,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'artificial') {
+                    if (isChecked && type === 'Artificial') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {
@@ -146,7 +147,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'artificial') {
+                    if (isChecked && type === 'Artificial') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {
@@ -174,7 +175,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
             </Form.Item>
           </>
         ) : null}
-        {type === 'organic' && isChecked ? (
+        {type === 'Organic' && isChecked ? (
           <>
             <Form.Item
               name='fertilizerUsed'
@@ -182,7 +183,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'organic') {
+                    if (isChecked && type === 'Organic') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {
@@ -201,7 +202,7 @@ function Preparation({ visible, tokenId, onCreate, onCancel }) {
               rules={[
                 {
                   validator: (rule, value) => {
-                    if (isChecked && type === 'organic') {
+                    if (isChecked && type === 'Organic') {
                       if (!Validator.isEmpty(value) && Validator.isAlphanumeric(String(value).replace(/\s+/g, ''))) {
                         return Promise.resolve()
                       } else {
