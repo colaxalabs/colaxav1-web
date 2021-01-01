@@ -183,7 +183,6 @@ export const confirmPreparation = (tokenId, values, message) => async dispatch =
   // Send tx
   const status = {}
   if (values.fertilizerCheck) {
-    console.log(values)
     status.confirmingPreparation = true
     dispatch(confirmingPreparation({ ...status }))
     const { crop, fertilizerProof, fertilizerSupplier, fertilizerType, fertilizerUsed } = values
@@ -470,7 +469,7 @@ export const gotoMarket = (tokenId, values, message) => async dispatch => {
   dispatch(goingtoMarket({ ...status }))
   marketContract.methods.createMarket(Number(tokenId), seasonCrop, Web3.utils.toWei(String(price), 'ether'), Number(supply), unit).send({ from: accounts[0] })
     .on('transactionHash', () => {
-      message.info('Confirming transactions...', 5)
+      message.info('Confirming transaction...', 5)
     })
     .on('confirmation', async(confirmationNumber, receipt) => {
       if (confirmationNumber === 1) {
@@ -481,7 +480,7 @@ export const gotoMarket = (tokenId, values, message) => async dispatch => {
         farm.currentSeasonSupply = _market.remainingSupply
         dispatch(seasonMarketed({ ...farm }))
         dispatch(goingtoMarket({ ...status }))
-        message.success('Transaction confirmed!', 5)
+        message.success('Congratulation! Watch out for bookings.', 5)
       }
     })
     .on('error', err => {

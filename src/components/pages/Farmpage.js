@@ -114,7 +114,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         farm.currentSeason = await seasonContract.methods.currentSeason(Number(farm.tokenId)).call()
         const { crop, harvestSupply, traceHash } = await seasonContract.methods.querySeasonData(Number(farm.tokenId), Number(farm.currentSeason)).call()
         farm.seasonCrop = crop
-        farm.seasonSupply = harvestSupply
+        farm.seasonSupply = harvestSupply.split(' ')[0]
         farm.seasonMarketed = await marketContract.methods.isSeasonMarketed(Number(farm.tokenId), Number(farm.currentSeason)).call()
         setIsOwner(String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase())
         farm.totalBookings = await marketContract.methods.totalMarketBookers(farm.tokenId).call()
@@ -375,7 +375,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
           <Closure tokenId={id} visible={openClosing} onCreate={handleClosure} cancel={() => setOpenClosing(false)} />
           <QR tokenId={id} traceId={farm.traceId} runningSeason={farm.currentSeason} visible={openQr} onClick={downloadQR} onCancel={() => setOpenQr(false)} />
-          <MarketModal crop={farm.seasonCrop} tokenId={id} visible={openMarket} onCreate={handleGotoMarket} cancel={() => setOpenMarket(false)} harvestSupply={farm.seasonSupply ? farm.seasonSupply.split(' ')[0] : '0'} supplyUnit={farm.seasonSupply ? farm.seasonSupply.split(' ')[1] : '0'} />
+          <MarketModal crop={farm.seasonCrop} tokenId={id} visible={openMarket} onCreate={handleGotoMarket} cancel={() => setOpenMarket(false)} harvestSupply={farm.seasonSupply} supplyUnit={farm.seasonSupplyUnit} />
         </Col>
         <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
           {isLoading ? (

@@ -43,7 +43,7 @@ function Tracepage() {
       const hash = String(data).split(':')[1]
       const hashPattern = /^0x/i
       const isValidHash = hashPattern.test(hash)
-      if (isValidHash && hash.length === 66) {
+      if (isValidHash && hash.length === 66 && await seasonContract.methods.resolvedHash(hash)) {
         setResolveStatus(undefined)
         const resp = await seasonContract.methods.resolveSeasonHash(hash).call()
         const season = {}

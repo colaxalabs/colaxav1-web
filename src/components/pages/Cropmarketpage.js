@@ -9,12 +9,14 @@ import {
   Table,
   Tag,
   Typography,
+  Space,
 } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 
 // Contracts
 import Market from '../../abis/Market.json'
 import Registry from '../../abis/FRMRegistry.json'
+import Season from '../../abis/Season.json'
 import Contracts from '../../contracts.json'
 
 // Utils
@@ -26,6 +28,7 @@ import { store } from '../../store'
 // Components
 import Loading from '../loading'
 import { Stats } from '../dashboard'
+import { QR } from '../modals'
 
 // Redux actions
 import { loadCurrency, loadMarkets, loadMarketDash } from '../../actions'
@@ -33,6 +36,18 @@ import { loadCurrency, loadMarkets, loadMarketDash } from '../../actions'
 const { Text } = Typography
 
 function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
+  const [traceOpen, setTraceOpen] = React.useState(false)
+
+  const downloadQR = (_id, _season) => {
+    const canvas = document.getElementById('1234_reap')
+    const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream')
+    let downloadLink = document.createElement('a')
+    downloadLink.href = pngUrl
+    downloadLink.download = `${Number(_id) + Number(_season)}.png`
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
+  }
 
   const columns = [
     {
@@ -112,6 +127,16 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       key: 'bookers',
     },
     {
+      title: 'Trace',
+      key: 'trace',
+      render: (text, record) => (
+        <Space>
+          <QR tokenId={record.tokenId} traceId={record.traceId} runningSeason={record.season} visible={traceOpen} onClick={downloadQR} onCancel={() => setTraceOpen(false)} />
+          <Button type='primary' size='small' onClick={() => setTraceOpen(true)}>Trace</Button>
+        </Space>
+      )
+    },
+    {
       title: 'Book',
       key: 'operation',
       fixed: 'right',
@@ -126,6 +151,7 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       // Init contracts
       const marketContract = initContract(Market, Contracts['4'].Market[0])
       const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
+      const seasonContract = initContract(Season, Contracts['4'].Season[0])
 
       const marketsData = {}
       const status = {}
@@ -142,10 +168,11 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       } else {
         for (let i = 1; i <= marketsData.totalMarkets; i++) {
           try {
-            const { tokenId, crop, bookers, closeDate, openDate, originalSupply, remainingSupply, price, supplyUnit } = await marketContract.methods.getEnlistedMarket(i).call()
+            const { tokenId, crop, bookers, season, closeDate, openDate, originalSupply, remainingSupply, price, supplyUnit } = await marketContract.methods.getEnlistedMarket(i).call()
             const { location } = await registryContract.methods.getFarm(Number(tokenId)).call()
             marketResponse.key = i
             marketResponse.crop = crop
+            marketResponse.tokenId = tokenId
             marketResponse.location = location
             marketResponse.bookers = bookers
             marketResponse.closeDate = closeDate
@@ -154,6 +181,11 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
             marketResponse.price = price
             marketResponse.remainingSupply = remainingSupply
             marketResponse.supplyUnit = supplyUnit
+            marketResponse.season = season
+            marketResponse.traceId = await seasonContract.methods.hashedSeason(
+              Number(tokenId),
+              Number(marketResponse.season)
+            ).call()
             marketsData.enlistedMarkets[i-1] = marketResponse
           } catch(err) {
             console.log(err)

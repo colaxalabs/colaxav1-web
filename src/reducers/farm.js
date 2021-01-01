@@ -25,6 +25,7 @@ const INITIAL_STATE = {
   currentSeason: '',
   seasonCrop: '',
   seasonSupply: '',
+  seasonSupplyUnit: 'KG',
   soil: '',
   currentSeasonSupply: 0,
   farmBookings: [],
@@ -35,6 +36,7 @@ export function farm(state = INITIAL_STATE, action = {}) {
   switch(action.type) {
     case LOAD_FARM_DATA:
       return {
+        ...state,
         ...action.farm,
       }
     case OPEN_SEASON:
