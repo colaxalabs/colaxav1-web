@@ -432,13 +432,14 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
   const { volume } = values
   // Init Contract
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const marketContract = initContract(Market, Contracts['4'].Market[0])
   const seasonNo = await seasonContract.methods.currentSeason(tokenId).call()
   const accounts = await window.web3.eth.getAccounts()
   // Send tx
   const status = {}
   status.booking = true
   dispatch(bookingHarvest({ ...status }))
-  seasonContract.methods.bookHarvest(tokenId, volume, seasonNo).send({ from: accounts[0], value: new Web3.utils.BN(price).mul(new Web3.utils.BN(volume)).toString() })
+  marketContract.methods.bookHarvest(Number(tokenId), Number(volume), Number(seasonNo)).send({ from: accounts[0], value: new Web3.utils.BN(price).mul(new Web3.utils.BN(volume)).toString() })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
     })

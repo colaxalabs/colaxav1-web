@@ -6,6 +6,7 @@ import Closure from './Closure'
 import QR from './QR'
 import InfiniteModal from './Infinitemodal'
 import MarketModal from './Market'
+import Book from './Book'
 
 export {
   Preparation,
@@ -16,5 +17,6 @@ export {
   QR,
   InfiniteModal,
   MarketModal,
+  Book,
 }
 

@@ -28,15 +28,16 @@ import { store } from '../../store'
 // Components
 import Loading from '../loading'
 import { Stats } from '../dashboard'
-import { QR } from '../modals'
+import { QR, Book } from '../modals'
 
 // Redux actions
-import { loadCurrency, loadMarkets, loadMarketDash } from '../../actions'
+import { bookHarvest, loadCurrency, loadMarkets, loadMarketDash } from '../../actions'
 
 const { Text } = Typography
 
-function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
+function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionable, isBooking, isLoading, markets, usdRate }) {
   const [traceOpen, setTraceOpen] = React.useState(false)
+  const [bookingOpen, setBookingOpen] = React.useState(false)
 
   const downloadQR = (_id, _season) => {
     const canvas = document.getElementById('1234_reap')
@@ -131,8 +132,21 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       key: 'trace',
       render: (text, record) => (
         <Space>
-          <QR tokenId={record.tokenId} traceId={record.traceId} runningSeason={record.season} visible={traceOpen} onClick={downloadQR} onCancel={() => setTraceOpen(false)} />
-          <Button type='primary' size='small' onClick={() => setTraceOpen(true)}>Trace</Button>
+          <QR
+            tokenId={record.tokenId}
+            traceId={record.traceId}
+            runningSeason={record.season}
+            visible={traceOpen}
+            onClick={downloadQR}
+            onCancel={() => setTraceOpen(false)}
+          />
+          <Button
+            type='primary'
+            size='small'
+            onClick={() => setTraceOpen(true)}
+          >
+            Trace
+          </Button>
         </Space>
       )
     },
@@ -141,7 +155,22 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
       key: 'operation',
       fixed: 'right',
       width: 100,
-      render: (text, record) => <Button type='primary' size='small' disabled={Number(record.remainingSupply) === 0}>Book</Button>
+      render: (text, record) => (
+        <>
+          <Space>
+            <Button
+              type='primary'
+              size='small'
+              loading={isBooking}
+              disabled={Number(record.remainingSupply) === 0 || isBooking || (walletLoaded ? String(record.owner).toUpperCase() === String(wallet[0]).toUpperCase() : false)}
+              onClick={() => setBookingOpen(true)}
+            >
+              Book
+            </Button>
+            <Book tokenId={Number(record.tokenId)} price={record.price} visible={bookingOpen} supply={Number(record.remainingSupply)} book={bookHarvest} isExecutionable={isExecutionable} onCancel={() => setBookingOpen(false)} />
+          </Space>
+        </>
+      )
     }
   ]
 
@@ -182,6 +211,7 @@ function CropMarket({ wallet, network, isLoading, markets, usdRate }) {
             marketResponse.remainingSupply = remainingSupply
             marketResponse.supplyUnit = supplyUnit
             marketResponse.season = season
+            marketResponse.owner = await registryContract.methods.ownerOf(Number(marketResponse.tokenId)).call()
             marketResponse.traceId = await seasonContract.methods.hashedSeason(
               Number(tokenId),
               Number(marketResponse.season)
@@ -274,6 +304,10 @@ CropMarket.propTypes = {
   isLoading: PropTypes.bool,
   markets: PropTypes.object,
   usdRate: PropTypes.number,
+  bookHarvest: PropTypes.func,
+  isBooking: PropTypes.bool,
+  isExecutionable: PropTypes.bool,
+  walletLoaded: PropTypes.bool,
 }
 
 function mapStateToProps(state) {
@@ -283,8 +317,11 @@ function mapStateToProps(state) {
     isLoading: state.loading.marketdashLoading,
     markets: state.markets,
     usdRate: Number(state.currency.ethusd),
+    isBooking: state.loading.booking,
+    isExecutionable: state.wallet.isMetaMask && state.wallet.loaded,
+    walletLoaded: state.wallet.loaded,
   }
 }
 
-export default connect(mapStateToProps)(CropMarket)
+export default connect(mapStateToProps, { bookHarvest })(CropMarket)
 
