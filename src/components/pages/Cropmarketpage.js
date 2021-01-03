@@ -197,7 +197,19 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       } else {
         for (let i = 1; i <= marketsData.totalMarkets; i++) {
           try {
-            const { tokenId, crop, bookers, season, closeDate, openDate, originalSupply, remainingSupply, price, supplyUnit } = await marketContract.methods.getEnlistedMarket(i).call()
+            const _token = await marketContract.methods.getIndexedEnlistedMarket(i).call()
+            const {
+              tokenId,
+              crop,
+              bookers,
+              season,
+              closeDate,
+              openDate,
+              originalSupply,
+              remainingSupply,
+              price,
+              supplyUnit
+            } = await marketContract.methods.getEnlistedMarket(Number(_token)).call()
             const { location } = await registryContract.methods.getFarm(Number(tokenId)).call()
             marketResponse.key = i
             marketResponse.crop = crop
