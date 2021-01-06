@@ -381,9 +381,12 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
       if (confirmationNumber === 1) {
         const farm = {}
         farm.season = await seasonContract.methods.getSeason(tokenId).call()
+        const _runningSeason = await seasonContract.methods.currentSeason(Number(tokenId)).call()
+        const { crop, harvestSupply, traceHash } = await seasonContract.methods.querySeasonData(Number(tokenId), Number(_runningSeason)).call()
+        farm.seasonCrop = crop
+        farm.seasonSupply = harvestSupply.split(' ')[0]
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(tokenId).call()
-        const _runningSeason = await seasonContract.methods.currentSeason(tokenId).call()
-        farm.traceId = await seasonContract.methods.hashedSeason(tokenId, Number(_runningSeason)).call()
+        farm.traceId = traceHash
         dispatch(finishHarvesting({ ...farm }))
         status.confirmingHarvest = false
         dispatch(confirmingHarvest({ ...status }))

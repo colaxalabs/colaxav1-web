@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import Web3 from 'web3'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Avatar,
   Row,
@@ -40,77 +40,146 @@ import { store } from '../../store'
 // Contracts
 import Registry from '../../abis/FRMRegistry.json'
 import Market from '../../abis/Market.json'
+import Season from '../../abis/Season.json'
 import Contracts from '../../contracts.json'
 
 // Utils
 import { initContract } from '../../utils'
 
+// Components
+import { QR } from '../modals'
+
 const { TabPane } = Tabs
 const { Text } = Typography
 
-const columns = [
-  {
-    title: '#',
-    dataIndex: 'tokenId',
-    key: 'tokenId',
-  },
-  {
-    title: 'Booker',
-    dataIndex: 'booker',
-    key: 'booker',
-    render: booker => (
-      <Space>
-        <Avatar size='small' src={makeBlockie(booker)} />
-        <Text ellipsis copyable>{booker}</Text>
-      </Space>
-    )
-  },
-  {
-    title: 'Volume',
-    dataIndex: 'volume',
-    key: 'volume',
-  },
-  {
-    title: 'Deposit',
-    dataIndex: 'deposit',
-    key: 'deposit',
-  },
-  {
-    title: 'Delivered',
-    dataIndex: 'delivered',
-    key: 'delivered',
-    render: delivered => (
-      <>
-        {!delivered ? (
-          <SyncOutlined spin style={{ color: '#7546C9' }} />
-        ) : (
-          <CheckCircleTwoTone twoToneColor='#7546C9'/>
-        )}
-      </>
-    ),
-  },
-  {
-    title: 'Season',
-    dataIndex: 'season',
-    key: 'season',
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (text, record) => (
-      <>
-        {record.volume !== 0 && <Button type='primary' size='small' onClick={() => console.log(record.volume)}>Confirm Receivership</Button>}
-      </>
-    )
-  }
-]
+
 
 function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
+  const [traceOpen, setTraceOpen] = useState(false)
+  const [bookRecord, setBookRecord] = useState({})
+
+  const downloadQR = (_id, _season) => {
+    const canvas = document.getElementById('1234_reap')
+    const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream')
+    let downloadLink = document.createElement('a')
+    downloadLink.href = pngUrl
+    downloadLink.download = `${Number(_id) + Number(_season)}.png`
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
+  }
+
+  const columns = [
+    {
+      title: '#',
+      dataIndex: 'marketId',
+      key: 'marketId',
+    },
+    {
+      title: 'Crop',
+      dataIndex: 'crop',
+      key: 'crop',
+    },
+    {
+      title: 'Booker',
+      dataIndex: 'booker',
+      key: 'booker',
+      render: booker => (
+        <Space
+          style={{ width: '150px' }}
+        >
+          <Avatar size='small' src={makeBlockie(booker)} />
+          {String(booker).toUpperCase() === String(wallet[0]).toUpperCase() ? (
+            <Text type='secondary'>You</Text>
+          ) : (
+            <Text ellipsis copyable>{booker}</Text>
+          )}
+        </Space>
+      )
+    },
+    {
+      title: 'Volume',
+      dataIndex: 'volume',
+      key: 'volume',
+      render: volume => (
+        <Text>{`${volume} KG`}</Text>
+      )
+    },
+    {
+      title: 'Deposit',
+      dataIndex: 'deposit',
+      key: 'deposit',
+      render: deposit => (
+        <>
+          <Text>
+            {`${Web3.utils.fromWei(deposit, 'ether')} ETH / ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(deposit, 'ether')) * usdRate)}`}
+          </Text>
+        </>
+      )
+    },
+    {
+      title: 'Delivered',
+      dataIndex: 'delivered',
+      key: 'delivered',
+      render: delivered => (
+        <>
+          {!delivered ? (
+            <SyncOutlined spin style={{ color: '#7546C9' }} />
+          ) : (
+            <CheckCircleTwoTone twoToneColor='#7546C9'/>
+          )}
+        </>
+      ),
+    },
+    {
+      title: 'Season',
+      dataIndex: 'season',
+      key: 'season',
+    },
+    {
+      title: 'Trace',
+      key: 'trace',
+      render: (text, record) => (
+        <Space>
+          <Button
+            type='primary'
+            size='small'
+            onClick={() => {
+              setTraceOpen(true)
+              setBookRecord(record)
+            }}
+          >
+            Trace
+          </Button>
+          <QR
+            tokenId={bookRecord.marketId}
+            traceId={bookRecord.traceId}
+            runningSeason={bookRecord.runningSeason}
+            visible={traceOpen}
+            onClick={downloadQR}
+            onCancel={() => setTraceOpen(false)}
+          />
+        </Space>
+      )
+    },
+    {
+      title: 'Confirm',
+      key: 'operation',
+      fixed: 'right',
+      width: 100,
+      render: (text, record) => (
+        <>
+          {record.volume !== 0 && <Button type='primary' size='small' onClick={() => console.log(record.volume)}>Received</Button>}
+        </>
+      )
+    }
+  ]
 
   useEffect(() => {
 
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
     const marketContract = initContract(Market, Contracts['4'].Market[0])
+    const seasonContract = initContract(Season, Contracts['4'].Season[0])
 
     async function loadUserDashboard() {
       const user = {}
@@ -135,7 +204,7 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
       } else {
         for (let i = 1; i <= Number(user.lands); i++) {
           try {
-            user.userFarms[i] = await registryContract.methods.queryUserTokenizedFarm(i).call({ from: wallet[0] })
+            user.userFarms[i-1] = await registryContract.methods.queryUserTokenizedFarm(i).call({ from: wallet[0] })
           } catch(err) {
             console.log(err)
           }
@@ -147,8 +216,15 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
       } else {
         for (let i = 1; i <= Number(user.totalBookings); i++) {
           try {
-            let seasonBooked = await marketContract.methods.getSeasonBooked(i).call()
-            user.userBookings[i] = await marketContract.methods.getBookerBooking(seasonBooked, wallet[0]).call()
+            let seasonBooked = await marketContract.methods.getSeasonBooked(i, wallet[0]).call()
+            user.userBookings[i-1] = await marketContract.methods.getBookerBooking(seasonBooked, wallet[0]).call()
+            const _token = Number(user.userBookings[i-1].marketId)
+            const _seasonNo = Number(user.userBookings[i-1].season)
+            const seasonData = await seasonContract.methods.querySeasonData(_token, _seasonNo).call()
+            user.userBookings[i-1].crop = seasonData.crop
+            user.userBookings[i-1].key = i-1
+            user.userBookings[i-1].traceId = await seasonContract.methods.hashedSeason(_token, _seasonNo).call()
+            user.userBookings[i-1].runningSeason = _seasonNo
           } catch(err) {
             console.log(err)
           }

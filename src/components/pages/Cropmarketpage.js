@@ -38,6 +38,8 @@ const { Text } = Typography
 function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionable, isBooking, isLoading, markets, usdRate }) {
   const [traceOpen, setTraceOpen] = React.useState(false)
   const [bookingOpen, setBookingOpen] = React.useState(false)
+  const [rowRecord, setRowRecord] = React.useState(null)
+  const [traceRecord, setTraceRecord] = React.useState({})
 
   const downloadQR = (_id, _season) => {
     const canvas = document.getElementById('1234_reap')
@@ -128,14 +130,19 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       key: 'bookers',
     },
     {
+      title: 'Reviews',
+      dataIndex: 'reviews',
+      key: 'reviews',
+    },
+    {
       title: 'Trace',
       key: 'trace',
       render: (text, record) => (
         <Space>
           <QR
-            tokenId={record.tokenId}
-            traceId={record.traceId}
-            runningSeason={record.season}
+            tokenId={traceRecord.tokenId}
+            traceId={traceRecord.traceId}
+            runningSeason={traceRecord.season}
             visible={traceOpen}
             onClick={downloadQR}
             onCancel={() => setTraceOpen(false)}
@@ -143,7 +150,10 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
           <Button
             type='primary'
             size='small'
-            onClick={() => setTraceOpen(true)}
+            onClick={() => {
+              setTraceRecord(record)
+              setTraceOpen(true)
+            }}
           >
             Trace
           </Button>
@@ -163,11 +173,17 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
               size='small'
               loading={isBooking}
               disabled={Number(record.remainingSupply) === 0 || isBooking || (walletLoaded ? String(record.owner).toUpperCase() === String(wallet[0]).toUpperCase() : false)}
-              onClick={() => setBookingOpen(true)}
+              onClick={() => {
+                setBookingOpen(true)
+                setRowRecord(record)
+              }}
             >
               Book
             </Button>
-            <Book tokenId={Number(record.tokenId)} price={record.price} visible={bookingOpen} supply={Number(record.remainingSupply)} book={bookHarvest} isExecutionable={isExecutionable} onCancel={() => setBookingOpen(false)} />
+            <Book record={rowRecord} visible={bookingOpen} book={bookHarvest} isExecutionable={isExecutionable} onCancel={() => {
+              setRowRecord(null)
+              setBookingOpen(false)
+            }} />
           </Space>
         </>
       )
@@ -184,7 +200,6 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
 
       const marketsData = {}
       const status = {}
-      const marketResponse = {}
       status.marketdashLoading = true
       store.dispatch(loadMarketDash({ ...status }))
       marketsData.totalMarkets = Number(await marketContract.methods.totalMarkets().call())
@@ -198,37 +213,14 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
         for (let i = 1; i <= marketsData.totalMarkets; i++) {
           try {
             const _token = await marketContract.methods.getIndexedEnlistedMarket(i).call()
-            const {
-              tokenId,
-              crop,
-              bookers,
-              season,
-              closeDate,
-              openDate,
-              originalSupply,
-              remainingSupply,
-              price,
-              supplyUnit
-            } = await marketContract.methods.getEnlistedMarket(Number(_token)).call()
-            const { location } = await registryContract.methods.getFarm(Number(tokenId)).call()
-            marketResponse.key = i
-            marketResponse.crop = crop
-            marketResponse.tokenId = tokenId
-            marketResponse.location = location
-            marketResponse.bookers = bookers
-            marketResponse.closeDate = closeDate
-            marketResponse.openDate = openDate
-            marketResponse.originalSupply = originalSupply
-            marketResponse.price = price
-            marketResponse.remainingSupply = remainingSupply
-            marketResponse.supplyUnit = supplyUnit
-            marketResponse.season = season
-            marketResponse.owner = await registryContract.methods.ownerOf(Number(marketResponse.tokenId)).call()
-            marketResponse.traceId = await seasonContract.methods.hashedSeason(
-              Number(tokenId),
-              Number(marketResponse.season)
-            ).call()
-            marketsData.enlistedMarkets[i-1] = marketResponse
+            const _currentSeason = await seasonContract.methods.currentSeason(Number(_token)).call()
+            marketsData.enlistedMarkets[i-1] = await marketContract.methods.getCurrentFarmMarket(Number(_token)).call()
+            const { location } = await registryContract.methods.getFarm(Number(_token)).call()
+            marketsData.enlistedMarkets[i-1].location = location
+            marketsData.enlistedMarkets[i-1].key = Number(_token)
+            marketsData.enlistedMarkets[i-1].traceId = await seasonContract.methods.hashedSeason(Number(_token), _currentSeason).call()
+            marketsData.enlistedMarkets[i-1].owner = await registryContract.methods.ownerOf(Number(_token)).call()
+            marketsData.enlistedMarkets[i-1].reviews = await marketContract.methods.marketReviewCount(Number(_token)).call()
           } catch(err) {
             console.log(err)
           }

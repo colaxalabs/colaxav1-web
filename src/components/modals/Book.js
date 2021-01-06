@@ -11,7 +11,7 @@ import Validator from 'validator'
 
 const { Text } = Typography
 
-function Book({ isExecutionable, tokenId, price, book, visible, onCancel, supply }) {
+function Book({ isExecutionable, record, book, visible, onCancel }) {
 
   const [form] = Form.useForm()
 
@@ -27,7 +27,8 @@ function Book({ isExecutionable, tokenId, price, book, visible, onCancel, supply
         form.validateFields()
           .then(values => {
             if (isExecutionable) {
-              book(tokenId, values, price, message)
+              book(Number(record.tokenId), values, record.price, message)
+              console.log(record.tokenId, values)
               onCancel()
             } else {
               window.alert('Connect Wallet!')
@@ -53,7 +54,7 @@ function Book({ isExecutionable, tokenId, price, book, visible, onCancel, supply
           rules={[
             {
               validator: (rule, value) => {
-                if (value !== 0 && Validator.isInt(String(value)) && value <= supply) {
+                if (value !== 0 && Validator.isInt(String(value)) && value <= Number(record.remainingSupply)) {
                   return Promise.resolve()
                 } else {
                   return Promise.reject('Invalid booking volume')
@@ -72,10 +73,8 @@ function Book({ isExecutionable, tokenId, price, book, visible, onCancel, supply
 Book.propTypes = {
   visible: PropTypes.bool,
   onCancel: PropTypes.func,
-  supply: PropTypes.number,
   book: PropTypes.func,
-  price: PropTypes.string,
-  tokenId: PropTypes.number,
+  record: PropTypes.object,
   isExecutionable: PropTypes.bool,
 }
 
