@@ -42,7 +42,7 @@ function QR({ tokenId, visible, traceId, runningSeason, onClick, onCancel }) {
 
 QR.propTypes = {
   tokenId: PropTypes.string,
-  runningSeason: PropTypes.string,
+  runningSeason: PropTypes.number,
   onCancel: PropTypes.func,
   onClick: PropTypes.func,
   traceId: PropTypes.string,

@@ -25,6 +25,7 @@ import {
 } from '../dashboard'
 import Loading from '../loading'
 import { Farm, Nofarm } from '../farm'
+import { QR, Received } from '../modals'
 
 // Redux action
 import {
@@ -46,9 +47,6 @@ import Contracts from '../../contracts.json'
 // Utils
 import { initContract } from '../../utils'
 
-// Components
-import { QR } from '../modals'
-
 const { TabPane } = Tabs
 const { Text } = Typography
 
@@ -57,6 +55,8 @@ const { Text } = Typography
 function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
   const [traceOpen, setTraceOpen] = useState(false)
   const [bookRecord, setBookRecord] = useState({})
+  const [tableRecord, setTableRecord] = useState({})
+  const [receivedOpen, setReceivedOpen] = useState(false)
 
   const downloadQR = (_id, _season) => {
     const canvas = document.getElementById('1234_reap')
@@ -168,9 +168,24 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
       fixed: 'right',
       width: 100,
       render: (text, record) => (
-        <>
-          {record.volume !== 0 && <Button type='primary' size='small' onClick={() => console.log(record.volume)}>Received</Button>}
-        </>
+        <Space>
+          <Button
+            type='primary'
+            size='small'
+            onClick={() => {
+              setReceivedOpen(true)
+              setTableRecord(record)
+            }}
+          >
+            Received
+          </Button>
+          <Received
+            visible={receivedOpen}
+            confirmReceived={() => console.log('Received')}
+            record={tableRecord}
+            cancel={() => setReceivedOpen(false)}
+          />
+        </Space>
       )
     }
   ]
@@ -299,7 +314,7 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
         ) : (
           <Col xs={24} xl={24} className='column_con'>
             <Tabs type='card'>
-              <TabPane tab='Farms' key='1'>
+              <TabPane tab={`Farms(${userData.userFarms.length})`} key='1'>
                 <Row>
                   {userData.userFarms.length === 0 ? (
                     <Col xs={24} xl={24} className='column_con'>
@@ -314,7 +329,7 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
                   )}
                 </Row>
               </TabPane>
-              <TabPane tab='Bookings' key='2'>
+              <TabPane tab={`Bookings(${userData.userBookings.length})`} key='2'>
                 <Row justify='center' align='center'>
                   <Col xs={24} xl={24} className='column_con'>
                     <Table size='small' tableLayout='auto' scroll={{ x: true }} dataSource={userData.userBookings} columns={columns} />
