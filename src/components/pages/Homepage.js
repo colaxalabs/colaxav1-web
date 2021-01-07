@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import {
   Row,
   Col,
+  Statistic,
 } from 'antd'
 import { connect } from 'react-redux'
 import {
@@ -116,9 +117,8 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             <Loading />  
           ) : (
             <Stats
-              title='Lands'
               description='Number of registered farms lands'
-              dispValue={dash.lands}
+              children={<Statistic title='Lands' value={dash.lands} />}
             />
           )} 
         </Col>
@@ -127,9 +127,8 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             <Loading />
           ) : (
             <Stats
-              title='Seasons'
               description='Number of completed seasons'
-              dispValue={dash.seasons}
+              children={<Statistic title='Seasons' value={dash.seasons} />}
             />
           )}
         </Col>
@@ -138,9 +137,8 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             <Loading />
           ) : (
             <Stats
-              title='Markets'
               description='Number of created markets'
-              dispValue={dash.markets}
+              children={<Statistic title='Markets' value={dash.markets} />}
             />
           )}
         </Col>

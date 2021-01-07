@@ -12,6 +12,8 @@ const { Text } = Typography
 
 function Received({ visible, confirmReceived, record, cancel }) {
 
+  const [confirmationVolume, setConfirmationVolume] = React.useState(0)
+
   const [form] = Form.useForm()
 
   return (
@@ -54,26 +56,28 @@ function Received({ visible, confirmReceived, record, cancel }) {
             }
           ]}
         >
-          <Input type='number' />
+          <Input type='number' onChange={(e) => setConfirmationVolume(e.target.value)} />
         </Form.Item>
-        <Form.Item
-          label='Review'
-          name='review'
-          extra={<Text type='secondary'>rate farm service or harvest product in 50 words</Text>}
-          rules={[
-            {
-              validator: (rule, value) => {
-                if (!Validator.isEmpty(value) && Validator.isAlpha(value.replace(/\s+/g, '')) && value.replace(/\s+/g, '').length <= 50) {
-                  return Promise.resolve()
-                } else {
-                  return Promise.reject('Invalid review')
+        {Number(record.volume) === Number(confirmationVolume) ? (
+          <Form.Item
+            label='Review'
+            name='review'
+            extra={<Text type='secondary'>rate farm service or harvest product in 50 words</Text>}
+            rules={[
+              {
+                validator: (rule, value) => {
+                  if (!Validator.isEmpty(value) && Validator.isAlpha(value.replace(/\s+/g, '')) && value.replace(/\s+/g, '').length <= 50) {
+                    return Promise.resolve()
+                  } else {
+                    return Promise.reject('Invalid review')
+                  }
                 }
               }
-            }
-          ]}
-        >
-          <Input type='textarea' />
-        </Form.Item>
+            ]}
+          >
+            <Input type='textarea' />
+          </Form.Item>
+        ) : null}
       </Form>
     </Modal>
   )

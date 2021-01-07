@@ -10,6 +10,7 @@ import {
   Tag,
   Typography,
   Space,
+  Statistic,
 } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 
@@ -258,9 +259,8 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
             <Loading />  
           ) : (
             <Stats
-              title='Traces'
               description='Number of performed traces'
-              dispValue={markets.traces}
+              children={<Statistic title='Traces' value={markets.traces} />}
             />
           )} 
         </Col>
@@ -269,9 +269,8 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
             <Loading />
           ) : (
             <Stats
-              title='Markets'
               description='Number of markets'
-              dispValue={markets.totalMarkets}
+              children={<Statistic value={markets.totalMarkets} title='Markets' />}
             />
           )}
         </Col>
@@ -280,9 +279,8 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
             <Loading />
           ) : (
             <Stats
-              title='Transaction Volume'
-              description='Total transaction volume'
-              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(markets.txs) * Number(usdRate))}`}
+              description='Transaction volume'
+              children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(markets.txs) * Number(usdRate))}`} />}
             />
           )}
         </Col>

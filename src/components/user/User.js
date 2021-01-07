@@ -10,6 +10,7 @@ import {
   Button,
   Typography,
   Space,
+  Statistic,
 } from 'antd'
 import {
   LoadingOutlined,
@@ -277,9 +278,8 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
             <Loading />
           ) : (
             <Stats
-              title='Lands'
               description='Number of registered farm lands'
-              dispValue={userData.lands}
+              children={<Statistic title='Lands' value={userData.lands} />}
             />
           )}
         </Col>
@@ -288,9 +288,8 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
             <Loading />
           ) : (
             <Stats
-              title='Bookings'
               description='Number of bookings'
-              dispValue={userData.totalBookings}
+              children={<Statistic title='Bookings' value={userData.totalBookings} />}
             />
           )}
         </Col>
@@ -299,9 +298,8 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
             <Loading />
           ) : (
             <Stats
-              title='Transaction'
-              description='Total amount transacted'
-              dispValue={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(userData.txs) * Number(usdRate))}`}
+              description='Transaction volume'
+              children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(userData.txs) * Number(usdRate))}`} />}
             />
           )}
         </Col>
