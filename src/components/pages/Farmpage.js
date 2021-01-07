@@ -32,7 +32,6 @@ import {
   QR,
   MarketModal,
 } from '../modals'
-import { Line } from '../charts'
 
 // Redux actions
 import {
@@ -219,8 +218,8 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
               <Loading />
             ) : (
               <Stats
-                children={<Line />}
-                description='Farm production rate'
+                children={<Statistic title='Seasons' value={farm.completedSeasons} />}
+                description='Completed seasons'
               />
             )} 
           </Col>
