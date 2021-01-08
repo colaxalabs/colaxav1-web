@@ -5,6 +5,7 @@ import {
   Form,
   Input,
   Typography,
+  message,
 } from 'antd'
 import Validator from 'validator'
 
@@ -27,7 +28,9 @@ function Received({ visible, confirmReceived, record, cancel }) {
       onOk={() => {
         form.validateFields()
           .then(values => {
-            console.log(values)
+            values.season = Number(record.season)
+            values.tokenId = Number(record.marketId)
+            confirmReceived(values, message)
             cancel()
           })
       }}
@@ -66,7 +69,7 @@ function Received({ visible, confirmReceived, record, cancel }) {
             rules={[
               {
                 validator: (rule, value) => {
-                  if (!Validator.isEmpty(value) && Validator.isAlpha(value.replace(/\s+/g, '')) && value.replace(/\s+/g, '').length <= 50) {
+                  if (!Validator.isEmpty(value) && Validator.isAlphanumeric(value.replace(/\s+/g, '')) && value.replace(/\s+/g, '').length <= 50) {
                     return Promise.resolve()
                   } else {
                     return Promise.reject('Invalid review')

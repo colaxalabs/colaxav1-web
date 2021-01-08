@@ -16,8 +16,10 @@ import {
   Button,
   message,
   Statistic,
+  Tabs,
+  Table,
 } from 'antd'
-import { LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { SyncOutlined, CheckCircleTwoTone, LoadingOutlined, ShareAltOutlined } from '@ant-design/icons'
 import makeBlockie from 'ethereum-blockies-base64'
 
 // Components
@@ -64,18 +66,86 @@ import {
 } from '../../utils'
 
 const { Text } = Typography
-
-const loadingInfo = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#fff',
-  margin: '0 12px 20px 0',
-  textAlign: 'center',
-  borderRadius: 4,
-}
+const { TabPane } = Tabs
 
 function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure, network, gotoMarket }) {
+
+  const columns = [
+    {
+      title: '#',
+      dataIndex: 'marketId',
+      key: 'marketId',
+    },
+    {
+      title: 'Crop',
+      dataIndex: 'crop',
+      key: 'crop',
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: date => (
+        <Text>{`${new Date(date * 1000).toLocaleDateString()}`}</Text>
+      )
+    },
+    {
+      title: 'Booker',
+      dataIndex: 'booker',
+      key: 'booker',
+      render: booker => (
+        <Space
+          style={{ width: '150px' }}
+        >
+          <Avatar size='small' src={makeBlockie(booker)} />
+          {String(booker).toUpperCase() === String(wallet[0]).toUpperCase() ? (
+            <Text type='secondary'>You</Text>
+          ) : (
+            <Text ellipsis copyable>{booker}</Text>
+          )}
+        </Space>
+      )
+    },
+    {
+      title: 'Volume',
+      dataIndex: 'volume',
+      key: 'volume',
+      render: volume => (
+        <Text>{`${volume} KG`}</Text>
+      )
+    },
+    {
+      title: 'Deposit',
+      dataIndex: 'deposit',
+      key: 'deposit',
+      render: deposit => (
+        <>
+          <Text>
+            {`${Web3.utils.fromWei(deposit, 'ether')} ETH / ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(deposit, 'ether')) * usdRate)}`}
+          </Text>
+        </>
+      )
+    },
+    {
+      title: 'Delivered',
+      dataIndex: 'delivered',
+      key: 'delivered',
+      render: delivered => (
+        <>
+          {!delivered ? (
+            <SyncOutlined spin style={{ color: '#7546C9' }} />
+          ) : (
+            <CheckCircleTwoTone twoToneColor='#7546C9'/>
+          )}
+        </>
+      ),
+    },
+    {
+      title: 'Season',
+      dataIndex: 'season',
+      key: 'season',
+    },
+  ]
 
   const { id } = useParams()
   const [isOwner, setIsOwner] = useState(false)
@@ -128,7 +198,13 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
           farm.farmBookings = []
         } else {
           for (let i = 1; i <= Number(farm.totalBookings); i++) {
-            farm.farmBookings[i] = await marketContract.methods.getMarketBooking(farm.tokenId, i).call()
+            farm.farmBookings[i-1] = await marketContract.methods.getMarketBooking(farm.tokenId, i).call()
+            const seasonMeta = await seasonContract.methods.querySeasonData(
+              Number(farm.tokenId),
+              Number(farm.farmBookings[i-1].season)
+            ).call()
+            farm.farmBookings[i-1].crop = seasonMeta.crop
+            farm.farmBookings[i-1].key = i-1
           }
         }
         farm.traceId = traceHash
@@ -244,171 +320,178 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
             )} 
           </Col>
         </Row>
-        <Row justify='center' align='center'>
-          <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
-            {isLoading ? (
-              <div style={{ ...loadingInfo, height: 350, width: '100%' }}>
-                <LoadingOutlined stype={{ marginTop: '50px' }} />
-              </div>
-            ) : (
-              <>
-                <Card
-                  hoverable
-                  style={{ width: 320 }}
-                  cover={<img src={`https://ipfs.io/ipfs/${farm.img}`} alt='img' heigth='230px' />}
-                  actions={[
-                    farm.season === 'Dormant' && isOwner ? (
-                      <Button
-                        disabled={opening}
-                        loading={opening}
-                        type='link'
-                        onClick={() => openSeason(id, message)}
-                      >
-                        Open Season
-                      </Button>
-                    ) : null,
-                    farm.season === 'Preparation' && isOwner ? (
-                      <Button
-                        disabled={closingPreparation}
-                        loading={closingPreparation}
-                        type='link'
-                        onClick={() => setOpenPreparation(true)}
-                      >
-                        Confirm Preparation
-                      </Button>
-                    ) : null,
-                    farm.season === 'Planting' && isOwner ? (
-                      <Button
-                        disabled={closingPlanting}
-                        loading={closingPlanting}
-                        type='link'
-                        onClick={() => setOpenPlanting(true)}
-                      >
-                        Confirm Planting
-                      </Button>
-                    ) : null,
-                    farm.season === 'Crop Growth' && isOwner ? (
-                      <Button
-                        disabled={closingGrowth}
-                        loading={closingGrowth}
-                        type='link'
-                        onClick={() => setOpenGrowth(true)}
-                      >
-                        Confirm Growth
-                      </Button>
-                    ) : null,
-                    farm.season === 'Harvesting' && isOwner ? (
-                      <Button
-                        disabled={closingHarvest}
-                        loading={closingHarvest}
-                        type='link'
-                        onClick={() => setOpenHarvest(true)}
-                      >
-                        Confirm Harvest
-                      </Button>
-                    ) : null,
-                    farm.season === 'Marketing' && isOwner && !farm.seasonMarketed ? (
-                      <>
+          {isLoading ? (
+            <Row>
+              <Col xl={24} xs={24} className='column_con loading_container'>
+                <LoadingOutlined />
+              </Col>
+            </Row>
+          ) : (
+            <>
+              <Row justify='center' align='center'>
+                <Col xl={12} xs={24} className='column_con site-layout-background' style={{ padding: 8 }}>
+                  <Card
+                    hoverable
+                    style={{ width: 320 }}
+                    cover={<img src={`https://ipfs.io/ipfs/${farm.img}`} alt='img' heigth='230px' />}
+                    actions={[
+                      farm.season === 'Dormant' && isOwner ? (
+                        <Button
+                          disabled={opening}
+                          loading={opening}
+                          type='link'
+                          onClick={() => openSeason(id, message)}
+                        >
+                          Open Season
+                        </Button>
+                      ) : null,
+                      farm.season === 'Preparation' && isOwner ? (
+                        <Button
+                          disabled={closingPreparation}
+                          loading={closingPreparation}
+                          type='link'
+                          onClick={() => setOpenPreparation(true)}
+                        >
+                          Confirm Preparation
+                        </Button>
+                      ) : null,
+                      farm.season === 'Planting' && isOwner ? (
+                        <Button
+                          disabled={closingPlanting}
+                          loading={closingPlanting}
+                          type='link'
+                          onClick={() => setOpenPlanting(true)}
+                        >
+                          Confirm Planting
+                        </Button>
+                      ) : null,
+                      farm.season === 'Crop Growth' && isOwner ? (
+                        <Button
+                          disabled={closingGrowth}
+                          loading={closingGrowth}
+                          type='link'
+                          onClick={() => setOpenGrowth(true)}
+                        >
+                          Confirm Growth
+                        </Button>
+                      ) : null,
+                      farm.season === 'Harvesting' && isOwner ? (
+                        <Button
+                          disabled={closingHarvest}
+                          loading={closingHarvest}
+                          type='link'
+                          onClick={() => setOpenHarvest(true)}
+                        >
+                          Confirm Harvest
+                        </Button>
+                      ) : null,
+                      farm.season === 'Marketing' && isOwner && !farm.seasonMarketed ? (
+                        <>
+                          <Button
+                            type='link'
+                            disabled={goingToMarket}
+                            loading={goingToMarket}
+                            onClick={() => setOpenMarket(true)}
+                          >
+                            Sell
+                          </Button>
+                          <Button
+                            type='link'
+                            danger
+                            disabled={closingSeason}
+                            loading={closingSeason}
+                            onClick={() => setOpenClosing(true)}
+                          >
+                            Close Season
+                          </Button>
+                        </>
+                      ) : null,
+                      farm.season === 'Marketing' && isOwner && farm.seasonMarketed && Number(farm.currentSeasonSupply) === 0 ? (
+                          <Button
+                            type='link'
+                            danger
+                            disabled={closingSeason}
+                            loading={closingSeason}
+                            onClick={handleClosure}
+                          >
+                            Close Season
+                          </Button>
+                      ) : null,
+                      farm.season === 'Marketing' ? (
                         <Button
                           type='link'
-                          disabled={goingToMarket}
-                          loading={goingToMarket}
-                          onClick={() => setOpenMarket(true)}
+                          onClick={() => setOpenQr(true)}
                         >
-                          Sell
+                          Trace
                         </Button>
-                        <Button
-                          type='link'
-                          danger
-                          disabled={closingSeason}
-                          loading={closingSeason}
-                          onClick={() => setOpenClosing(true)}
-                        >
-                          Close Season
-                        </Button>
-                      </>
-                    ) : null,
-                    farm.season === 'Marketing' && isOwner && farm.seasonMarketed && Number(farm.currentSeasonSupply) === 0 ? (
-                        <Button
-                          type='link'
-                          danger
-                          disabled={closingSeason}
-                          loading={closingSeason}
-                          onClick={handleClosure}
-                        >
-                          Close Season
-                        </Button>
-                    ) : null,
-                    farm.season === 'Marketing' ? (
-                      <Button
-                        type='link'
-                        onClick={() => setOpenQr(true)}
-                      >
-                        Trace
-                      </Button>
-                    ) : null,
-                    <Text
-                      copyable={{
-                        text: `${window.location.href}`,
-                        icon: <ShareAltOutlined style={{ fontSize: '18px', marginTop: '5px' }} />
-                      }}
-                    />,
-                  ].filter(i => i !== null)}
-                >
-                  <Card.Meta
-                    description={<Tag color={farm.season === 'Dormant' ? '#f50' :
-            farm.season === 'Preparation' ? '#b22989' :
-            farm.season === 'Planting' ? '#108ee9' :
-            farm.season === 'Crop Growth' ? '#87d068' :
-            farm.season === 'Harvesting' ? '#0aa679' :
-          farm.season === 'Marketing' ? '#7546C9' : null}>{farm.season}</Tag>}
-                  />
-                </Card>
-              </>
-            )}
-            <Preparation tokenId={id} visible={openPreparation} onCreate={handlePreparation} onCancel={() => setOpenPreparation(false)} />
-            <Planting tokenId={id} visible={openPlanting} onCreate={handlePlanting} onCancel={() => setOpenPlanting(false)} />
-            <Growth tokenId={id} visible={openGrowth} onCreate={handleGrowth} onCancel={() => setOpenGrowth(false)} />
-            <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
-            <Closure tokenId={id} visible={openClosing} onCreate={handleClosure} cancel={() => setOpenClosing(false)} />
-            <QR tokenId={id} traceId={farm.traceId} runningSeason={farm.currentSeason} visible={openQr} onClick={downloadQR} onCancel={() => setOpenQr(false)} />
-            <MarketModal crop={farm.seasonCrop} tokenId={id} visible={openMarket} onCreate={handleGotoMarket} cancel={() => setOpenMarket(false)} harvestSupply={farm.seasonSupply} supplyUnit={farm.seasonSupplyUnit} />
-          </Col>
-          <Col xs={24} xl={12} className='column_con site-layout-background' style={{ padding: 8 }}>
-            {isLoading ? (
-              <div style={{ ...loadingInfo, height: 350, width: '100%' }}>
-                <LoadingOutlined stype={{ marginTop: '50px' }} />
-              </div>
-            ) : (
-              <>
-                <Descriptions title={farm.name} size='middle' layout='vertical' bordered>
-                  <Descriptions.Item label='Farm Size'>{sanitize(farm.size)}</Descriptions.Item>
-                  <Descriptions.Item label='Location'>{farm.location}</Descriptions.Item>
-                  <Descriptions.Item label='Soil'>{farm.soil}</Descriptions.Item>
-                  <Descriptions.Item label='Owner'>
-                    <Space>
-                      <Avatar size='small' src={farm.owner ? makeBlockie(farm.owner) : ''} />
-                      <Text ellipsis copyable>{farm.owner}</Text>
-                    </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label='Completed Season'>{farm.completedSeasons}</Descriptions.Item>
-                <Descriptions.Item label='State'>
-                  <Tag color={farm.season === 'Dormant' ? '#f50' :
-          farm.season === 'Preparation' ? '#b22989' :
-          farm.season === 'Planting' ? '#108ee9' :
-          farm.season === 'Crop Growth' ? '#87d068' :
-          farm.season === 'Harvesting' ? '#0aa679' :
-        farm.season === 'Marketing' ? '#7546C9' : null}>{farm.season}</Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label='#tokenId'>{farm.tokenId}</Descriptions.Item>
-              </Descriptions>
+                      ) : null,
+                      <Text
+                        copyable={{
+                          text: `${window.location.href}`,
+                          icon: <ShareAltOutlined style={{ fontSize: '18px', marginTop: '5px' }} />
+                        }}
+                      />,
+                    ].filter(i => i !== null)}
+                  >
+                    <Card.Meta
+                      description={<Tag color={farm.season === 'Dormant' ? '#f50' :
+                      farm.season === 'Preparation' ? '#b22989' :
+                      farm.season === 'Planting' ? '#108ee9' :
+                      farm.season === 'Crop Growth' ? '#87d068' :
+                      farm.season === 'Harvesting' ? '#0aa679' :
+                      farm.season === 'Marketing' ? '#7546C9' : null}>{farm.season}</Tag>}
+                    />
+                  </Card>
+                  <Preparation tokenId={id} visible={openPreparation} onCreate={handlePreparation} onCancel={() => setOpenPreparation(false)} />
+                  <Planting tokenId={id} visible={openPlanting} onCreate={handlePlanting} onCancel={() => setOpenPlanting(false)} />
+                  <Growth tokenId={id} visible={openGrowth} onCreate={handleGrowth} onCancel={() => setOpenGrowth(false)} />
+                  <Harvest tokenId={id} visible={openHarvest} onCreate={handleHarvest} onCancel={() => setOpenHarvest(false)} />
+                  <Closure tokenId={id} visible={openClosing} onCreate={handleClosure} cancel={() => setOpenClosing(false)} />
+                  <QR tokenId={id} traceId={farm.traceId} runningSeason={Number(farm.currentSeason)} visible={openQr} onClick={downloadQR} onCancel={() => setOpenQr(false)} />
+                  <MarketModal crop={farm.seasonCrop} tokenId={id} visible={openMarket} onCreate={handleGotoMarket} cancel={() => setOpenMarket(false)} harvestSupply={farm.seasonSupply} supplyUnit={farm.seasonSupplyUnit} />
+                </Col>
+                <Col xl={12} xs={24} className='column_con site-layout-background' style={{ padding: 8 }}>
+                  <Descriptions title={farm.name} size='middle' layout='vertical' bordered>
+                    <Descriptions.Item label='Farm Size'>{sanitize(farm.size)}</Descriptions.Item>
+                    <Descriptions.Item label='Location'>{farm.location}</Descriptions.Item>
+                    <Descriptions.Item label='Soil'>{farm.soil}</Descriptions.Item>
+                    <Descriptions.Item label='Owner'>
+                      <Space>
+                        <Avatar size='small' src={farm.owner ? makeBlockie(farm.owner) : ''} />
+                        <Text ellipsis copyable>{farm.owner}</Text>
+                      </Space>
+                    </Descriptions.Item>
+                    <Descriptions.Item label='Completed Season'>{farm.completedSeasons}</Descriptions.Item>
+                    <Descriptions.Item label='State'>
+                      <Tag color={farm.season === 'Dormant' ? '#f50' :
+                        farm.season === 'Preparation' ? '#b22989' :
+                        farm.season === 'Planting' ? '#108ee9' :
+                        farm.season === 'Crop Growth' ? '#87d068' :
+                        farm.season === 'Harvesting' ? '#0aa679' :
+                        farm.season === 'Marketing' ? '#7546C9' : null}>{farm.season}</Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label='#tokenId'>{farm.tokenId}</Descriptions.Item>
+                  </Descriptions>
+                </Col>
+              </Row>
+              <Row justify='center' align='center'>
+                <Col xl={24} xs={24} className='column_con'>
+                  <Tabs type='card'>
+                    <TabPane tab={`Bookings(${farm.totalBookings})`} key='1'>
+                      <Row>
+                        <Col xs={24} xl={24} className='column_con'>
+                          <Table size='small' tableLayout='auto' scroll={{ x: true }} dataSource={farm.farmBookings} columns={columns} />
+                        </Col>
+                      </Row>
+                    </TabPane>
+                  </Tabs>
+                </Col>
+              </Row>
             </>
           )}
-        </Col>
-      </Row>
-     </>
-    )}
-   </>
+        </>
+      )}
+    </>
   )
 }
 

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, { useEffect } from 'react'
+import Web3 from 'web3'
 import {
   Row,
   Col,
@@ -22,7 +23,6 @@ import Loading from '../loading'
 
 // Contracts
 import Registry from '../../abis/FRMRegistry.json'
-import Season from '../../abis/Season.json'
 import Market from '../../abis/Market.json'
 import Contracts from '../../contracts.json'
 
@@ -43,7 +43,6 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
 
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
-    const seasonContract = initContract(Season, Contracts['4'].Season[0])
     const marketContract = initContract(Market, Contracts['4'].Market[0])
 
     async function loadDashboardData() {
@@ -61,7 +60,8 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
       // Query app dashboard info from the blockchain
       dashboard.lands = Number(await registryContract.methods.totalSupply().call())
       dashboard.markets = Number(await marketContract.methods.totalMarkets().call())
-      dashboard.seasons = Number(await seasonContract.methods.completeSeasons().call())
+      const tx = await marketContract.methods.platformTransactions().call()
+      dashboard.txs = Web3.utils.fromWei(tx, 'ether')
       dashboard.farms = []
       // Load the first 3 farms
       if (dashboard.lands === 0) {
@@ -127,8 +127,8 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             <Loading />
           ) : (
             <Stats
-              description='Number of completed seasons'
-              children={<Statistic title='Seasons' value={dash.seasons} />}
+              description='Number of created markets'
+              children={<Statistic title='Markets' value={dash.markets} />}
             />
           )}
         </Col>
@@ -137,8 +137,8 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
             <Loading />
           ) : (
             <Stats
-              description='Number of created markets'
-              children={<Statistic title='Markets' value={dash.markets} />}
+              description='Transaction volume'
+              children={<Statistic title='Transaction Volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(dash.txs) * Number(usdRate))}`} />}
             />
           )}
         </Col>

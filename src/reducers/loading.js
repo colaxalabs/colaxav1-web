@@ -13,6 +13,7 @@ import {
   CLOSING_SEASON,
   GOING_TO_MARKET,
   MARKET_DASH_LOADING,
+  CONFIRMING_RECEIVED,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -26,6 +27,7 @@ const INITIAL_STATE = {
   confirmingPlanting: false,
   confirmingGrowth: false,
   confirmingHarvest: false,
+  confirmingReceived: false,
   booking: false,
   closingSeason: false,
   goingToMarket: false,
@@ -103,6 +105,11 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         marketdashLoading: action.status.marketdashLoading,
+      }
+    case CONFIRMING_RECEIVED:
+      return {
+        ...state,
+        confirmingReceived: action.status.confirmingReceived,
       }
     default:
       return state

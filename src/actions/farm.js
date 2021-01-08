@@ -16,6 +16,9 @@ import {
   CLOSING_FARM_SEASON,
   GOING_TO_MARKET,
   SEASON_MARKETED,
+  CONFIRMING_RECEIVED,
+  CONFIRM_RECEIVED,
+  BOOKED,
 } from '../types'
 import ipfs from '../ipfs'
 import Web3 from 'web3'
@@ -110,6 +113,21 @@ const goingtoMarket = status => ({
 const seasonMarketed = farm => ({
   type: SEASON_MARKETED,
   farm,
+})
+
+const confirming = status => ({
+  type: CONFIRMING_RECEIVED,
+  status,
+})
+
+const booked = resp => ({
+  type: BOOKED,
+  resp,
+})
+
+const confirmReceived = resp => ({
+  type: CONFIRM_RECEIVED,
+  resp,
 })
 
 export const tokenize = (values, message) => async dispatch => {
@@ -448,6 +466,11 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
     })
     .on('confirmation', async(confirmationNumber, receipt) => {
       if (confirmationNumber === 1) {
+        const resp = {}
+        resp.id = tokenId
+        resp.volume = volume
+        resp.bookers = await marketContract.methods.totalMarketBookers(Number(tokenId)).call()
+        dispatch(booked({ ...resp }))
         status.booking = false
         dispatch(bookingHarvest({ ...status }))
         message.success('Transaction confirmed!', 5)
@@ -492,5 +515,68 @@ export const gotoMarket = (tokenId, values, message) => async dispatch => {
       dispatch(goingtoMarket({ ...status }))
       message.error(`Error: ${err.message}`, 10)
     })
+}
+
+export const received = (values, message) => async dispatch => {
+  const { tokenId, season, volume, review } = values
+  // Init contracts
+  const marketContract = initContract(Market, Contracts['4'].Market[0])
+  const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
+  // Send tx
+  const provider = '0x603Fca0361F0F791f849a98F776bfdbE9ecE26A4'
+  const accounts = await window.web3.eth.getAccounts()
+  const farmer = await registryContract.methods.ownerOf(tokenId).call()
+  const status = {}
+  if (review) {
+    status.confirmingReceived = true
+    dispatch(confirming({ ...status }))
+    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, review).send({ from: accounts[0], value: Web3.utils.toWei('0.0037', 'ether') })
+      .on('transactionHash', () => {
+        message.info('Confirming...', 5)
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const resp = {}
+          resp.id = tokenId
+          resp.volume = volume
+          const tx = await marketContract.methods.userTransactions(accounts[0]).call()
+          resp.txs = Web3.utils.fromWei(tx, 'ether')
+          dispatch(confirmReceived({ ...resp }))
+          status.confirmingReceived = false
+          dispatch(confirming({ ...status }))
+          message.success('Confirmed!', 5)
+        }
+      })
+      .on('error', err => {
+        status.confirmingReceived = false
+        dispatch(confirming({ ...status }))
+        message.error(`Error: ${err.message}`, 10)
+      })
+  } else {
+    status.confirmingReceived = true
+    dispatch(confirming({ ...status }))
+    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, "").send({ from: accounts[0], value: Web3.utils.toWei('0.0037', 'ether') })
+      .on('transactionHash', () => {
+        message.info('Confirming...', 5)
+      })
+      .on('confirmation', async(confirmationNumber, receipt) => {
+        if (confirmationNumber === 1) {
+          const resp = {}
+          resp.id = tokenId
+          resp.volume = volume
+          const tx = await marketContract.methods.userTransactions(accounts[0]).call()
+          resp.txs = Web3.utils.fromWei(tx, 'ether')
+          dispatch(confirmReceived({ ...resp }))
+          status.confirmingReceived = false
+          dispatch(confirming({ ...status }))
+          message.success('Confirmed!', 5)
+        }
+      })
+      .on('error', err => {
+        status.confirmingReceived = false
+        dispatch(confirming({ ...status }))
+        message.error(`Error: ${err.message}`, 10)
+      })
+  }
 }
 

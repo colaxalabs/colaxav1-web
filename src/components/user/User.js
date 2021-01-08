@@ -34,6 +34,7 @@ import {
   loadUser,
   isUserDashLoading,
   tokenize,
+  received,
 } from '../../actions'
 
 // Redux store
@@ -53,7 +54,7 @@ const { Text } = Typography
 
 
 
-function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
+function User({ tokenize, received, confirming, wallet, network, userData, isLoading, usdRate }) {
   const [traceOpen, setTraceOpen] = useState(false)
   const [bookRecord, setBookRecord] = useState({})
   const [tableRecord, setTableRecord] = useState({})
@@ -173,6 +174,8 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
           <Button
             type='primary'
             size='small'
+            disabled={confirming || Number(record.volume) === 0}
+            loading={confirming && Number(record.volume) !== 0}
             onClick={() => {
               setReceivedOpen(true)
               setTableRecord(record)
@@ -182,7 +185,7 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
           </Button>
           <Received
             visible={receivedOpen}
-            confirmReceived={() => console.log('Received')}
+            confirmReceived={received}
             record={tableRecord}
             cancel={() => setReceivedOpen(false)}
           />
@@ -306,7 +309,7 @@ function User({ tokenize, wallet, network, userData, isLoading, usdRate }) {
       </Row>
       <Row>
         {isLoading ? (
-          <Col xs={24} xl={24} className='column_con' style={{ height: '300px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          <Col xs={24} xl={24} className='column_con loading_container'>
             <LoadingOutlined />
           </Col>
         ) : (
@@ -349,6 +352,7 @@ User.propTypes = {
   userData: PropTypes.object,
   tokenize: PropTypes.func,
   network: PropTypes.number,
+  confirming: PropTypes.bool,
 }
 
 function mapStateToProps(state) {
@@ -358,8 +362,9 @@ function mapStateToProps(state) {
     wallet: state.wallet.address,
     userData: state.user,
     network: state.network.currentNetwork,
+    confirming: state.loading.confirmingReceived,
   }
 }
 
-export default connect(mapStateToProps, { tokenize })(User)
+export default connect(mapStateToProps, { received, tokenize })(User)
 
