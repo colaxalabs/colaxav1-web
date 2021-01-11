@@ -37,6 +37,9 @@ import {
   loadDashboard,
   isDashLoading,
   loadCurrency,
+  listenTokenize,
+  listenCreateMarket,
+  listenVolume,
 } from '../../actions'
 
 function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
@@ -44,6 +47,39 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
   useEffect(() => {
     const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
     const marketContract = initContract(Market, Contracts['4'].Market[0])
+
+    function tokenizeMeta() {
+      registryContract.events.Tokenize((error, result) => {
+        if (!error) {
+          const { _totalFarms } = result.returnValues
+          store.dispatch(listenTokenize(_totalFarms))
+        } else {
+          console.error(error)
+        }
+      })
+    }
+
+    function createMarketMeta() {
+      marketContract.events.CreateMarket((error, result) => {
+        if (!error) {
+          const { _totalMarket } = result.returnValues
+          store.dispatch(listenCreateMarket(_totalMarket))
+        } else {
+          console.error(error)
+        }
+      })
+    }
+
+    function confirmationMeta() {
+      marketContract.events.Confirmation((error,result) => {
+        if (!error) {
+          const { _txVolume } = result.returnValues
+          store.dispatch(listenVolume(_txVolume))
+        } else {
+          console.error(error)
+        }
+      })
+    }
 
     async function loadDashboardData() {
       const dashboard = {}
@@ -60,8 +96,7 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
       // Query app dashboard info from the blockchain
       dashboard.lands = Number(await registryContract.methods.totalSupply().call())
       dashboard.markets = Number(await marketContract.methods.totalMarkets().call())
-      const tx = await marketContract.methods.platformTransactions().call()
-      dashboard.txs = Web3.utils.fromWei(tx, 'ether')
+      dashboard.txs = await marketContract.methods.platformTransactions().call()
       dashboard.farms = []
       // Load the first 3 farms
       if (dashboard.lands === 0) {
@@ -104,6 +139,9 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
     }, 2500)
 
     loadDashboardData()
+    tokenizeMeta()
+    createMarketMeta()
+    confirmationMeta()
 
     return () => clearInterval(interval)
 
@@ -138,7 +176,7 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
           ) : (
             <Stats
               description='Transaction volume'
-              children={<Statistic title='Transaction Volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(dash.txs) * Number(usdRate))}`} />}
+              children={<Statistic title='Transaction Volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(dash.txs, 'ether')) * Number(usdRate))}`} />}
             />
           )}
         </Col>

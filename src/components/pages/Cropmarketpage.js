@@ -32,7 +32,7 @@ import { Stats } from '../dashboard'
 import { QR, Book } from '../modals'
 
 // Redux actions
-import { bookHarvest, loadCurrency, loadMarkets, loadMarketDash } from '../../actions'
+import { bookHarvest, loadCurrency, loadMarkets, loadMarketDash, listenBook } from '../../actions'
 
 const { Text } = Typography
 
@@ -110,7 +110,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
           {record.closeDate >= record.openDate ? (
             <Tag color='red'>Closed</Tag>
           ) : (
-            <Tag color='green'>Open</Tag>
+            <Tag color='#20c89e'>Open</Tag>
           )}
         </>
       )
@@ -192,13 +192,26 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
   ]
 
   React.useEffect(() => {
+    // Init contracts
+    const marketContract = initContract(Market, Contracts['4'].Market[0])
+    const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
+    const seasonContract = initContract(Season, Contracts['4'].Season[0])
+
+    function bookMeta() {
+      marketContract.events.BookHarvest((error, result) => {
+        if (!error) {
+          const resp = {}
+          const { _tokenId, _farmVolume } = result.returnValues
+          resp.id = _tokenId
+          resp.volume = _farmVolume
+          store.dispatch(listenBook({ ...resp }))
+        } else {
+          console.error(error)
+        }
+      })
+    }
 
     async function queryMarkets() {
-      // Init contracts
-      const marketContract = initContract(Market, Contracts['4'].Market[0])
-      const registryContract = initContract(Registry, Contracts['4'].FRMRegistry[0])
-      const seasonContract = initContract(Season, Contracts['4'].Season[0])
-
       const marketsData = {}
       const status = {}
       status.marketdashLoading = true
@@ -245,7 +258,9 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
     const interval = setInterval(() => {
       fetchEtherConversionRate()
     }, 2500)
+
     queryMarkets()
+    bookMeta()
 
     return () => clearInterval(interval)
 

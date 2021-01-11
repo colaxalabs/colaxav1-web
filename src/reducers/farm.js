@@ -65,6 +65,8 @@ export function farm(state = INITIAL_STATE, action = {}) {
         season: action.farm.season,
         completedSeasons: action.farm.completedSeasons,
         traceId: action.farm.traceId,
+        seasonCrop: action.farm.seasonCrop,
+        seasonSupply: action.farm.seasonSupply,
       }
     case CLOSING_FARM_SEASON:
       return {

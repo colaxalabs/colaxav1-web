@@ -16,9 +16,12 @@ import {
   isDashLoading,
   isUserDashLoading,
   isFarmDashLoading,
+  listenTokenize,
+  listenCreateMarket,
+  listenVolume,
 } from './dashboard'
 import { loadCurrency } from './currency'
-import { loadUser } from './user'
+import { loadUser, listenBookingConfirmation } from './user'
 import {
   loadFarm,
   tokenize,
@@ -42,6 +45,7 @@ import {
 import {
   loadMarkets,
   loadMarketDash,
+  listenBook,
 } from './markets'
 
 const networkFound = net => ({
@@ -81,5 +85,10 @@ export {
   gotoMarket,
   loadMarketDash,
   received,
+  listenTokenize,
+  listenCreateMarket,
+  listenVolume,
+  listenBook,
+  listenBookingConfirmation,
 }
 

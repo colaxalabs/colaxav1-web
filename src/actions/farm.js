@@ -17,8 +17,6 @@ import {
   GOING_TO_MARKET,
   SEASON_MARKETED,
   CONFIRMING_RECEIVED,
-  CONFIRM_RECEIVED,
-  BOOKED,
 } from '../types'
 import ipfs from '../ipfs'
 import Web3 from 'web3'
@@ -118,16 +116,6 @@ const seasonMarketed = farm => ({
 const confirming = status => ({
   type: CONFIRMING_RECEIVED,
   status,
-})
-
-const booked = resp => ({
-  type: BOOKED,
-  resp,
-})
-
-const confirmReceived = resp => ({
-  type: CONFIRM_RECEIVED,
-  resp,
 })
 
 export const tokenize = (values, message) => async dispatch => {
@@ -466,11 +454,13 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
     })
     .on('confirmation', async(confirmationNumber, receipt) => {
       if (confirmationNumber === 1) {
-        const resp = {}
-        resp.id = tokenId
-        resp.volume = volume
-        resp.bookers = await marketContract.methods.totalMarketBookers(Number(tokenId)).call()
-        dispatch(booked({ ...resp }))
+        /*
+         *const resp = {}
+         *resp.id = tokenId
+         *resp.volume = volume
+         *resp.bookers = await marketContract.methods.totalMarketBookers(Number(tokenId)).call()
+         *dispatch(booked({ ...resp }))
+         */
         status.booking = false
         dispatch(bookingHarvest({ ...status }))
         message.success('Transaction confirmed!', 5)
@@ -536,12 +526,6 @@ export const received = (values, message) => async dispatch => {
       })
       .on('confirmation', async(confirmationNumber, receipt) => {
         if (confirmationNumber === 1) {
-          const resp = {}
-          resp.id = tokenId
-          resp.volume = volume
-          const tx = await marketContract.methods.userTransactions(accounts[0]).call()
-          resp.txs = Web3.utils.fromWei(tx, 'ether')
-          dispatch(confirmReceived({ ...resp }))
           status.confirmingReceived = false
           dispatch(confirming({ ...status }))
           message.success('Confirmed!', 5)
@@ -561,12 +545,6 @@ export const received = (values, message) => async dispatch => {
       })
       .on('confirmation', async(confirmationNumber, receipt) => {
         if (confirmationNumber === 1) {
-          const resp = {}
-          resp.id = tokenId
-          resp.volume = volume
-          const tx = await marketContract.methods.userTransactions(accounts[0]).call()
-          resp.txs = Web3.utils.fromWei(tx, 'ether')
-          dispatch(confirmReceived({ ...resp }))
           status.confirmingReceived = false
           dispatch(confirming({ ...status }))
           message.success('Confirmed!', 5)

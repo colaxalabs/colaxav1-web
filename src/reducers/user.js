@@ -1,12 +1,12 @@
 import {
   LOAD_USER_DASHBOARD,
-  CONFIRM_RECEIVED,
+  LISTEN_CONFIRM,
 } from '../types'
 
 const INITIAL_STATE = {
   lands: 0,
   totalBookings: 0,
-  txs: 0,
+  txs: '0',
   userFarms: [],
   userBookings: [],
 }
@@ -17,15 +17,14 @@ export function user(state = INITIAL_STATE, action = {}) {
       return {
         ...action.user,
       }
-    case CONFIRM_RECEIVED:
+    case LISTEN_CONFIRM:
       return {
         ...state,
-        txs: action.resp.txs,
+        txs: action.resp.bkTxs,
         userBookings: [...state.userBookings].map(book =>
-          (Number(book.marketId) === Number(action.resp.id))
-          ? { ...book, delivered: (Number(book.volume) - Number(action.resp.volume)) === 0, volume: Number(book.volume) - Number(action.resp.volume) }
-          : book
-        )
+        (Number(book.marketId) === Number(action.resp.id))
+          ? { ...book, delivered: action.resp.delivered, volume: action.resp.bookerVolume }
+          : book)
       }
     default:
       return state

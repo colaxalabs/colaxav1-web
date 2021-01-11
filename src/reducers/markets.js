@@ -1,6 +1,6 @@
 import {
   LOAD_MARKETS,
-  BOOKED,
+  LISTEN_BOOK,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -16,14 +16,13 @@ export function markets(state = INITIAL_STATE, action = {}) {
       return {
         ...action.marketsData,
       }
-    case BOOKED:
+    case LISTEN_BOOK:
       return {
         ...state,
         enlistedMarkets: [...state.enlistedMarkets].map(market =>
         (Number(market.tokenId) === Number(action.resp.id))
-          ? { ...market, bookers: action.resp.bookers, remainingSupply: Number(market.remainingSupply) - Number(action.resp.volume) }
-          : market
-        )
+          ? { ...market, remainingSupply: action.resp.volume }
+          : market)
       }
     default:
       return state

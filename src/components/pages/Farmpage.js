@@ -133,9 +133,9 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
       render: delivered => (
         <>
           {!delivered ? (
-            <SyncOutlined spin style={{ color: '#7546C9' }} />
+            <SyncOutlined spin style={{ color: '#fae276' }} />
           ) : (
-            <CheckCircleTwoTone twoToneColor='#7546C9'/>
+            <CheckCircleTwoTone twoToneColor='#20c89e'/>
           )}
         </>
       ),

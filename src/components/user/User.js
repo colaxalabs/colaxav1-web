@@ -35,6 +35,7 @@ import {
   isUserDashLoading,
   tokenize,
   received,
+  listenBookingConfirmation,
 } from '../../actions'
 
 // Redux store
@@ -126,9 +127,9 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
       render: delivered => (
         <>
           {!delivered ? (
-            <SyncOutlined spin style={{ color: '#7546C9' }} />
+            <SyncOutlined spin style={{ color: '#fae276' }} />
           ) : (
-            <CheckCircleTwoTone twoToneColor='#7546C9'/>
+            <CheckCircleTwoTone twoToneColor='#20c89e'/>
           )}
         </>
       ),
@@ -200,6 +201,22 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
     const marketContract = initContract(Market, Contracts['4'].Market[0])
     const seasonContract = initContract(Season, Contracts['4'].Season[0])
 
+    function bookingConfirmationMeta() {
+      marketContract.events.Confirmation((error,result) => {
+        if (!error) {
+          const resp = {}
+          const { _tokenId, _newBookerVolume, _delivered, _bookerTxVolume } = result.returnValues
+          resp.id = _tokenId
+          resp.bkTxs = _bookerTxVolume
+          resp.delivered = _delivered
+          resp.bookerVolume = _newBookerVolume
+          store.dispatch(listenBookingConfirmation({ ...resp }))
+        } else {
+          console.error(error)
+        }
+      })
+    }
+
     async function loadUserDashboard() {
       const user = {}
       const conversionRate = {}
@@ -215,8 +232,7 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
       // Query user info from the blockchain
       user.lands = await registryContract.methods.balanceOf(wallet[0]).call()
       user.totalBookings = await marketContract.methods.totalBookerBooking(wallet[0]).call()
-      const tx = await marketContract.methods.userTransactions(wallet[0]).call()
-      user.txs = Web3.utils.fromWei(tx, 'ether')
+      user.txs = await marketContract.methods.userTransactions(wallet[0]).call()
       user.userFarms = []
       if (Number(user.lands) === 0) {
         user.userFarms = []
@@ -268,6 +284,7 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
     }, 2500)
 
     loadUserDashboard()
+    bookingConfirmationMeta()
 
     return () => clearInterval(interval)
 
@@ -302,7 +319,7 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
           ) : (
             <Stats
               description='Transaction volume'
-              children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(userData.txs) * Number(usdRate))}`} />}
+              children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(userData.txs, 'ether')) * Number(usdRate))}`} />}
             />
           )}
         </Col>
