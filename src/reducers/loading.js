@@ -14,6 +14,7 @@ import {
   GOING_TO_MARKET,
   MARKET_DASH_LOADING,
   CONFIRMING_RECEIVED,
+  LOADING_REVIEWS,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -32,6 +33,7 @@ const INITIAL_STATE = {
   closingSeason: false,
   goingToMarket: false,
   marketdashLoading: false,
+  loadingReviews: false,
 }
 
 export function loading(state = INITIAL_STATE, action = {}) {
@@ -110,6 +112,11 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         confirmingReceived: action.status.confirmingReceived,
+      }
+    case LOADING_REVIEWS:
+      return {
+        ...state,
+        loadingReviews: action.status.loadingReviews,
       }
     default:
       return state

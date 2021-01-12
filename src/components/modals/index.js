@@ -8,6 +8,7 @@ import InfiniteModal from './Infinitemodal'
 import MarketModal from './Market'
 import Book from './Book'
 import Received from './Received'
+import Reviews from './Reviews'
 
 export {
   Preparation,
@@ -20,5 +21,6 @@ export {
   MarketModal,
   Book,
   Received,
+  Reviews,
 }
 

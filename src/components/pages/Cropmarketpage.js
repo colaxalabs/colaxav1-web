@@ -29,10 +29,19 @@ import { store } from '../../store'
 // Components
 import Loading from '../loading'
 import { Stats } from '../dashboard'
-import { QR, Book } from '../modals'
+import { QR, Book, Reviews } from '../modals'
 
 // Redux actions
-import { bookHarvest, loadCurrency, loadMarkets, loadMarketDash, listenBook, listenMarketing, listenMarketConfirmation } from '../../actions'
+import {
+  bookHarvest,
+  loadCurrency,
+  loadMarkets,
+  loadMarketDash,
+  listenBook,
+  listenMarketing,
+  listenMarketConfirmation,
+  listenReviewing,
+} from '../../actions'
 
 const { Text } = Typography
 
@@ -41,6 +50,9 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
   const [bookingOpen, setBookingOpen] = React.useState(false)
   const [rowRecord, setRowRecord] = React.useState(null)
   const [traceRecord, setTraceRecord] = React.useState({})
+  const [openReviews, setOpenReviews] = React.useState(false)
+  const [counts, setCounts] = React.useState(0)
+  const [comments, setComments] = React.useState([])
 
   const downloadQR = (_id, _season) => {
     const canvas = document.getElementById('1234_reap')
@@ -134,6 +146,16 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       title: 'Reviews',
       dataIndex: 'reviews',
       key: 'reviews',
+      render: (text, record) => (
+        <>
+          {Number(record.reviews) === 0 ? <Text>{`${record.reviews} reviews`}</Text> : <Button type='link' onClick={() => {
+            setCounts(record.reviews)
+            setOpenReviews(true)
+            setComments(record.comments)
+          }}>{`${record.reviews} reviews`}</Button>}
+          <Reviews visible={openReviews} comments={comments} count={Number(counts)} cancel={() => setOpenReviews(false)} />
+        </>
+      )
     },
     {
       title: 'Trace',
@@ -233,6 +255,18 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       })
     }
 
+    function reviewMeta() {
+      marketContract.events.LeaveReview((error, result) => {
+        if (!error) {
+          const resp = {}
+          const { _tokenId, _totalReviews } = result.returnValues
+          resp.id = _tokenId
+          resp.totalReviews = _totalReviews
+          store.dispatch(listenReviewing({ ...resp }))
+        }
+      })
+    }
+
     async function queryMarkets() {
       const marketsData = {}
       const status = {}
@@ -247,7 +281,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       } else {
         for (let i = 1; i <= marketsData.totalMarkets; i++) {
           try {
-            const _token = await marketContract.methods.getIndexedEnlistedMarket(i).call()
+            let _token = await marketContract.methods.getIndexedEnlistedMarket(i).call()
             const _currentSeason = await seasonContract.methods.currentSeason(Number(_token)).call()
             marketsData.enlistedMarkets[i-1] = await marketContract.methods.getCurrentFarmMarket(Number(_token)).call()
             const { location } = await registryContract.methods.getFarm(Number(_token)).call()
@@ -260,6 +294,16 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
             console.log(err)
           }
         } 
+      }
+      for (let i = 0; i < marketsData.enlistedMarkets.length; i++) {
+        marketsData.enlistedMarkets[i].comments = []
+        if (Number(marketsData.enlistedMarkets[i].reviews) === 0) {
+          marketsData.enlistedMarkets[i].comments = []
+        } else {
+          for (let j = 1; j <= Number(marketsData.enlistedMarkets[i].reviews); j++) {
+            marketsData.enlistedMarkets[i].comments[j-1] = await marketContract.methods.getReviewForMarket(Number(marketsData.enlistedMarkets[i].tokenId), j).call()
+          }
+        }
       }
       store.dispatch(loadMarkets({ ...marketsData }))
 
@@ -284,6 +328,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
     bookMeta()
     createMarketMeta()
     marketConfirmation()
+    reviewMeta()
 
     return () => clearInterval(interval)
 

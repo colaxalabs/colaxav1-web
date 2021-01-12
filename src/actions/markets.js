@@ -4,6 +4,7 @@ import {
   MARKET_DASH_LOADING,
   LISTEN_MARKETING,
   LISTEN_MARKET_CONFIRMATION,
+  LISTEN_REVIEWING,
 } from '../types'
 
 export const loadMarkets = marketsData => ({
@@ -29,5 +30,10 @@ export const listenMarketing = totals => ({
 export const listenMarketConfirmation = txs => ({
   type: LISTEN_MARKET_CONFIRMATION,
   txs,
+})
+
+export const listenReviewing = resp => ({
+  type: LISTEN_REVIEWING,
+  resp,
 })
 

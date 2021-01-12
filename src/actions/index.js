@@ -51,6 +51,7 @@ import {
   listenBook,
   listenMarketing,
   listenMarketConfirmation,
+  listenReviewing
 } from './markets'
 
 const networkFound = net => ({
@@ -100,5 +101,6 @@ export {
   listenConfirmation,
   listenMarketing,
   listenMarketConfirmation,
+  listenReviewing,
 }
 
