@@ -206,10 +206,11 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
       marketContract.events.Confirmation((error,result) => {
         if (!error) {
           const resp = {}
-          const { _tokenId, _newBookerVolume, _delivered, _bookerTxVolume } = result.returnValues
+          const { _tokenId, _newBookerDeposit, _newBookerVolume, _delivered, _bookerTxVolume } = result.returnValues
           resp.id = _tokenId
           resp.bkTxs = _bookerTxVolume
           resp.delivered = _delivered
+          resp.deposit = _newBookerDeposit
           resp.bookerVolume = _newBookerVolume
           store.dispatch(listenBookingConfirmation({ ...resp }))
         } else {

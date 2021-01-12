@@ -50,7 +50,7 @@ function Received({ visible, confirmReceived, record, cancel }) {
           rules={[
             {
               validator: (rule, value) => {
-                if (value !== 0 && Validator.isInt(String(value)) && value <= Number(record.volume)) {
+                if (value !== 0 && value > 1 && Validator.isInt(String(value)) && value <= Number(record.volume)) {
                   return Promise.resolve()
                 } else {
                   return Promise.reject('Invalid confirmation volume')

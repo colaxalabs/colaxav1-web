@@ -48,6 +48,8 @@ import {
   bookHarvest,
   seasonClosure,
   gotoMarket,
+  listenBooking,
+  listenConfirmation,
 } from '../../actions'
 
 // Redux store
@@ -162,6 +164,31 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
     const seasonContract = initContract(Season, Contracts['4'].Season[0])
     const marketContract = initContract(Market, Contracts['4'].Market[0])
 
+    function bookingMeta() {
+      marketContract.events.BookHarvest((error, result) => {
+        if (!error) {
+          const resp = {}
+          const { _tokenId, _marketBookers } = result.returnValues
+          resp.id = _tokenId
+          resp.bookers = _marketBookers
+          store.dispatch(listenBooking({ ...resp }))
+        }
+      })
+    }
+
+    function confirmationMeta() {
+      marketContract.events.Confirmation((error, result) => {
+        if (!error) {
+          const resp = {}
+          const { _tokenId, _farmTxVolume, _delivered } = result.returnValues
+          resp.id = _tokenId
+          resp.volume = _farmTxVolume
+          resp.delivered = _delivered
+          store.dispatch(listenConfirmation({ ...resp }))
+        }
+      })
+    }
+
     async function loadFarmDashboard() {
       const loadingState = {}
       const conversionRate = {}
@@ -189,8 +216,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
         setIsOwner(String(farm.owner).toLowerCase() === String(wallet.address[0]).toLowerCase())
         farm.totalBookings = await marketContract.methods.totalMarketBookers(farm.tokenId).call()
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(farm.tokenId).call()
-        const tx = await marketContract.methods.farmTransactions(farm.tokenId).call()
-        farm.txs = Web3.utils.fromWei(tx, 'ether')
+        farm.txs = await marketContract.methods.farmTransactions(farm.tokenId).call()
         const currentMarket = await marketContract.methods.getCurrentFarmMarket(Number(farm.tokenId)).call()
         farm.currentSeasonSupply = currentMarket.remainingSupply
         farm.farmBookings = []
@@ -242,6 +268,8 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
     }, 2500)
 
     loadFarmDashboard()
+    bookingMeta()
+    confirmationMeta()
 
     return () => clearInterval(interval)
 
@@ -315,7 +343,7 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
             ) : (
               <Stats
                 description='Transaction volume'
-                children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(farm.txs) * Number(usdRate))}`} />}
+                children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(farm.txs, 'ether')) * Number(usdRate))}`} />}
               />
             )} 
           </Col>

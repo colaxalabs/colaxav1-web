@@ -7,12 +7,14 @@ import {
   FINISH_HARVEST,
   CLOSING_FARM_SEASON,
   SEASON_MARKETED,
+  LISTEN_BOOKING,
+  LISTEN_CONFIRMATION,
 } from '../types'
 
 const INITIAL_STATE = {
   tokenId: 0,
   totalBookings: 0,
-  txs: 0,
+  txs: '0',
   season: '',
   seasonMarketed: false,
   img: '',
@@ -78,6 +80,20 @@ export function farm(state = INITIAL_STATE, action = {}) {
         ...state,
         seasonMarketed: action.farm.seasonMarketed,
         currentSeasonSupply: action.farm.currentSeasonSupply,
+      }
+    case LISTEN_BOOKING:
+      return {
+        ...state,
+        totalBookings: Number(state.tokenId) === Number(action.resp.id) ? action.resp.bookers : state.totalBookings
+      }
+    case LISTEN_CONFIRMATION:
+      return {
+        ...state,
+        txs: Number(state.tokenId) === Number(action.resp.id) ? action.resp.volume : state.txs,
+        farmBookings: [...state.farmBookings].map(book =>
+        (Number(book.marketId) === Number(action.resp.id))
+          ? { ...book, delivered: action.resp.delivered }
+          : book)
       }
     default:
       return state

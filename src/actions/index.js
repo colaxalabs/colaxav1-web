@@ -36,6 +36,8 @@ import {
   seasonClosure,
   gotoMarket,
   received,
+  listenBooking,
+  listenConfirmation,
 } from './farm'
 import {
   collectDetails,
@@ -47,6 +49,8 @@ import {
   loadMarkets,
   loadMarketDash,
   listenBook,
+  listenMarketing,
+  listenMarketConfirmation,
 } from './markets'
 
 const networkFound = net => ({
@@ -92,5 +96,9 @@ export {
   listenBook,
   listenBookingConfirmation,
   listenTransition,
+  listenBooking,
+  listenConfirmation,
+  listenMarketing,
+  listenMarketConfirmation,
 }
 

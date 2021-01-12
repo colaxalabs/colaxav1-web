@@ -32,7 +32,7 @@ import { Stats } from '../dashboard'
 import { QR, Book } from '../modals'
 
 // Redux actions
-import { bookHarvest, loadCurrency, loadMarkets, loadMarketDash, listenBook } from '../../actions'
+import { bookHarvest, loadCurrency, loadMarkets, loadMarketDash, listenBook, listenMarketing, listenMarketConfirmation } from '../../actions'
 
 const { Text } = Typography
 
@@ -201,12 +201,34 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       marketContract.events.BookHarvest((error, result) => {
         if (!error) {
           const resp = {}
-          const { _tokenId, _farmVolume } = result.returnValues
+          const { _tokenId, _newMarketVolume, _marketBookers, _closeDate } = result.returnValues
           resp.id = _tokenId
-          resp.volume = _farmVolume
+          resp.volume = _newMarketVolume
+          resp.bookers = _marketBookers
+          resp.closeDate = _closeDate
           store.dispatch(listenBook({ ...resp }))
         } else {
           console.error(error)
+        }
+      })
+    }
+
+    function createMarketMeta() {
+      marketContract.events.CreateMarket((error, result) => {
+        if (!error) {
+          const { _totalMarket } = result.returnValues
+          store.dispatch(listenMarketing(_totalMarket))
+        } else {
+          console.error(error)
+        }
+      })
+    }
+
+    function marketConfirmation() {
+      marketContract.events.Confirmation((error, result) => {
+        if (!error) {
+          const { _txVolume } = result.returnValues
+          store.dispatch(listenMarketConfirmation(_txVolume))
         }
       })
     }
@@ -219,8 +241,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       marketsData.totalMarkets = Number(await marketContract.methods.totalMarkets().call())
       marketsData.traces = 0
       marketsData.enlistedMarkets = []
-      const tx = await marketContract.methods.platformTransactions().call()
-      marketsData.txs = Web3.utils.fromWei(tx, 'ether')
+      marketsData.txs = await marketContract.methods.platformTransactions().call()
       if (marketsData.totalMarkets === 0) {
         marketsData.enlistedMarkets = []
       } else {
@@ -261,6 +282,8 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
 
     queryMarkets()
     bookMeta()
+    createMarketMeta()
+    marketConfirmation()
 
     return () => clearInterval(interval)
 
@@ -295,7 +318,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
           ) : (
             <Stats
               description='Transaction volume'
-              children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(markets.txs) * Number(usdRate))}`} />}
+              children={<Statistic title='Transaction volume' value={`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(Web3.utils.fromWei(markets.txs, 'ether')) * Number(usdRate))}`} />}
             />
           )}
         </Col>

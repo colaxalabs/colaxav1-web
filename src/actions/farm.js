@@ -17,6 +17,8 @@ import {
   GOING_TO_MARKET,
   SEASON_MARKETED,
   CONFIRMING_RECEIVED,
+  LISTEN_BOOKING,
+  LISTEN_CONFIRMATION,
 } from '../types'
 import ipfs from '../ipfs'
 import Web3 from 'web3'
@@ -116,6 +118,16 @@ const seasonMarketed = farm => ({
 const confirming = status => ({
   type: CONFIRMING_RECEIVED,
   status,
+})
+
+export const listenBooking = resp => ({
+  type: LISTEN_BOOKING,
+  resp,
+})
+
+export const listenConfirmation = resp => ({
+  type: LISTEN_CONFIRMATION,
+  resp,
 })
 
 export const tokenize = (values, message) => async dispatch => {
