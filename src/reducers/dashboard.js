@@ -3,6 +3,7 @@ import {
   LISTEN_FOR_TOKENIZE,
   LISTEN_FOR_VOLUME,
   LISTEN_FOR_CREATE_MARKET,
+  LISTEN_TRANSITION,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -32,6 +33,14 @@ export function dashboard(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         markets: action.markets,
+      }
+    case LISTEN_TRANSITION:
+      return {
+        ...state,
+        farms: [...state.farms].map(farm =>
+        (Number(farm.tokenId) === Number(action.resp.id)
+          ? { ...farm, season: action.resp.season }
+          : farm))
       }
     default:
       return state

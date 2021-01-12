@@ -1,6 +1,7 @@
 import {
   LOAD_USER_DASHBOARD,
   LISTEN_CONFIRM,
+  LISTEN_TRANSITION,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -25,6 +26,14 @@ export function user(state = INITIAL_STATE, action = {}) {
         (Number(book.marketId) === Number(action.resp.id))
           ? { ...book, delivered: action.resp.delivered, volume: action.resp.bookerVolume }
           : book)
+      }
+    case LISTEN_TRANSITION:
+      return {
+        ...state,
+        userFarms: [...state.userFarms].map(farm =>
+        (Number(farm.tokenId) === Number(action.resp.id)
+          ? { ...farm, season: action.resp.season }
+          : farm))
       }
     default:
       return state

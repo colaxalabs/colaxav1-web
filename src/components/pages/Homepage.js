@@ -40,6 +40,7 @@ import {
   listenTokenize,
   listenCreateMarket,
   listenVolume,
+  listenTransition,
 } from '../../actions'
 
 function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
@@ -77,6 +78,18 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
           store.dispatch(listenVolume(_txVolume))
         } else {
           console.error(error)
+        }
+      })
+    }
+
+    function transitionMeta() {
+      registryContract.events.Transition((error, result) => {
+        if (!error) {
+          const resp = {}
+          const { _tokenId, _season } = result.returnValues
+          resp.id = _tokenId
+          resp.season = _season
+          store.dispatch(listenTransition({ ...resp }))
         }
       })
     }
@@ -142,6 +155,7 @@ function Homepage({ dash, network, wallet, isLoading, usdRate, isMetamask }) {
     tokenizeMeta()
     createMarketMeta()
     confirmationMeta()
+    transitionMeta()
 
     return () => clearInterval(interval)
 

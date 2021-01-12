@@ -6,6 +6,7 @@ import {
   LISTEN_FOR_TOKENIZE,
   LISTEN_FOR_CREATE_MARKET,
   LISTEN_FOR_VOLUME,
+  LISTEN_TRANSITION,
 } from '../types'
 
 export const loadDashboard = dashboardData => ({
@@ -41,5 +42,10 @@ export const listenVolume = txs => ({
 export const listenCreateMarket = markets => ({
   type: LISTEN_FOR_CREATE_MARKET,
   markets,
+})
+
+export const listenTransition = resp => ({
+  type: LISTEN_TRANSITION,
+  resp,
 })
 

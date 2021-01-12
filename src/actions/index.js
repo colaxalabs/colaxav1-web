@@ -19,6 +19,7 @@ import {
   listenTokenize,
   listenCreateMarket,
   listenVolume,
+  listenTransition,
 } from './dashboard'
 import { loadCurrency } from './currency'
 import { loadUser, listenBookingConfirmation } from './user'
@@ -90,5 +91,6 @@ export {
   listenVolume,
   listenBook,
   listenBookingConfirmation,
+  listenTransition,
 }
 

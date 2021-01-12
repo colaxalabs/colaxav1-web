@@ -36,6 +36,7 @@ import {
   tokenize,
   received,
   listenBookingConfirmation,
+  listenTransition,
 } from '../../actions'
 
 // Redux store
@@ -217,6 +218,18 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
       })
     }
 
+    function transitionMeta() {
+      registryContract.events.Transition((error, result) => {
+        if (!error) {
+          const resp = {}
+          const { _tokenId, _season } = result.returnValues
+          resp.id = _tokenId
+          resp.season = _season
+          store.dispatch(listenTransition({ ...resp }))
+        }
+      })
+    }
+
     async function loadUserDashboard() {
       const user = {}
       const conversionRate = {}
@@ -285,6 +298,7 @@ function User({ tokenize, received, confirming, wallet, network, userData, isLoa
 
     loadUserDashboard()
     bookingConfirmationMeta()
+    transitionMeta()
 
     return () => clearInterval(interval)
 
