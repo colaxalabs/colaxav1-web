@@ -84,7 +84,8 @@ export function farm(state = INITIAL_STATE, action = {}) {
     case LISTEN_BOOKING:
       return {
         ...state,
-        totalBookings: Number(state.tokenId) === Number(action.resp.id) ? action.resp.bookers : state.totalBookings
+        totalBookings: Number(state.tokenId) === Number(action.resp.id) ? action.resp.bookers : state.totalBookings,
+        currentSeasonSupply: Number(state.tokenId) === Number(action.resp.id) ? action.resp.volume : state.currentSeasonSupply
       }
     case LISTEN_CONFIRMATION:
       return {

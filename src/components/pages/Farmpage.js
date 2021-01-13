@@ -168,9 +168,10 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
       marketContract.events.BookHarvest((error, result) => {
         if (!error) {
           const resp = {}
-          const { _tokenId, _marketBookers } = result.returnValues
+          const { _tokenId, _marketBookers, _newMarketVolume } = result.returnValues
           resp.id = _tokenId
           resp.bookers = _marketBookers
+          resp.volume = _newMarketVolume
           store.dispatch(listenBooking({ ...resp }))
         }
       })

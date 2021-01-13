@@ -10,6 +10,9 @@ import {
 } from 'antd'
 import Validator from 'validator'
 
+// Utils
+import { handleUpload } from '../../utils'
+
 const { Text } = Typography
 
 function MarketModal({
@@ -24,6 +27,7 @@ function MarketModal({
 }) {
 
   const [form] = Form.useForm()
+  const [productImage, setProductImage] = React.useState('')
 
   return (
     <Modal
@@ -38,6 +42,7 @@ function MarketModal({
           .then((values) => {
             const _price = Number(values.price) / Number(ethusd)
             values.price = _price.toFixed(4)
+            values.productImage = productImage
             onCreate(tokenId, values, message)
             cancel()
           })
@@ -65,6 +70,20 @@ function MarketModal({
           <Input disabled={true} value={crop} />
         </Form.Item>
         <Form.Item
+          label='Proof of Harvest'
+          name='harvestProof'
+          extra={<Text type='secondary'>Upload 3 image files of farm harvest</Text>}
+          rules={[
+            {
+              required: true,
+              message: 'Required!',
+            }
+          ]}
+          hasFeedback
+        >
+          <Input type='file' onChange={(e) => handleUpload(e, setProductImage)} bordered={false} />
+        </Form.Item>
+        <Form.Item
           name='supply'
           label='Supply'
           extra={<Text type='secondary'>Season supply</Text>}
@@ -85,7 +104,7 @@ function MarketModal({
           rules={[
             {
               validator: (rule, value) => {
-                if (Number(value) !== 0 && Validator.isFloat(value)) {
+                if (Number(value) > 0 && Number(value) !== 0 && Validator.isFloat(value)) {
                   return Promise.resolve()
                 } else {
                   return Promise.reject('Invalid price')

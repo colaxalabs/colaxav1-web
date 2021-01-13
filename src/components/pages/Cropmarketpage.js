@@ -11,6 +11,8 @@ import {
   Typography,
   Space,
   Statistic,
+  Modal,
+  Image,
 } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 
@@ -53,6 +55,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
   const [openReviews, setOpenReviews] = React.useState(false)
   const [counts, setCounts] = React.useState(0)
   const [comments, setComments] = React.useState([])
+  const [imageOpen, setImageOpen] = React.useState(false)
 
   const downloadQR = (_id, _season) => {
     const canvas = document.getElementById('1234_reap')
@@ -75,6 +78,23 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       title: 'Crop',
       dataIndex: 'crop',
       key: 'crop',
+      render: (text, record) => (
+        <>
+          <Button type='link' onClick={() => setImageOpen(true)}>{record.crop}</Button>
+          <Modal
+            visible={imageOpen}
+            centered
+            footer={false}
+            onCancel={() => setImageOpen(false)}
+          >
+            <Image
+              width='100%'
+              height='100%'
+              src={`https://ipfs.io/ipfs/${record.productImage}`}
+            />
+          </Modal>
+        </>
+      )
     },
     {
       title: 'Location',
@@ -92,7 +112,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
       )
     },
     {
-      title: 'Price',
+      title: 'Price(per KG)',
       dataIndex: 'price',
       key: 'price',
       render: price => (

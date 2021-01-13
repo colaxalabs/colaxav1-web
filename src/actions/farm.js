@@ -144,7 +144,10 @@ export const tokenize = (values, message) => async dispatch => {
   const token = randInt(999, 999999999)
   const accounts = await window.web3.eth.getAccounts()
   // Send transaction
-  registryContract.methods.tokenizeLand(farmName, _size, farmLocation, fileHash, soilType, token).send({ from: accounts[0] })
+  registryContract.methods.tokenizeLand(farmName, _size, farmLocation, fileHash, soilType, token).send({
+    from: accounts[0],
+    gas: await registryContract.methods.tokenizeLand(farmName, _size, farmLocation, fileHash, soilType, token).estimateGas({ from: accounts[0] }),
+  })
     .on('transactionHash', (hash) => {
       message.info('Confirming transaction...', 5)
     })
@@ -172,7 +175,10 @@ export const openSeason = (tokenId, message) => async dispatch => {
   const status = {}
   status.openingSeason = true
   dispatch(openingSeason({ ...status }))
-  seasonContract.methods.openSeason(tokenId).send({ from: accounts[0] })
+  seasonContract.methods.openSeason(tokenId).send({
+    from: accounts[0],
+    gas: await seasonContract.methods.openSeason(tokenId).estimateGas({ from: accounts[0] }),
+  })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
     })
@@ -207,7 +213,10 @@ export const confirmPreparation = (tokenId, values, message) => async dispatch =
     const fertilizerName = `${fertilizerType} (${fertilizerUsed})`
     const { cid } = await ipfs.add(fertilizerProof)
     const fileHash = cid.string
-    seasonContract.methods.confirmPreparations(Number(tokenId), crop, fertilizerName, fertilizerSupplier, fileHash).send({ from: accounts[0] })
+    seasonContract.methods.confirmPreparations(Number(tokenId), crop, fertilizerName, fertilizerSupplier, fileHash).send({
+      from: accounts[0],
+      gas: await seasonContract.methods.confirmPreparations(Number(tokenId), crop, fertilizerName, fertilizerSupplier, fileHash).estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -231,7 +240,10 @@ export const confirmPreparation = (tokenId, values, message) => async dispatch =
     status.confirmingPreparation = true
     dispatch(confirmingPreparation({ ...status }))
     const { crop } = values
-    seasonContract.methods.confirmPreparations(tokenId, crop, "", "", "").send({ from: accounts[0] })
+    seasonContract.methods.confirmPreparations(tokenId, crop, "", "", "").send({
+      from: accounts[0],
+      gas: await seasonContract.methods.confirmPreparations(tokenId, crop, "", "", "").estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -270,7 +282,10 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
     const fertHash = _f.cid.string
     const _s = await ipfs.add(seedProof)
     const seedHash = _s.cid.string
-    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, fertilizerName, fertilizerSupplier, fertHash).send({ from: accounts[0] })
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, fertilizerName, fertilizerSupplier, fertHash).send({
+      from: accounts[0],
+      gas: await seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, fertilizerName, fertilizerSupplier, fertHash).estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -297,7 +312,10 @@ export const confirmPlanting = (tokenId, values, message) => async dispatch => {
     const eYield = `${expectedYield} ${yieldUnit}`
     const _s = await ipfs.add(seedProof)
     const seedHash = _s.cid.string
-    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, "", "", "").send({ from: accounts[0] })
+    seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, "", "", "").send({
+      from: accounts[0],
+      gas: await seasonContract.methods.confirmPlanting(tokenId, seedsUsed, seedsSupplier, seedHash, eYield, "", "", "").estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -335,7 +353,10 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
     const pestProofHash = _p.cid.string
     const _pf = await ipfs.add(pesticideProof)
     const pesticideProofHash = _pf.cid.string
-    seasonContract.methods.confirmGrowth(tokenId, pestName, pestProofHash, pesticideUsed, pesticideSupplier, pesticideProofHash).send({ from: accounts[0] })
+    seasonContract.methods.confirmGrowth(tokenId, pestName, pestProofHash, pesticideUsed, pesticideSupplier, pesticideProofHash).send({
+      from: accounts[0],
+      gas: await seasonContract.methods.confirmGrowth(tokenId, pestName, pestProofHash, pesticideUsed, pesticideSupplier, pesticideProofHash).estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -358,7 +379,10 @@ export const confirmGrowth = (tokenId, values, message) => async dispatch => {
   } else {
     status.confirmingGrowth = true
     dispatch(confirmingGrowth({ ...status }))
-    seasonContract.methods.confirmGrowth(tokenId, "", "", "", "", "").send({ from: accounts[0] })
+    seasonContract.methods.confirmGrowth(tokenId, "", "", "", "", "").send({
+      from: accounts[0],
+      gas: await seasonContract.methods.confirmGrowth(tokenId, "", "", "", "", "").estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming transaction...', 5)
       })
@@ -391,7 +415,10 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
   const status = {}
   status.confirmingHarvest = true
   dispatch(confirmingHarvest({ ...status }))
-  seasonContract.methods.confirmHarvesting(tokenId, _supply).send({ from: accounts[0] })
+  seasonContract.methods.confirmHarvesting(tokenId, _supply).send({
+    from: accounts[0],
+    gas: await seasonContract.methods.confirmHarvesting(tokenId, _supply).estimateGas({ from: accounts[0] }),
+  })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
     })
@@ -427,7 +454,10 @@ export const seasonClosure = (tokenId, message) => async dispatch => {
   const status = {}
   status.closingSeason = true
   dispatch(closing({ ...status }))
-  seasonContract.methods.closeSeason(tokenId).send({ from: accounts[0] })
+  seasonContract.methods.closeSeason(tokenId).send({
+    from: accounts[0],
+    gas: await seasonContract.methods.closeSeason(tokenId).estimateGas({ from: accounts[0] }),
+  })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
     })
@@ -460,19 +490,16 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
   const status = {}
   status.booking = true
   dispatch(bookingHarvest({ ...status }))
-  marketContract.methods.bookHarvest(Number(tokenId), Number(volume), Number(seasonNo)).send({ from: accounts[0], value: new Web3.utils.BN(price).mul(new Web3.utils.BN(volume)).toString() })
+  marketContract.methods.bookHarvest(Number(tokenId), Number(volume), Number(seasonNo)).send({
+    from: accounts[0],
+    value: new Web3.utils.BN(price).mul(new Web3.utils.BN(volume)).toString(),
+    gas: await marketContract.methods.bookHarvest(Number(tokenId), Number(volume), Number(seasonNo)).estimateGas({ from: accounts[0] }),
+  })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
     })
     .on('confirmation', async(confirmationNumber, receipt) => {
       if (confirmationNumber === 1) {
-        /*
-         *const resp = {}
-         *resp.id = tokenId
-         *resp.volume = volume
-         *resp.bookers = await marketContract.methods.totalMarketBookers(Number(tokenId)).call()
-         *dispatch(booked({ ...resp }))
-         */
         status.booking = false
         dispatch(bookingHarvest({ ...status }))
         message.success('Transaction confirmed!', 5)
@@ -486,7 +513,7 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
 }
 
 export const gotoMarket = (tokenId, values, message) => async dispatch => {
-  const { price, supply, unit, seasonCrop } = values
+  const { price, supply, unit, seasonCrop, productImage } = values
   // Init contracts
   const marketContract = initContract(Market, Contracts['4'].Market[0])
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
@@ -496,7 +523,12 @@ export const gotoMarket = (tokenId, values, message) => async dispatch => {
   const farm = {}
   status.goingToMarket = true
   dispatch(goingtoMarket({ ...status }))
-  marketContract.methods.createMarket(Number(tokenId), seasonCrop, Web3.utils.toWei(String(price), 'ether'), Number(supply), unit).send({ from: accounts[0] })
+  const { cid } = await ipfs.add(productImage)
+  const harvestImage = cid.string
+  marketContract.methods.createMarket(Number(tokenId), seasonCrop, harvestImage, Web3.utils.toWei(String(price), 'ether'), Number(supply), unit).send({
+    from: accounts[0],
+    gas: await marketContract.methods.createMarket(Number(tokenId), seasonCrop, harvestImage, Web3.utils.toWei(String(price), 'ether'), Number(supply), unit).estimateGas({ from: accounts[0] }),
+  })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
     })
@@ -532,7 +564,11 @@ export const received = (values, message) => async dispatch => {
   if (review) {
     status.confirmingReceived = true
     dispatch(confirming({ ...status }))
-    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, review).send({ from: accounts[0], value: Web3.utils.toWei('0.0037', 'ether') })
+    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, review).send({
+      from: accounts[0],
+      value: Web3.utils.toWei('0.0037', 'ether'),
+      gas: await marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, review).estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming...', 5)
       })
@@ -551,7 +587,11 @@ export const received = (values, message) => async dispatch => {
   } else {
     status.confirmingReceived = true
     dispatch(confirming({ ...status }))
-    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, "").send({ from: accounts[0], value: Web3.utils.toWei('0.0037', 'ether') })
+    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, "").send({
+      from: accounts[0],
+      value: Web3.utils.toWei('0.0037', 'ether'),
+      gas: await marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, "").estimateGas({ from: accounts[0] }),
+    })
       .on('transactionHash', () => {
         message.info('Confirming...', 5)
       })
