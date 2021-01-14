@@ -19,6 +19,7 @@ import {
   CONFIRMING_RECEIVED,
   LISTEN_BOOKING,
   LISTEN_CONFIRMATION,
+  DEFAULT_CLOSING,
 } from '../types'
 import ipfs from '../ipfs'
 import Web3 from 'web3'
@@ -117,6 +118,11 @@ const seasonMarketed = farm => ({
 
 const confirming = status => ({
   type: CONFIRMING_RECEIVED,
+  status,
+})
+
+const defaultClosure = status => ({
+  type: DEFAULT_CLOSING,
   status,
 })
 
@@ -446,45 +452,10 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
     })
 }
 
-export const seasonClosure = (tokenId, message) => async dispatch => {
-  // Init contracts
-  const seasonContract = initContract(Season, Contracts['4'].Season[0])
-  const accounts = await window.web3.eth.getAccounts()
-  // Send tx
-  const status = {}
-  status.closingSeason = true
-  dispatch(closing({ ...status }))
-  seasonContract.methods.closeSeason(tokenId).send({
-    from: accounts[0],
-    gas: await seasonContract.methods.closeSeason(tokenId).estimateGas({ from: accounts[0] }),
-  })
-    .on('transactionHash', () => {
-      message.info('Confirming transaction...', 5)
-    })
-    .on('confirmation', async(confirmationNumber, receipt) => {
-      if (confirmationNumber === 1) {
-        const farm = {}
-        farm.season = await seasonContract.methods.getSeason(tokenId).call()
-        dispatch(closingSeason({ ...farm }))
-        status.closingSeason = false
-        dispatch(closing({ ...status }))
-        message.success('Transaction confirmed!', 5)
-      } 
-    })
-    .on('error', err => {
-      status.closingSeason = false
-      dispatch(closing({ ...status }))
-      message.error(`Error: ${err.message}`, 10)
-      console.log(err)
-    })
-}
-
-export const bookHarvest = (tokenId, values, price, message) => async dispatch => {
-  const { volume } = values
+export const bookHarvest = (values, message) => async dispatch => {
+  const { tokenId, seasonNo, price, volume } = values
   // Init Contract
-  const seasonContract = initContract(Season, Contracts['4'].Season[0])
   const marketContract = initContract(Market, Contracts['4'].Market[0])
-  const seasonNo = await seasonContract.methods.currentSeason(tokenId).call()
   const accounts = await window.web3.eth.getAccounts()
   // Send tx
   const status = {}
@@ -493,7 +464,6 @@ export const bookHarvest = (tokenId, values, price, message) => async dispatch =
   marketContract.methods.bookHarvest(Number(tokenId), Number(volume), Number(seasonNo)).send({
     from: accounts[0],
     value: new Web3.utils.BN(price).mul(new Web3.utils.BN(volume)).toString(),
-    gas: await marketContract.methods.bookHarvest(Number(tokenId), Number(volume), Number(seasonNo)).estimateGas({ from: accounts[0] }),
   })
     .on('transactionHash', () => {
       message.info('Confirming transaction...', 5)
@@ -567,7 +537,6 @@ export const received = (values, message) => async dispatch => {
     marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, review).send({
       from: accounts[0],
       value: Web3.utils.toWei('0.0037', 'ether'),
-      gas: await marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, review).estimateGas({ from: accounts[0] }),
     })
       .on('transactionHash', () => {
         message.info('Confirming...', 5)
@@ -590,7 +559,6 @@ export const received = (values, message) => async dispatch => {
     marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, "").send({
       from: accounts[0],
       value: Web3.utils.toWei('0.0037', 'ether'),
-      gas: await marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, "").estimateGas({ from: accounts[0] }),
     })
       .on('transactionHash', () => {
         message.info('Confirming...', 5)
@@ -608,5 +576,71 @@ export const received = (values, message) => async dispatch => {
         message.error(`Error: ${err.message}`, 10)
       })
   }
+}
+
+export const seasonClosure = (tokenId, message) => async dispatch => {
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  // Send tx
+  const status = {}
+  status.closingSeason = true
+  dispatch(closing({ ...status }))
+  seasonContract.methods.closeSeason(tokenId).send({
+    from: accounts[0],
+    gas: await seasonContract.methods.closeSeason(tokenId).estimateGas({ from: accounts[0] }),
+  })
+    .on('transactionHash', () => {
+      message.info('Confirming transaction...', 5)
+    })
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
+        const farm = {}
+        farm.season = await seasonContract.methods.getSeason(tokenId).call()
+        dispatch(closingSeason({ ...farm }))
+        status.closingSeason = false
+        dispatch(closing({ ...status }))
+        message.success('Transaction confirmed!', 5)
+      } 
+    })
+    .on('error', err => {
+      status.closingSeason = false
+      dispatch(closing({ ...status }))
+      message.error(`Error: ${err.message}`, 10)
+      console.log(err)
+    })
+}
+
+export const definiteClosure = (id, message) => async dispatch => {
+  // Init contracts
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const accounts = await window.web3.eth.getAccounts()
+  // Send tx
+  const status = {}
+  status.defaultClosing = true
+  dispatch(defaultClosure({ ...status }))
+  seasonContract.methods.closeSeason(id).send({
+    from: accounts[0],
+    gas: await seasonContract.methods.closeSeason(id).estimateGas({ from: accounts[0] }),
+  })
+    .on('transactionHash', () => {
+      message.info('Confirming transaction...', 5)
+    })
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
+        const farm = {}
+        farm.season = await seasonContract.methods.getSeason(id).call()
+        dispatch(closingSeason({ ...farm }))
+        status.defaultClosing = false
+        dispatch(defaultClosure({ ...status }))
+        message.success('Transaction confirmed!', 5)
+      } 
+    })
+    .on('error', err => {
+      status.defaultClosing = false
+      dispatch(defaultClosure({ ...status }))
+      message.error(`Error: ${err.message}`, 10)
+      console.log(err)
+    })
 }
 

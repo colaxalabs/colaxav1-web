@@ -27,8 +27,11 @@ function Book({ isExecutionable, record, book, visible, onCancel }) {
         form.validateFields()
           .then(values => {
             if (isExecutionable) {
-              book(Number(record.tokenId), values, record.price, message)
-              console.log(record.tokenId, values)
+              values.seasonNo = record.season
+              values.price = record.price
+              values.tokenId = record.tokenId
+              book(values, message)
+              console.log(values)
               onCancel()
             } else {
               window.alert('Connect Wallet!')
@@ -54,7 +57,7 @@ function Book({ isExecutionable, record, book, visible, onCancel }) {
           rules={[
             {
               validator: (rule, value) => {
-                if (value !== 0 && Validator.isInt(String(value)) && value <= Number(record.remainingSupply)) {
+                if (value > 0 && value !== 0 && Validator.isInt(String(value)) && value <= Number(record.remainingSupply)) {
                   return Promise.resolve()
                 } else {
                   return Promise.reject('Invalid booking volume')

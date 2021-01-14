@@ -50,6 +50,7 @@ import {
   gotoMarket,
   listenBooking,
   listenConfirmation,
+  definiteClosure,
 } from '../../actions'
 
 // Redux store
@@ -70,7 +71,7 @@ import {
 const { Text } = Typography
 const { TabPane } = Tabs
 
-function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure, network, gotoMarket }) {
+function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, farm, usdRate, isLoading, opening, openSeason, confirmPreparation, confirmPlanting, confirmGrowth, closingHarvest, confirmHarvest, bookHarvest, isBooking, closingSeason, goingToMarket, seasonClosure, network, gotoMarket, definiteClosure, defaultClosing }) {
 
   const columns = [
     {
@@ -439,9 +440,9 @@ function Farmpage({ closingPreparation, closingPlanting, closingGrowth, wallet, 
                           <Button
                             type='link'
                             danger
-                            disabled={closingSeason}
-                            loading={closingSeason}
-                            onClick={handleClosure}
+                            disabled={defaultClosing}
+                            loading={defaultClosing}
+                            onClick={() => definiteClosure(id, message)}
                           >
                             Close Season
                           </Button>
@@ -545,6 +546,8 @@ Farmpage.propTypes = {
   goingToMarket: PropTypes.bool,
   seasonClosure: PropTypes.func,
   network: PropTypes.number,
+  defaultClosing: PropTypes.bool,
+  definiteClosure: PropTypes.func,
 }
 
 function mapStateToProps(state) {
@@ -562,6 +565,7 @@ function mapStateToProps(state) {
     closingSeason: state.loading.closingSeason,
     goingToMarket: state.loading.goingToMarket,
     network: state.network.currentNetwork,
+    defaultClosing: state.loading.defaultClosing,
   }
 }
 
@@ -574,5 +578,6 @@ export default connect(mapStateToProps, {
   bookHarvest,
   seasonClosure,
   gotoMarket,
+  definiteClosure,
 })(Farmpage)
 

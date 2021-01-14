@@ -38,6 +38,7 @@ import {
   received,
   listenBooking,
   listenConfirmation,
+  definiteClosure,
 } from './farm'
 import {
   collectDetails,
@@ -102,5 +103,6 @@ export {
   listenMarketing,
   listenMarketConfirmation,
   listenReviewing,
+  definiteClosure,
 }
 

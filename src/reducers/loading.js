@@ -15,6 +15,7 @@ import {
   MARKET_DASH_LOADING,
   CONFIRMING_RECEIVED,
   LOADING_REVIEWS,
+  DEFAULT_CLOSING,
 } from '../types'
 
 const INITIAL_STATE = {
@@ -117,6 +118,11 @@ export function loading(state = INITIAL_STATE, action = {}) {
       return {
         ...state,
         loadingReviews: action.status.loadingReviews,
+      }
+    case DEFAULT_CLOSING:
+      return {
+        ...state,
+        defaultClosing: action.status.defaultClosing,
       }
     default:
       return state
