@@ -416,6 +416,7 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
   const _supply = `${supply} ${unit}`
   // Init contracts
   const seasonContract = initContract(Season, Contracts['4'].Season[0])
+  const marketContract = initContract(Market, Contracts['4'].Market[0])
   const accounts = await window.web3.eth.getAccounts()
   // Send tx
   const status = {}
@@ -437,6 +438,7 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
         farm.seasonCrop = crop
         farm.seasonSupply = harvestSupply.split(' ')[0]
         farm.completedSeasons = await seasonContract.methods.getFarmCompleteSeasons(tokenId).call()
+        farm.seasonMarketed = await marketContract.methods.isSeasonMarketed(Number(tokenId), Number(_runningSeason)).call()
         farm.traceId = traceHash
         dispatch(finishHarvesting({ ...farm }))
         status.confirmingHarvest = false
@@ -453,15 +455,17 @@ export const confirmHarvest = (tokenId, values, message) => async dispatch => {
 }
 
 export const bookHarvest = (values, message) => async dispatch => {
-  const { tokenId, seasonNo, price, volume } = values
+  const { tokenId, price, volume } = values
   // Init Contract
   const marketContract = initContract(Market, Contracts['4'].Market[0])
+  const seasonContract = initContract(Season, Contracts['4'].Season[0])
   const accounts = await window.web3.eth.getAccounts()
+  const runningSeason = Number(await seasonContract.methods.currentSeason(Number(tokenId)).call())
   // Send tx
   const status = {}
   status.booking = true
   dispatch(bookingHarvest({ ...status }))
-  marketContract.methods.bookHarvest(Number(tokenId), Number(volume), Number(seasonNo)).send({
+  marketContract.methods.bookHarvest(Number(tokenId), Number(volume), runningSeason).send({
     from: accounts[0],
     value: new Web3.utils.BN(price).mul(new Web3.utils.BN(volume)).toString(),
   })
@@ -531,51 +535,28 @@ export const received = (values, message) => async dispatch => {
   const accounts = await window.web3.eth.getAccounts()
   const farmer = await registryContract.methods.ownerOf(tokenId).call()
   const status = {}
-  if (review) {
-    status.confirmingReceived = true
-    dispatch(confirming({ ...status }))
-    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, review).send({
+  const comment = review ? review : ''
+  status.confirmingReceived = true
+  dispatch(confirming({ ...status }))
+  marketContract.methods.confirmReceivership(tokenId, Number(volume), season, farmer, provider, comment).send({
       from: accounts[0],
       value: Web3.utils.toWei('0.0037', 'ether'),
     })
-      .on('transactionHash', () => {
+    .on('transactionHash', () => {
         message.info('Confirming...', 5)
-      })
-      .on('confirmation', async(confirmationNumber, receipt) => {
-        if (confirmationNumber === 1) {
-          status.confirmingReceived = false
-          dispatch(confirming({ ...status }))
-          message.success('Confirmed!', 5)
-        }
-      })
-      .on('error', err => {
-        status.confirmingReceived = false
-        dispatch(confirming({ ...status }))
-        message.error(`Error: ${err.message}`, 10)
-      })
-  } else {
-    status.confirmingReceived = true
-    dispatch(confirming({ ...status }))
-    marketContract.methods.confirmReceivership(Number(tokenId), Number(volume), Number(season), farmer, provider, "").send({
-      from: accounts[0],
-      value: Web3.utils.toWei('0.0037', 'ether'),
     })
-      .on('transactionHash', () => {
-        message.info('Confirming...', 5)
-      })
-      .on('confirmation', async(confirmationNumber, receipt) => {
-        if (confirmationNumber === 1) {
-          status.confirmingReceived = false
-          dispatch(confirming({ ...status }))
-          message.success('Confirmed!', 5)
-        }
-      })
-      .on('error', err => {
+    .on('confirmation', async(confirmationNumber, receipt) => {
+      if (confirmationNumber === 1) {
         status.confirmingReceived = false
         dispatch(confirming({ ...status }))
-        message.error(`Error: ${err.message}`, 10)
-      })
-  }
+        message.success('Confirmed!', 5)
+      }
+    })
+    .on('error', err => {
+      status.confirmingReceived = false
+      dispatch(confirming({ ...status }))
+      message.error(`Error: ${err.message}`, 10)
+    })
 }
 
 export const seasonClosure = (tokenId, message) => async dispatch => {

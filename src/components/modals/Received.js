@@ -8,10 +8,12 @@ import {
   message,
 } from 'antd'
 import Validator from 'validator'
+import { connect } from 'react-redux'
+import { received } from '../../actions'
 
 const { Text } = Typography
 
-function Received({ visible, confirmReceived, record, cancel }) {
+function Received({ visible, received, record, cancel }) {
 
   const [confirmationVolume, setConfirmationVolume] = React.useState(0)
 
@@ -30,7 +32,8 @@ function Received({ visible, confirmReceived, record, cancel }) {
           .then(values => {
             values.season = Number(record.season)
             values.tokenId = Number(record.marketId)
-            confirmReceived(values, message)
+            received(values, message)
+            //console.log(values)
             cancel()
           })
       }}
@@ -65,7 +68,7 @@ function Received({ visible, confirmReceived, record, cancel }) {
           <Form.Item
             label='Review'
             name='review'
-            extra={<Text type='secondary'>rate farm service or harvest product in 50 words</Text>}
+            extra={<Text type='secondary'>rate farm service or harvest product in less 50 words</Text>}
             rules={[
               {
                 validator: (rule, value) => {
@@ -88,10 +91,10 @@ function Received({ visible, confirmReceived, record, cancel }) {
 
 Received.propTypes = {
   visible: PropTypes.bool,
-  confirmReceived: PropTypes.func,
+  received: PropTypes.func,
   record: PropTypes.object,
   cancel: PropTypes.func,
 }
 
-export default Received
+export default connect(null, { received })(Received)
 

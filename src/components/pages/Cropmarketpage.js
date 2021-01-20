@@ -89,7 +89,7 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
           >
             <Image
               width='100%'
-              height='100%'
+              height='400px'
               src={`https://ipfs.io/ipfs/${record.productImage}`}
             />
           </Modal>
@@ -217,8 +217,8 @@ function CropMarket({ wallet, network, bookHarvest, walletLoaded, isExecutionabl
               loading={isBooking}
               disabled={Number(record.remainingSupply) === 0 || isBooking || (walletLoaded ? String(record.owner).toUpperCase() === String(wallet[0]).toUpperCase() : false)}
               onClick={() => {
-                setBookingOpen(true)
                 setRowRecord(record)
+                setBookingOpen(true)
               }}
             >
               Book

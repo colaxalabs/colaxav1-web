@@ -23,7 +23,7 @@ export function user(state = INITIAL_STATE, action = {}) {
         ...state,
         txs: action.resp.bkTxs,
         userBookings: [...state.userBookings].map(book =>
-        (Number(book.marketId) === Number(action.resp.id))
+        (Number(book.marketId) === Number(action.resp.id) && Number(book.season) === Number(action.resp.seasonNo))
           ? { ...book, delivered: action.resp.delivered, deposit: action.resp.deposit, volume: action.resp.bookerVolume }
           : book)
       }
