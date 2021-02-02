@@ -86,14 +86,16 @@ function Details({ nextPage, nameOfFarm, location }) {
           store.dispatch(collectDetails({ ...values }))
           nextPage()
         }
-        form.validateFields()
-          .then(values => {
-            store.dispatch(collectDetails({ ...values }))
-            nextPage()
-          })
-          .catch(err => {
-            console.log('Validate Error:', err)
-          })
+        /*
+         *form.validateFields()
+         *  .then(values => {
+         *    store.dispatch(collectDetails({ ...values }))
+         *    nextPage()
+         *  })
+         *  .catch(err => {
+         *    console.log('Validate Error:', err)
+         *  })
+         */
         
       }}
     >
