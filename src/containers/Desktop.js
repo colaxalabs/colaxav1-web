@@ -93,7 +93,7 @@ class DesktopContainer extends React.Component {
                       <Image
                         width={40}
                         height={30}
-                        src='https://gateway.pinata.cloud/ipfs/QmaFbmHGWjUXbfyfTNPqhG1ajEyucszxDBXvzP1E9kbUCp'
+                        src='https://gateway.pinata.cloud/ipfs/QmNj9anTCJ644dwWAvK7V7zskJcPybWPyFTC5JGazKKKfY'
                         style={{ paddingRight: '10px' }}
                       />
                     }
