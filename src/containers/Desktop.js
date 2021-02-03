@@ -103,7 +103,7 @@ class DesktopContainer extends React.Component {
                       Reap
                     </a>
                   </Menu.Item>
-                  <SubMenu key='sub1' icon={<SwapOutlined />} title='Tokenization'>
+                  <SubMenu key='sub1' icon={<SwapOutlined />} title='Lands'>
                     <Menu.Item key='1' icon={<PlusCircleOutlined />}>
                       <a href='/register/'>
                         Register
